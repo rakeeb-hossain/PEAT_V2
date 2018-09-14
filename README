@@ -1,0 +1,20 @@
+PEAT 2.0
+
+Directions on how to view your video file after running the prophylactic rool (using FFMPEG):
+
+1. Unzip and install FFMPEG for your Windows system (https://ffmpeg.zeranoe.com/builds/) and take note of the directory
+
+2. Right click 'this PC' or 'My Computer' and select Properties > Advanced System Settings > Advanced tab > Environment Variables
+
+3. Select System Variable (or create new variable) called 'Path' and set value to {directory of FFMPEG}\ffmpeg\bin\
+
+4. Now navigate to your Frames directory for your project folder using the command 'cd {PEAT directory}/myProject/frames/'
+*Make sure to replace {PEAT directory} and myProject with the appropriate directories
+
+5. Run the following command 'ffmpeg -framerate 60 -i %d.jpg video.mp4' where video.mp4 is whatever you would like to name your video
+
+6. Your video will be in the frames directory!
+
+
+Troubleshooting if Video is not loading in PEAT:
+Download and install K-Lite Code Pack (https://filehippo.com/download_klite_codec_pack/)
