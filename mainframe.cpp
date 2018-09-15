@@ -166,7 +166,7 @@ mainFrame::~mainFrame()
 void mainFrame::on_folderButton_clicked()
 {
 
-    QString filename = QFileDialog::getOpenFileName(this, "Open a Video File", "", "Video File (*.mp4, *.avi, *.mpeg, *.*)");
+    QString filename = QFileDialog::getOpenFileName(this, "Open a Video File", "", "Video File (*.mp4; *.avi; *.flv; *.mpeg)");
     QFileInfo fi(filename);
     QString ext = fi.suffix();
     bool didSelect = false;
@@ -731,7 +731,7 @@ void mainFrame::on_reportButton_clicked()
 
 void mainFrame::openReport()
 {
-    QString filename = QFileDialog::getOpenFileName(this, "Open a report file", "", ".txt (*.*)");
+    QString filename = QFileDialog::getOpenFileName(this, "Open a report file", "", ".txt (*.txt)");
     ui->label->setText(filename);
     if(!filename.isEmpty())
     {
@@ -778,9 +778,15 @@ void mainFrame::openReport()
             vector<double> yDiag;
             vector<double> xDiag;
             int64 frameNum = 0;
-
+            double startOfRed = 0.0;
+            double endOfRed = 0.0;
+            vector<double> redPortions = {};
+            //QString stylesheet = "QSlider::groove:horizontal { border: 1px solid #999999; height: 10px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #B1B1B1, stop: 1.0 #c4c4c4); margin: 2px 0; } QSlider::handle:horizontal { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f); border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 3px; }";
+            QString firstHalfStylesheet = "QSlider::groove:horizontal { border: 1px solid #999999; height: 10px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #25c660, ";
+            QString secondHalfStylesheet = "stop: 1.0 #25c660); margin: 2px 0; } QSlider::handle:horizontal { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f); border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 3px; }";
             bool isDiagnostic = false;
             int n = 0;
+
             while (!in.atEnd())
             {
                 line = in.readLine();
@@ -806,9 +812,14 @@ void mainFrame::openReport()
                         }
                         else {
                             end = ynum;
+                            startOfRed = static_cast<double>(start)/frameNum;
+                            endOfRed = static_cast<double>(end)/frameNum;
+                            redPortions.push_back(startOfRed - 0.0001);
+                            redPortions.push_back(startOfRed);
+                            redPortions.push_back(endOfRed);
+                            redPortions.push_back(endOfRed + 0.0001);
                             for (int i = start; i <= end; i++)
                             {
-
                                 y.push_back(1.0);
                                 x.push_back(static_cast<double>(i));
                             }
@@ -858,7 +869,15 @@ void mainFrame::openReport()
                 }
                 counter++;
             }
-
+            for (int x = 0; x < redPortions.size(); x += 4)
+            {
+                firstHalfStylesheet += "stop: " + QString::number(redPortions[x]) + " #25c660, ";
+                firstHalfStylesheet += "stop: " + QString::number(redPortions[x+1]) + " #c10707, ";
+                firstHalfStylesheet += "stop: " + QString::number(redPortions[x+2]) + " #c10707, ";
+                firstHalfStylesheet += "stop: " + QString::number(redPortions[x+3]) + " #25c660, ";
+            }
+            QString stylesheet = firstHalfStylesheet + secondHalfStylesheet;
+            ui->slider->setStyleSheet(stylesheet);
             /*
             while (!in.atEnd())
             {
@@ -915,7 +934,8 @@ void mainFrame::openReport()
             ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
             //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
             ui->customPlot->graph(0)->setData(xx, yy);
-            ui->customPlot->xAxis->scaleRange(5.0, ui->customPlot->xAxis->range().center());
+            ui->customPlot->xAxis->scaleRange(8.0, ui->customPlot->xAxis->range().center());
+
             //ADDED
             ui->customPlot->addGraph();
             QPen solid;
@@ -926,25 +946,33 @@ void mainFrame::openReport()
             ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
             //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
             ui->customPlot->graph(1)->setData(xxDiag, yyDiag);
-            ui->customPlot->xAxis->scaleRange(0.1, ui->customPlot->xAxis->range().center());
-            ui->customPlot->replot();
 
-            connect(ui->horizontalSlider, &QSlider::valueChanged, this, [&](qint64 moved)
+            ui->customPlot->replot();
+            connect(ui->horizontalSlider, &QSlider::valueChanged, this, [&](int moved)
             {
                 //FIX THIS
-                int x = ui->horizontalSlider->value();
-                double alpha;
-                if (x > 50)
+                int alpha;
+                int delta = moved - lastValue;
+                if (delta > 0)
                 {
-                    alpha = 1.0 - (x-50)*0.02;
+                    for (int x = lastValue + 1; x < moved + 1; x++)
+                    {
+                        alpha *= 1.0 + (x)*0.01;
+                    }
                 }
                 else {
-                    alpha = 1.0 + (50-x)*0.16;
+                    for (int x = lastValue - 1; x > moved - 1; x--)
+                    {
+                        alpha *= 1/(1.0 + (abs(x))*0.01);
+                    }
                 }
+                qDebug() << "Delta: " << moved - lastValue;
+                qDebug() << "Moved: " << moved;
+                qDebug() << "Last: " << lastValue;
 
                 ui->customPlot->xAxis->scaleRange(alpha, ui->customPlot->xAxis->range().center());
                 ui->customPlot->replot();
-
+                lastValue = moved;
             });
 
 

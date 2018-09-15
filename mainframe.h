@@ -46,6 +46,7 @@ public:
     QAction *skipFrameLeft;
     QAction *skipFrameRight;
     bool forwardWarningJustPressed = false;
+    int lastValue = 0;
 
 public slots:
 

@@ -40,7 +40,7 @@ void makeFrameGradient(int lowerBound, int upperBound, string gradientFolder, st
     string lowerBoundGradientPath = gradientFolder + to_string(lowerBound) + ".jpg";
     string nextGradientPath = gradientFolder + to_string(lowerBound + 1) + ".jpg";
     string upperBoundGradientPath = gradientFolder + to_string(upperBound) + ".jpg";
-    
+
     Mat frame1 = imread(lowerBoundGradientPath);
     Mat frame2 = imread(nextGradientPath);
     Mat frameFinal = imread(upperBoundGradientPath);
@@ -58,7 +58,7 @@ void makeFrameGradient(int lowerBound, int upperBound, string gradientFolder, st
                 Vec3b color1 = frame1.at<Vec3b>(x,y);
                 Vec3b color2 = frame2.at<Vec3b>(x,y);
                 Vec3b newColorFrame = newFrame.at<Vec3b>(x,y);
-                
+
                 if (color1[0] - color2[0] > thresholdInt)
                 {
                     newColorFrame[0] = color1[0] - 10;
@@ -70,12 +70,12 @@ void makeFrameGradient(int lowerBound, int upperBound, string gradientFolder, st
                 else if (color1[1] - color2[1] > thresholdInt)
                 {
                     newColorFrame[1] = color1[1] - 10;
-                    
+
                 }
                 else if (color2[1] - color1[1] > thresholdInt)
                 {
                     newColorFrame[1] = color1[1] + 10;
-                    
+
                 }
                 else if (color1[2] - color2[2] > thresholdInt)
                 {
@@ -96,10 +96,10 @@ void makeFrameGradient(int lowerBound, int upperBound, string gradientFolder, st
         {
             frame2 = imread(pointPath);
         }
-        
+
         frame1 = newFrame;
         imwrite(pointPath, newFrame);
-        
+
         if (count == 8 && seizureBool == true)
         {
             lowerBound = lowerBound + count;
@@ -118,13 +118,13 @@ void makeFrameGradient(int lowerBound, int upperBound, string gradientFolder, st
 
 void lowerContrast(int lowerBound, int upperBound, string gradientFolder, double alpha)
 {
-    
+
     for (int count = 0; count <= (upperBound - lowerBound); count++)
     {
         string lowerBoundGradientPath = gradientFolder + to_string(lowerBound + count) + ".jpg";
         Mat frame1 = imread(lowerBoundGradientPath);
         Mat updatedFrame = Mat::zeros( frame1.size(), frame1.type() );
-        
+
         for(int x = 0; x < frame1.rows; x++)
         {
             for(int y = 0; y < frame1.cols; y++)
@@ -150,7 +150,7 @@ void overlayFilter(int lowerBound, int upperBound, string gradientFolder, double
         cv::rectangle(overlay, cv::Rect(0, 0, frame1.cols, frame1.rows), cv::Scalar(50, 50, 50), -1);
 
         cv::addWeighted(overlay, alpha, frame1, 1.0 - alpha, 0.0, frame1);
-        
+
         imwrite(lowerBoundGradientPath, frame1);
     }
 }
@@ -236,7 +236,7 @@ vector< vector<int> > relativeLuminance(Mat colorFrame)
     for (int x = 0; colorFrame.rows > x; x++)
     {
         brightnessMatrix[x].resize(colorFrame.cols);
-        
+
         for (int y = 0; colorFrame.cols > y; y++)
         {
             int pixelValue = (int)colorFrame.at<uchar>(x,y);
@@ -697,13 +697,13 @@ void rkbcore(string vidDir, QString report, vector<int> props)
 {
 
     vector<vector<int > > randMatrix = seizureDetection(vidDir, report, props);
-    
+
     /*
     int decision;
     cout << "Choose a filter method: 1. Color-shift 2. Change Contrast 3. Overlay 4. Blur" << endl;
     cin >> decision;
     double alpha;
-    
+
     */
 }
 
