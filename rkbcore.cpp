@@ -20,6 +20,7 @@
 #include <fstream>
 #include <QFile>
 #include <QProgressDialog>
+#include <algorithm>
 
 using namespace std;
 using namespace cv;
@@ -421,6 +422,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
         {
             for(int k = 0; k < frame1.cols - 341; k += 15)
             {
+                int currentLumSizeSecond = lumDiagFrames.size();
                 diagInt = 0;
                 wasSeizure = false;
                 avgLum = 0.0;
@@ -482,6 +484,8 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                     }
                 }
 
+                vector<int> peakIndex = {};
+
                 for (num = 0; num < peaks.size(); num++)
                 {
                     vector<double> betweenPeaksMin;
@@ -512,12 +516,17 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
 
                     if ((peaks[num] - min)/(min) > 0.10 && (peaks[num] - otherMin)/(otherMin) > 0.10)
                     {
-                        vector<int> frameData;
-                        diagInt++;
-                        frameData.push_back(index[num] + n);
-                        frameData.push_back(diagInt);
-                        lumDiagFrames.push_back(frameData);
-                        count++;
+                        if (index[num] + 1 != 1)
+                        {
+                            vector<int> frameData;
+                            diagInt++;
+                            frameData.push_back(index[num] + n + 1);
+                            frameData.push_back(diagInt);
+
+                            lumDiagFrames.push_back(frameData);
+
+                            peakIndex.push_back(index[num] + 1);
+                        }
                     }
                 }
 
@@ -525,9 +534,6 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                 {
                     if (diagInt >= 3)
                     {
-                        cout << to_string(index[num] + n);
-                        cout << to_string(lumDiagFrames[lumDiagFrames.size() - lumDiagFrames[lumDiagFrames.size() - 1][1]][0]);
-                        cout << to_string(lumDiagFrames[lumDiagFrames.size() - 1][0]);
                         seizureCount++;
                     }
                 }
@@ -540,36 +546,36 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                 {
                     bounds.push_back(lumDiagFrames[lumDiagFrames.size() - lumDiagFrames[lumDiagFrames.size() - 1][1]][0]);
                     bounds.push_back(lumDiagFrames[lumDiagFrames.size() - 1][0]);
-                    cout << lumDiagFrames[lumDiagFrames.size()-1][1];
-                    seizureBoundaries.push_back(bounds);
+                    qDebug() << "BROP: " << lumDiagFrames[lumDiagFrames.size() - lumDiagFrames[lumDiagFrames.size() - 1][1]][0];
+                    if (lumDiagFrames[lumDiagFrames.size() - lumDiagFrames[lumDiagFrames.size() - 1][1]][0] > seizureBoundaries[seizureBoundaries.size() - 1][1])
+                    {
+                        cout << lumDiagFrames[lumDiagFrames.size()-1][1];
+                        seizureBoundaries.push_back(bounds);
 
-                    n += index[num];
+
+                        qDebug() << currentLumSizeSecond;
+                        qDebug() << lumDiagFrames[lumDiagFrames.size() - 1][1];
+                        //currentLumSizeSecond = 297 for some reason
+                        lumDiagFrames.erase(lumDiagFrames.begin() + currentLumSizeSecond - 1, lumDiagFrames.begin() + lumDiagFrames.size() - 1 - lumDiagFrames[lumDiagFrames.size() - 1][1]);
+                    }
+                    else {
+                        seizureBoundaries[seizureBoundaries.size() - 1][1] = lumDiagFrames[lumDiagFrames.size() - 1][0];
+                    }
+                    n += peakIndex[0];
                     wasSeizure = true;
                     j = frame1.rows;
                     k = frame1.cols;
 
                     seizureCount = 0;
-                    diagInt = lumDiagFrames[lumDiagFrames.size() - 1][1];
+                    diagInt = 1;
+
                 }
-                else {
-                    diagInt = 0;
-
-                    /*
-                    if (index.size() > 0)
-                    {
-                        n += index[0] + 1;
-                    }
-                    else {
-                        n += 30;
-                    }
-                    */
-                }
-
-
             }
         }
+
         if (wasSeizure == false)
         {
+
             qDebug() << "Test1";
             if (lumDiagFrames.size() != currentLumArrSize)
             {
@@ -590,24 +596,33 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                 }
 
                 sort(newDiagFrames.begin(), newDiagFrames.end());
-                newDiagFrames.erase(unique(newDiagFrames.begin(), newDiagFrames.begin()), newDiagFrames.end());
+                newDiagFrames.erase(unique(newDiagFrames.begin(), newDiagFrames.end()), newDiagFrames.end());
 
                 for (int i = 0; i < newDiagFrames.size(); i++)
                 {
-                    qDebug() << "Test4";
-                    lumDiagFrames.push_back({newDiagFrames[i], i + 1});
+                    qDebug() << "Test4: " << newDiagFrames[i];
+                    if (i != 0)
+                    {
+                        lumDiagFrames.push_back({newDiagFrames[i], 2});
+                    }
+                    else {
+                        lumDiagFrames.push_back({newDiagFrames[i], i + 1});
+                    }
                 }
-
-                n += lumDiagFrames[lumDiagFrames.size() - 1][0];
+                for (int x = 0; x < newDiagFrames.size(); x++)
+                {
+                    qDebug() << "__:" << newDiagFrames[x];
+                }
+                n = lumDiagFrames[lumDiagFrames.size() - lumDiagFrames[lumDiagFrames.size() - 1][1]][0];
                 qDebug() << n;
                 newDiagFrames.empty();
                 diagInt = 0;
             }
             else {
+                diagInt = 0;
                 n += 30;
             }
         }
-
     }
 
     if (seizureBoundaries.size() > 1) {
