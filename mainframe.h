@@ -115,5 +115,4 @@ private:
     rkbProTool *rkbprotool;
 
 };
-
 #endif // MAINFRAME_H
