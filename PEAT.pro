@@ -25,29 +25,29 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-    mainframe.cpp \
     mainwindow.cpp \
     rkbcore.cpp \
     waitdialog.cpp \
     qcustomplot.cpp \
     rkbprotool.cpp \
-    mwtest.cpp
+    mwtest.cpp \
+    mainframe.cpp
 
 HEADERS += \
-    mainframe.h \
     mainwindow.h \
     rkbcore.h \
     waitdialog.h \
     qcustomplot.h \
     rkbprotool.h \
-    mwtest.h
+    mwtest.h \
+    mainframe.h
 
 FORMS += \
         mainwindow.ui \
-    mainframe.ui \
     waitdialog.ui \
     rkbprotool.ui \
-    mwtest.ui
+    mwtest.ui \
+    mainframe.ui
 
 RESOURCES += \
     resources.qrc

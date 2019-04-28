@@ -29,12 +29,12 @@ namespace Ui {
 class mainFrame;
 }
 
-class mainFrame : public QMainWindow
+class mainFrame : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit mainFrame(QWidget *parent = nullptr);
+    explicit mainFrame(QWidget *parent = 0);
     ~mainFrame();
     double x = 1.0;
     qreal rate = x;
@@ -47,7 +47,8 @@ public:
     QAction *skipFrameRight;
     bool forwardWarningJustPressed = false;
     int lastValue = 0;
-    bool firstOpen = true;
+
+public slots:
 
 private slots:
     void on_folderButton_clicked();
@@ -96,7 +97,6 @@ private slots:
 
     string execute(const char * cmd);
 
-    string replaceChar(string str, char ch1, char ch2);
 
 private:
     Ui::mainFrame *ui;
@@ -113,8 +113,6 @@ private:
     QStatusBar *statusbar;
     int index = 0;
     rkbProTool *rkbprotool;
-    QCPItemRect *section;
+
 };
-
-
 #endif // MAINFRAME_H

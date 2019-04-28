@@ -21,6 +21,7 @@
 #include <QFile>
 #include <QProgressDialog>
 #include <algorithm>
+#include <set>
 
 using namespace std;
 using namespace cv;
@@ -245,7 +246,53 @@ vector< vector<int> > relativeLuminance(Mat colorFrame)
     }
     return brightnessMatrix;
 }
+vector< vector< vector<double> > > saturationValues(Mat colorFrame)
+{
+    vector<vector<vector<double> > > brightnessMatrix;
+    brightnessMatrix.resize(floor(colorFrame.rows/2));
+    for (int x = 0; floor(colorFrame.rows/2) > x; x++)
+    {
+        brightnessMatrix[x].resize(floor(colorFrame.cols/2));
 
+        for (int y = 0; floor(colorFrame.cols/2) > y; y++)
+        {
+            brightnessMatrix[x][y].resize(3);
+            Vec3b bgrValues = colorFrame.at<Vec3b>(x,y);
+            double sBlue = bgrValues[0]/255.0;
+            double sGreen = bgrValues[1]/255.0;
+            double sRed = bgrValues[2]/255.0;
+            double blue;
+            double green;
+            double red;
+            if (sBlue <= 0.0398)
+            {
+                blue = sBlue/12.92;
+            }
+            else {
+                blue = pow(((sBlue + 0.055)/1.055), 2.4);
+            }
+            if (sGreen <= 0.0398)
+            {
+                green = sGreen/12.92;
+            }
+            else {
+                green = pow(((sGreen + 0.055)/1.055), 2.4);
+            }
+            if (sRed <= 0.03)
+            {
+                red = sRed/12.92;
+            }
+            else {
+                red = pow(((sRed + 0.055)/1.055), 2.4);
+            }
+
+            brightnessMatrix[x][y][0] = blue;
+            brightnessMatrix[x][y][1] = green;
+            brightnessMatrix[x][y][2] = red;
+        }
+    }
+    return brightnessMatrix;
+}
 
 vector<vector<int > > seizureDetection(string path, QString reportName, vector<int> properties)
 {
@@ -258,15 +305,24 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
     int numOfFrames = properties[0];
     int n = 0;
     int seizureCount = 0;
+    int redSeizureCount = 0;
     int arb = 0;
     int aarb = 0;
     int rate = round(properties[1]);
 
+    QString newPath = QString::fromStdString(path);
+    QDir dir(newPath);
+    dir.setFilter(QDir::AllEntries | QDir::NoDotAndDotDot);
+    numOfFrames = dir.count();
 
     vector<vector<int > > seizureBoundaries;
     seizureBoundaries.push_back({0,0});
     vector<vector<int > > lumDiagFrames;
+    vector<vector<int > > redDiagFrames;
+    vector<vector<int > > redSeizureBoundaries;
+    redSeizureBoundaries.push_back({0,0});
     vector<double> index = {0};
+    vector<double> redIndex = {0};
     int num = 0;
     QApplication::processEvents();
     bool updatingBounds = false;
@@ -275,13 +331,20 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
     progress.setFixedSize(500, 100);
     progress.show();
     int diagInt = 0;
+    int redDiagInt = 0;
     bool wasSeizure = false;
+    bool wasRedSeizure = false;
+    bool adjustN = false;
+
     int count = 0;
     QApplication::processEvents();
 
+    QString labelText;
     while(n + 30 <= numOfFrames)
     {
         QApplication::processEvents();
+        labelText = "Analyzing frames... " + QString::number(n) + "/" + QString::number(numOfFrames);
+        progress.setLabelText(labelText);
         progress.setValue(round(n/30));
         qDebug() << "Level: " << n << endl;
 
@@ -348,6 +411,37 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
         Mat frame29 = imread(path29);
         Mat frame30 = imread(path30);
 
+        Mat frame1R = imread(path1);
+        Mat frame2R = imread(path2);
+        Mat frame3R = imread(path3);
+        Mat frame4R = imread(path4);
+        Mat frame5R = imread(path5);
+        Mat frame6R = imread(path6);
+        Mat frame7R = imread(path7);
+        Mat frame8R = imread(path8);
+        Mat frame9R = imread(path9);
+        Mat frame10R = imread(path10);
+        Mat frame11R = imread(path11);
+        Mat frame12R = imread(path12);
+        Mat frame13R = imread(path13);
+        Mat frame14R = imread(path14);
+        Mat frame15R = imread(path15);
+        Mat frame16R = imread(path16);
+        Mat frame17R = imread(path17);
+        Mat frame18R = imread(path18);
+        Mat frame19R = imread(path19);
+        Mat frame20R = imread(path20);
+        Mat frame21R = imread(path21);
+        Mat frame22R = imread(path22);
+        Mat frame23R = imread(path23);
+        Mat frame24R = imread(path24);
+        Mat frame25R = imread(path25);
+        Mat frame26R = imread(path26);
+        Mat frame27R = imread(path27);
+        Mat frame28R = imread(path28);
+        Mat frame29R = imread(path29);
+        Mat frame30R = imread(path30);
+
         cvtColor(frame1, frame1, CV_BGR2GRAY);
         cvtColor(frame2, frame2, CV_BGR2GRAY);
         cvtColor(frame3, frame3, CV_BGR2GRAY);
@@ -411,23 +505,67 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
         vector < vector<int> > frame30Luminance = relativeLuminance(frame30);
         vector<vector<vector<int> > > luminanceMatrix {frame1Luminance, frame2Luminance, frame3Luminance, frame4Luminance, frame5Luminance, frame6Luminance, frame7Luminance, frame8Luminance, frame9Luminance, frame10Luminance, frame11Luminance, frame12Luminance, frame13Luminance, frame14Luminance, frame15Luminance, frame16Luminance, frame17Luminance, frame18Luminance, frame19Luminance, frame20Luminance, frame21Luminance, frame22Luminance, frame23Luminance, frame24Luminance, frame25Luminance, frame26Luminance, frame27Luminance, frame28Luminance, frame29Luminance, frame30Luminance};
 
+        vector < vector< vector<double> > > frame1RLuminance = saturationValues(frame1R);
+        vector < vector< vector<double> > > frame2RLuminance = saturationValues(frame2R);
+        vector < vector< vector<double> > > frame3RLuminance = saturationValues(frame3R);
+        vector < vector< vector<double> > > frame4RLuminance = saturationValues(frame4R);
+        vector < vector< vector<double> > > frame5RLuminance = saturationValues(frame5R);
+        vector < vector< vector<double> > > frame6RLuminance = saturationValues(frame6R);
+        vector < vector< vector<double> > > frame7RLuminance = saturationValues(frame7R);
+        vector < vector< vector<double> > > frame8RLuminance = saturationValues(frame8R);
+        vector < vector< vector<double> > > frame9RLuminance = saturationValues(frame9R);
+        vector < vector< vector<double> > > frame10RLuminance = saturationValues(frame10R);
+        vector < vector< vector<double> > > frame11RLuminance = saturationValues(frame11R);
+        vector < vector< vector<double> > > frame12RLuminance = saturationValues(frame12R);
+        vector < vector< vector<double> > > frame13RLuminance = saturationValues(frame13R);
+        vector < vector< vector<double> > > frame14RLuminance = saturationValues(frame14R);
+        vector < vector< vector<double> > > frame15RLuminance = saturationValues(frame15R);
+        vector < vector< vector<double> > > frame16RLuminance = saturationValues(frame16R);
+        vector < vector< vector<double> > > frame17RLuminance = saturationValues(frame17R);
+        vector < vector< vector<double> > > frame18RLuminance = saturationValues(frame18R);
+        vector < vector< vector<double> > > frame19RLuminance = saturationValues(frame19R);
+        vector < vector< vector<double> > > frame20RLuminance = saturationValues(frame20R);
+        vector < vector< vector<double> > > frame21RLuminance = saturationValues(frame21R);
+        vector < vector< vector<double> > > frame22RLuminance = saturationValues(frame22R);
+        vector < vector< vector<double> > > frame23RLuminance = saturationValues(frame23R);
+        vector < vector< vector<double> > > frame24RLuminance = saturationValues(frame24R);
+        vector < vector< vector<double> > > frame25RLuminance = saturationValues(frame25R);
+        vector < vector< vector<double> > > frame26RLuminance = saturationValues(frame26R);
+        vector < vector< vector<double> > > frame27RLuminance = saturationValues(frame27R);
+        vector < vector< vector<double> > > frame28RLuminance = saturationValues(frame28R);
+        vector < vector< vector<double> > > frame29RLuminance = saturationValues(frame29R);
+        vector < vector< vector<double> > > frame30RLuminance = saturationValues(frame30R);
+        vector<vector<vector<vector<double > > > > redMatrix {frame1RLuminance, frame2RLuminance, frame3RLuminance, frame4RLuminance, frame5RLuminance, frame6RLuminance, frame7RLuminance, frame8RLuminance, frame9RLuminance, frame10RLuminance, frame11RLuminance, frame12RLuminance, frame13RLuminance, frame14RLuminance, frame15RLuminance, frame16RLuminance, frame17RLuminance, frame18RLuminance, frame19RLuminance, frame20RLuminance, frame21RLuminance, frame22RLuminance, frame23RLuminance, frame24RLuminance, frame25RLuminance, frame26RLuminance, frame27RLuminance, frame28RLuminance, frame29RLuminance, frame30RLuminance};
+
         vector<double> avgLumMatrix(30);
+        vector<double> avgRedMatrix(30);
         double avgLum = 0.0;
+        double avgSaturation = 0.0;
+        double avgBlue = 0.0;
+        double avgGreen = 0.0;
+        double avgRed = 0.0;
         int a = 256;
         int b = 341;
 
         int currentLumArrSize = lumDiagFrames.size();
 
-        for(int j = 0; j < frame1.rows - 256; j += 15)
+        for(int j = 0; j < frame1.rows - 256; j += 30)
         {
-            for(int k = 0; k < frame1.cols - 341; k += 15)
+            for(int k = 0; k < frame1.cols - 341; k += 30)
             {
-                int currentLumSizeSecond = lumDiagFrames.size();
                 diagInt = 0;
+                redDiagInt = 0;
+                int currentLumSizeSecond = lumDiagFrames.size();
                 wasSeizure = false;
                 avgLum = 0.0;
+                avgSaturation = 0.0;
+                avgBlue = 0.0;
+                avgGreen = 0.0;
+                avgRed = 0.0;
                 avgLumMatrix.empty();
+                avgRedMatrix.empty();
                 index.empty();
+                redIndex.empty();
 
                 for(int i = 0; i < 30; i++)
                 {
@@ -438,9 +576,35 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                             avgLum += luminanceMatrix[i][x + j][y + k];
                         }
                     }
+                    for (int c = 0; c < floor(frame1.rows/4); c++)
+                    {
+                        for (int d = 0; d < floor(frame1.cols/4); d++)
+                        {
+                            avgSaturation += (redMatrix[i][c][d][2])/(redMatrix[i][c][d][0] + redMatrix[i][c][d][1] + redMatrix[i][c][d][2]);
+                            avgBlue += redMatrix[i][c][d][0];
+                            avgGreen += redMatrix[i][c][d][1];
+                            avgRed += redMatrix[i][c][d][2];
+                        }
+                    }
                     avgLum = avgLum/(static_cast<double>(a*b));
                     avgLumMatrix[i] = avgLum;
                     avgLum = 0;
+
+                    avgSaturation = avgSaturation/(static_cast<double>(a*b*4));
+                    avgBlue = avgBlue/(static_cast<double>(a*b*4));
+                    avgGreen = avgGreen/(static_cast<double>(a*b*4));
+                    avgRed = avgRed/(static_cast<double>(a*b*4));
+                    qDebug() << avgSaturation;
+
+                    if (avgSaturation >= 0.02)
+                    {
+                        qDebug() << n << " : SATURATION";
+                        avgRedMatrix[i] = (avgRed - avgGreen - avgBlue)*320.0;
+                    }
+                    else{
+                        avgRedMatrix[i] = 0.0;
+                    }
+                    avgSaturation = 0;
                 }
 
                 vector<double> amp = avgLumMatrix;
@@ -484,6 +648,41 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                     }
                 }
 
+                vector<double> peaksRed;
+                redIndex = {0};
+                // vector<double>::iterator it;
+                grad = -1;                      // Sign of gradient (almost)
+
+                for ( int i = 0; i < avgRedMatrix.size(); i++ )
+                {
+                    if ( avgRedMatrix[i+1] < avgRedMatrix[i])         // Only possibility of a peak
+                    {
+                        if ( grad == 1 && avgRedMatrix[i] > NOISE )
+                        {
+                            peaksRed.push_back(avgRedMatrix[i]);
+                            redIndex.push_back(i);
+                        }
+                        else if ( grad == 0 && avgRedMatrix[i] > NOISE )
+                        {
+                        }
+                        grad = -1;
+                    }
+                    else if ( avgRedMatrix[i+1] == avgRedMatrix[i] )   // Check for start of a wide peak
+                    {
+                        if ( grad == 1 )
+                        {
+                            wideStart = i;
+                            grad = 0;
+                        }
+                    }
+                    else
+                    {
+                        grad = 1;
+                    }
+                }
+
+
+
                 vector<int> peakIndex = {};
 
                 for (num = 0; num < peaks.size(); num++)
@@ -514,7 +713,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                         }
                     }
 
-                    if ((peaks[num] - min)/(min) > 0.10 && (peaks[num] - otherMin)/(otherMin) > 0.10)
+                    if ((peaks[num] - min)/(min) > 0.07 && (peaks[num] - otherMin)/(otherMin) > 0.07)
                     {
                         if (index[num] + 1 != 1)
                         {
@@ -538,7 +737,115 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                     }
                 }
 
+                vector<int> redPeakIndex = {};
 
+                for (num = 0; num < peaksRed.size(); num++)
+                {
+                    vector<double> betweenPeaksMin;
+                    vector<double> betweenPeaksMax;
+                    double min = 0.0, otherMin = 0.0, deviation1 = 0.0, deviation2 = 0.0;
+
+                    for (int abc = 0; abc < (redIndex[num + 1] - redIndex[num] - 1); abc++)
+                    {
+                        betweenPeaksMin.push_back(avgRedMatrix[abc + redIndex[num] + 1]);
+                        min = *min_element(betweenPeaksMin.begin(), betweenPeaksMin.end());
+                    }
+                    if (num + 2 < redIndex.size())
+                    {
+                        for (int abc = 0; abc < (redIndex[num + 2] - redIndex[num + 1] - 1); abc++)
+                        {
+                            betweenPeaksMax.push_back(avgRedMatrix[abc + redIndex[num + 1] + 1]);
+                            otherMin = *min_element(betweenPeaksMax.begin(), betweenPeaksMax.end());
+                        }
+                    }
+                    else
+                    {
+                        for (int abc = 0; abc < (30 - redIndex[num + 1] - 1); abc++)
+                        {
+                            betweenPeaksMax.push_back(avgRedMatrix[abc + redIndex[num + 1] + 1]);
+                            otherMin = *min_element(betweenPeaksMax.begin(), betweenPeaksMax.end());
+                        }
+                    }
+                    qDebug() << "Check: " << (peaksRed[num] - min);
+                    if ((peaksRed[num] - min) > 4.0 && (peaksRed[num] - otherMin) > 4.0)
+                    {
+                        if (redIndex[num] + 1 != 1)
+                        {
+                            vector<int> frameData;
+                            redDiagInt++;
+                            frameData.push_back(redIndex[num] + n + 1);
+                            frameData.push_back(redDiagInt);
+
+                            redDiagFrames.push_back(frameData);
+
+                            redPeakIndex.push_back(redIndex[num] + 1);
+                            if (adjustN == true)
+                            {
+                                qDebug() << redDiagInt;
+                            }
+                        }
+                    }
+                }
+
+                if (redDiagFrames.size() != 0)
+                {
+                    if (redDiagInt >= 3)
+                    {
+                        redSeizureCount++;
+                    }
+                }
+
+
+                vector<int> redBounds(2);
+                redBounds = {};
+
+                if (redSeizureCount != 0)
+                {
+                    redBounds.push_back(redDiagFrames[redDiagFrames.size() - redDiagFrames[redDiagFrames.size() - 1][1]][0]);
+                    redBounds.push_back(redDiagFrames[redDiagFrames.size() - 1][0]);
+
+                    qDebug() << "BROPred: " << redDiagFrames[redDiagFrames.size() - redDiagFrames[redDiagFrames.size() - 1][1]][0];
+                    qDebug() << redBounds[0] << "___" << redBounds[1];
+                    if (redDiagFrames[redDiagFrames.size() - redDiagFrames[redDiagFrames.size() - 1][1]][0] > redSeizureBoundaries[redSeizureBoundaries.size() - 1][1])
+                    {
+                        cout << redDiagFrames[redDiagFrames.size()-1][1];
+                        redSeizureBoundaries.push_back(redBounds);
+
+
+
+                        qDebug() << redDiagFrames[redDiagFrames.size() - 1][1];
+                        //currentLumSizeSecond = 297 for some reason
+                        //redDiagFrames.erase(redDiagFrames.begin() + currentLumSizeSecond - 1, redDiagFrames.begin() + redDiagFrames.size() - 1 - redDiagFrames[redDiagFrames.size() - 1][1]);
+                    }
+                    else {
+                        qDebug() << "bokemonronto!";
+                        redSeizureBoundaries[redSeizureBoundaries.size() - 1][1] = redDiagFrames[redDiagFrames.size() - 1][0];
+                    }
+                    qDebug() << "toronto!";
+                    if (peakIndex.size() != 0)
+                    {
+                        if (n > n - peakIndex[0] + redPeakIndex[0])
+                        {
+                            n = n - peakIndex[0] + redPeakIndex[0];
+                        }
+                        else{
+                            n += peakIndex[0];
+                        }
+                    }
+
+                    qDebug() << "got eem!";
+                    wasRedSeizure = true;
+                    j = frame1.rows;
+                    k = frame1.cols;
+
+                    redSeizureCount = 0;
+                    redDiagInt = 1;
+                    if (wasSeizure == false)
+                    {
+                        n += redPeakIndex[0];
+                    }
+
+                }
                 vector<int> bounds(2);
                 bounds = {};
 
@@ -546,6 +853,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                 {
                     bounds.push_back(lumDiagFrames[lumDiagFrames.size() - lumDiagFrames[lumDiagFrames.size() - 1][1]][0]);
                     bounds.push_back(lumDiagFrames[lumDiagFrames.size() - 1][0]);
+
                     qDebug() << "BROP: " << lumDiagFrames[lumDiagFrames.size() - lumDiagFrames[lumDiagFrames.size() - 1][1]][0];
                     if (lumDiagFrames[lumDiagFrames.size() - lumDiagFrames[lumDiagFrames.size() - 1][1]][0] > seizureBoundaries[seizureBoundaries.size() - 1][1])
                     {
@@ -601,6 +909,7 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                 for (int i = 0; i < newDiagFrames.size(); i++)
                 {
                     qDebug() << "Test4: " << newDiagFrames[i];
+
                     if (i != 0)
                     {
                         lumDiagFrames.push_back({newDiagFrames[i], 2});
@@ -622,9 +931,56 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
                 diagInt = 0;
                 n += 30;
             }
+            if (n + 30 > numOfFrames && adjustN == false)
+            {
+                n = numOfFrames - 30;
+                adjustN = true;
+            }
         }
     }
 
+    vector< vector<int>> newLumInfo = {};
+
+    //Loop to edit lumDiagFrames
+    for (int i = 0; i < lumDiagFrames.size(); i++)
+    {
+        bool foundRepeat = false;
+
+        for (int x = 0; x < newLumInfo.size(); x++)
+        {
+            if (lumDiagFrames[i][0] == newLumInfo[x][0])
+            {
+                foundRepeat = true;
+                break;
+            }
+        }
+        if (foundRepeat == false)
+        {
+            newLumInfo.push_back(lumDiagFrames[i]);
+        }
+    }
+
+    vector< vector<int>> newRedLumInfo = {};
+
+    //Loop to edit lumDiagFrames
+    for (int i = 0; i < redDiagFrames.size(); i++)
+    {
+        bool foundRepeat = false;
+
+        for (int x = 0; x < newRedLumInfo.size(); x++)
+        {
+            if (redDiagFrames[i][0] == newRedLumInfo[x][0])
+            {
+                foundRepeat = true;
+                break;
+            }
+        }
+        if (foundRepeat == false)
+        {
+            newRedLumInfo.push_back(redDiagFrames[i]);
+        }
+    }
+    //
     if (seizureBoundaries.size() > 1) {
         if ( file.open(QIODevice::ReadWrite|QIODevice::Text) )
         {
@@ -632,6 +988,10 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
             for (int x = 1; x < seizureBoundaries.size(); x++)
             {
                 stream << "Seizure at frames: " << seizureBoundaries[x][0] << " to " << seizureBoundaries[x][1] << endl;
+            }
+            for (int x = 1; x < redSeizureBoundaries.size(); x++)
+            {
+                stream << "Saturated red seizure at frames: " << redSeizureBoundaries[x][0] << " to " << redSeizureBoundaries[x][1] << endl;
             }
         }
     }
@@ -648,11 +1008,17 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
         if ( aFile.open(QIODevice::ReadWrite|QIODevice::Text) )
         {
             QTextStream stream( &aFile );
-            stream << properties[0] << endl;
+            stream << numOfFrames << endl;
             for (int x = 1; x < seizureBoundaries.size(); x++)
             {
                 stream << seizureBoundaries[x][0] << endl;
                 stream << seizureBoundaries[x][1] << endl;
+            }
+            stream << "RedSeizure" << endl;
+            for (int x = 1; x < redSeizureBoundaries.size(); x++)
+            {
+                stream << redSeizureBoundaries[x][0] << endl;
+                stream << redSeizureBoundaries[x][1] << endl;
             }
         }
     }
@@ -679,10 +1045,36 @@ vector<vector<int > > seizureDetection(string path, QString reportName, vector<i
     if(in.atEnd())
     {
         stream << "Diagnostic" << endl;
-        for (int x = 0; x < lumDiagFrames.size(); x++)
+        for (int x = 0; x < newLumInfo.size(); x++)
         {
-            stream << lumDiagFrames[x][0] << endl;
-            stream << lumDiagFrames[x][1] << endl;
+            if (x == 0)
+            {
+                stream << 0 << endl;
+                stream << 0 << endl;
+            }
+            stream << newLumInfo[x][0] << endl;
+            stream << newLumInfo[x][1] << endl;
+            if (x == newLumInfo.size() - 1)
+            {
+                stream << numOfFrames << endl;
+                stream << 0 << endl;
+            }
+        }
+        stream << "RedDiagnostic" << endl;
+        for (int x = 0; x < newRedLumInfo.size(); x++)
+        {
+            if (x == 0)
+            {
+                stream << 0 << endl;
+                stream << 0 << endl;
+            }
+            stream << newRedLumInfo[x][0] << endl;
+            stream << newRedLumInfo[x][1] << endl;
+            if (x == newRedLumInfo.size() - 1)
+            {
+                stream << numOfFrames << endl;
+                stream << 0 << endl;
+            }
         }
     }
 
@@ -749,23 +1141,36 @@ void proTool(QString ndir, QString report, int decision, double alpha)
             int end = 0;
             bool atStart = true;
             bool reachedDiagnostic = false;
+            bool reachedRed = false;
             int n = 0;
+            int otherCounter = 0;
 
             while (!in.atEnd())
             {
                 line = in.readLine();
                 std::string newLine = line.toUtf8().constData();
                 ynum = line.toInt();
-
+                if (line == "RedSeizure")
+                {
+                    reachedRed = true;
+                }
                 if (line == "Diagnostic")
                 {
                     reachedDiagnostic = true;
                 }
-                if (newLine.find_first_not_of("0123456789.") != std::string::npos && reachedDiagnostic == false)
+                if (newLine.find_first_not_of("0123456789.") != std::string::npos && reachedDiagnostic == false && reachedRed == false)
                 {
                     valid = false;
                 }
-                if (counter > 0 && valid == true && reachedDiagnostic == false)
+                if (counter > 0 && valid == true && reachedDiagnostic == false && reachedRed == false)
+                {
+                    y.push_back(ynum);
+                }
+                else if (counter > 0 && valid == true && reachedDiagnostic == false && reachedRed == true && otherCounter == 0)
+                {
+                    otherCounter++;
+                }
+                else if (counter > 0 && valid == true && reachedDiagnostic == false && reachedRed == true && otherCounter > 0)
                 {
                     y.push_back(ynum);
                 }
@@ -791,15 +1196,15 @@ void proTool(QString ndir, QString report, int decision, double alpha)
                     {
                         if (warn.size() != 0 && warn[i] != 0)
                         {
-                            sampleRate = floor((warn[i+1] - warn[i])/15);
-                            extraFrames = (warn[i+1] - warn[i]) % 15;
+                            sampleRate = floor((warn[i+1] - warn[i])/30);
+                            extraFrames = (warn[i+1] - warn[i]) % 30;
                             if(sampleRate > 0)
                             {
                                 for(int b = 0; b < sampleRate; b++)
                                 {
-                                    makeFrameGradient(warn[i] + 1, warn[i] + 15*(b+1), dir, dir);
+                                    makeFrameGradient(warn[i] + 1 + 30*(b), warn[i] + 30*(b+1), dir, dir);
                                 }
-                                makeFrameGradient(warn[i] + 15*sampleRate + 1, warn[i] + 15*sampleRate + extraFrames, dir, dir);
+                                makeFrameGradient(warn[i] + 16*sampleRate + 1, warn[i] + 30*sampleRate + extraFrames, dir, dir);
                             }
                             else {
                                 makeFrameGradient(warn[i] + 1, (warn[i+1]), dir, dir);
