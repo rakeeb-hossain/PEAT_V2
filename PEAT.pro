@@ -30,7 +30,8 @@ SOURCES += \
     rkbcore.cpp \
     waitdialog.cpp \
     qcustomplot.cpp \
-    rkbprotool.cpp
+    rkbprotool.cpp \
+    mwtest.cpp
 
 HEADERS += \
     mainframe.h \
@@ -38,13 +39,15 @@ HEADERS += \
     rkbcore.h \
     waitdialog.h \
     qcustomplot.h \
-    rkbprotool.h
+    rkbprotool.h \
+    mwtest.h
 
 FORMS += \
         mainwindow.ui \
     mainframe.ui \
     waitdialog.ui \
-    rkbprotool.ui
+    rkbprotool.ui \
+    mwtest.ui
 
 RESOURCES += \
     resources.qrc

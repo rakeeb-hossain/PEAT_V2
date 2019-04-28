@@ -1,5 +1,5 @@
-#include "mainframe.h"
-#include "ui_mainframe.h"
+#include "mwtest.h"
+#include "ui_mwtest.h"
 #include <windows.h>
 #include <stdio.h>
 #include <QProgressDialog>
@@ -18,15 +18,10 @@
 
 using namespace std;
 using namespace cv;
-// PEAT App Window
 
-using namespace std;
-using namespace cv;
-
-mainFrame::mainFrame(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::mainFrame)
-
+MWTest::MWTest(QWidget *parent) :
+    QMainWindow(parent),
+    ui(new Ui::MWTest)
 {
     ui->setupUi(this);
     this->setWindowTitle("UW Trace Center Photosensitive Epilepsy Analysis Tool (PEAT)");
@@ -36,25 +31,6 @@ mainFrame::mainFrame(QWidget *parent) :
 
     //QVBoxLayout *layout = new QVBoxLayout;
     //this->setLayout(layout);
-
-    menubar = new QMenuBar(this);
-    statusbar = new QStatusBar(this);
-
-    QAction *quit = new QAction("&Quit...                  Alt+F4", this);
-    QAction *openVideo = new QAction("&Open Video...", this);
-    QAction *openReport = new QAction("&Open Report...", this);
-    generateReport = new QAction("&Generate Seizure Report...", this);
-    generateReport->setEnabled(false);
-    QAction *remove = new QAction("Run Prophylactic Tool...", this);
-
-    QAction *peatHelp = new QAction("PEAT Help", this);
-    QAction *aboutPEAT = new QAction("About PEAT", this);
-    QAction *traceHome = new QAction("Trace Center Homepage", this);
-
-    QMenu *file;
-    QMenu *analysis;
-    QMenu *controls;
-    QMenu *help;
 
     skipLeft = new QAction("&Forward 5 seconds...       L", this);
     skipRight = new QAction("&Back 5 seconds...             J", this);
@@ -67,40 +43,6 @@ mainFrame::mainFrame(QWidget *parent) :
     skipFrameRight->setEnabled(false);
     skipFrameLeft->setEnabled(false);
 
-    file = menubar->addMenu("&File");
-    analysis = menubar->addMenu("&Analysis");
-    controls = menubar->addMenu("&Controls");
-    help = menubar->addMenu("&Help");
-
-    file->addAction(openVideo);
-    file->addAction(openReport);
-    file->addAction(quit);
-    analysis->addAction(remove);
-    analysis->addAction(generateReport);
-    controls->addAction(skipLeft);
-    controls->addAction(skipRight);
-    controls->addAction(playPause);
-    controls->addAction(skipFrameRight);
-    controls->addAction(skipFrameLeft);
-    help->addAction(peatHelp);
-    help->addAction(aboutPEAT);
-    help->addAction(traceHome);
-    //layout->setMenuBar(menubar);
-    connect(openVideo, &QAction::triggered, this, &mainFrame::on_folderButton_clicked);
-    connect(openReport, &QAction::triggered, this, &mainFrame::openReport);
-    connect(generateReport, &QAction::triggered, this, &mainFrame::on_reportButton_clicked);
-    connect(quit, &QAction::triggered, qApp, QApplication::quit);
-    connect(remove, &QAction::triggered, this, &mainFrame::openProTool);
-
-    connect(skipLeft, &QAction::triggered, this, &mainFrame::skipLeftFunc);
-    connect(skipRight, &QAction::triggered, this, &mainFrame::skipRightFunc);
-    connect(playPause, &QAction::triggered, this,& mainFrame::playPauseFunc);
-    connect(skipFrameRight, &QAction::triggered, this, &mainFrame::skipFrameRightFunc);
-    connect(skipFrameLeft, &QAction::triggered, this, &mainFrame::skipFrameLeftFunc);
-
-    connect(peatHelp, &QAction::triggered, this, &mainFrame::peatHelp);
-    connect(aboutPEAT, &QAction::triggered, this, &mainFrame::aboutPEAT);
-    connect(traceHome, &QAction::triggered, this, &mainFrame::traceHome);
 
     ui->customPlot->yAxis->setRange(0,1);
     ui->customPlot->xAxis->setLabel("Frame Number");
@@ -155,15 +97,14 @@ mainFrame::mainFrame(QWidget *parent) :
 */
     connect(player, &QMediaPlayer::durationChanged, ui->slider, &QSlider::setMaximum);
     connect(player, &QMediaPlayer::positionChanged, ui->slider, &QSlider::setValue);
-
 }
 
-mainFrame::~mainFrame()
+MWTest::~MWTest()
 {
     delete ui;
 }
 
-void mainFrame::on_folderButton_clicked()
+void MWTest::on_folderButton_clicked()
 {
 
     QString filename = QFileDialog::getOpenFileName(this, "Open a Video File", "", "Video File (*.mp4; *.avi; *.flv; *.mpeg)");
@@ -218,10 +159,10 @@ void mainFrame::on_folderButton_clicked()
                 playlist->setCurrentIndex(1);
 
                 player->setPlaylist(playlist);
-                player->setVideoOutput(ui->videoWidget);
-                ui->videoWidget->show();
-                ui->label_4->setEnabled(false);
-                ui->label_4->setText("Press play");
+                player->setVideoOutput(ui->videoWidget_2);
+                ui->videoWidget_2->show();
+                ui->label_14->setEnabled(false);
+                ui->label_14->setText("Press play");
                 ui->label->setText(filename);
                 ui->timeLabel->setStyleSheet("background-color:rgb(210, 255, 189); border-style:solid; border-color:black; border-width:1px;");
                 connect(player, &QMediaPlayer::positionChanged, this, [&](qint64 dur) {
@@ -302,17 +243,17 @@ void mainFrame::on_folderButton_clicked()
     }
 }
 
-void mainFrame::on_playButton_clicked()
+void MWTest::on_playButton_clicked()
 {
     player->play();
 }
 
-void mainFrame::on_pauseButton_clicked()
+void MWTest::on_pauseButton_clicked()
 {
     player->pause();
 }
 
-void mainFrame::on_forwardButton_clicked()
+void MWTest::on_forwardButton_clicked()
 {
 
     if (x < 32.0)
@@ -323,7 +264,7 @@ void mainFrame::on_forwardButton_clicked()
     }
 }
 
-void mainFrame::on_rewindButton_clicked()
+void MWTest::on_rewindButton_clicked()
 {
     if (x > 0.03125)
     {
@@ -331,7 +272,7 @@ void mainFrame::on_rewindButton_clicked()
         player->setPlaybackRate(x);
     }
 }
-vector<int> mainFrame::frameSplit(string filename, string location)
+vector<int> MWTest::frameSplit(string filename, string location)
 {
 
     //Extract + Save Frames
@@ -426,7 +367,7 @@ vector<int> mainFrame::frameSplit(string filename, string location)
 
         return props;
 }
-void mainFrame::horzScrollBarChanged(int value)
+void MWTest::horzScrollBarChanged(int value)
 {
   if (qAbs(ui->customPlot->xAxis->range().center()-value) > 0.01) // if user is dragging plot, we don't want to replot twice
   {
@@ -436,11 +377,11 @@ void mainFrame::horzScrollBarChanged(int value)
   }
 }
 
-void mainFrame::xAxisChanged(QCPRange range)
+void MWTest::xAxisChanged(QCPRange range)
 {
   ui->horizontalScrollBar->setPageStep(qRound(range.size())); // adjust size of scroll bar slider
 }
-void mainFrame::on_reportButton_clicked()
+void MWTest::on_reportButton_clicked()
 {
     QMessageBox messageBox;
     QMessageBox::StandardButton reply;
@@ -729,7 +670,7 @@ void mainFrame::on_reportButton_clicked()
     }
 }
 
-void mainFrame::openReport()
+void MWTest::openReport()
 {
     QString filename = QFileDialog::getOpenFileName(this, "Open a report file", "", ".txt (*.txt)");
     ui->label->setText(filename);
@@ -1002,7 +943,7 @@ void mainFrame::openReport()
 }
 
 
-void mainFrame::on_forwardWarning_clicked()
+void MWTest::on_forwardWarning_clicked()
 {
     if (forwardWarningJustPressed == false)
     {
@@ -1029,7 +970,7 @@ void mainFrame::on_forwardWarning_clicked()
     }
 }
 
-void mainFrame::on_backWarning_clicked()
+void MWTest::on_backWarning_clicked()
 {
 
     if (index == 0)
@@ -1044,19 +985,19 @@ void mainFrame::on_backWarning_clicked()
 
 }
 
-void mainFrame::openProTool()
+void MWTest::openProTool()
 {
     rkbprotool = new rkbProTool(this);
     rkbprotool->exec();
 
 }
 
-void mainFrame::on_restartButton_clicked()
+void MWTest::on_restartButton_clicked()
 {
     player->setPosition(0);
 }
 
-void mainFrame::keyPressEvent(QKeyEvent * event)
+void MWTest::keyPressEvent(QKeyEvent * event)
 {
     if(event->key() == Qt::Key_Right)
     {
@@ -1098,19 +1039,19 @@ void mainFrame::keyPressEvent(QKeyEvent * event)
     }
 }
 
-void mainFrame::skipLeftFunc()
+void MWTest::skipLeftFunc()
 {
     qint64 position = player->position();
     position += 5000;
     player->setPosition(position);
 }
-void mainFrame::skipRightFunc()
+void MWTest::skipRightFunc()
 {
     qint64 position = player->position();
     position -= 5000;
     player->setPosition(position);
 }
-void mainFrame::playPauseFunc()
+void MWTest::playPauseFunc()
 {
     if (player->state() == 1)
     {
@@ -1123,38 +1064,38 @@ void mainFrame::playPauseFunc()
         player->play();
     }
 }
-void mainFrame::skipFrameRightFunc()
+void MWTest::skipFrameRightFunc()
 {
     qint64 position = player->position();
     position += 1000;
     player->setPosition(position);
 }
-void mainFrame::skipFrameLeftFunc()
+void MWTest::skipFrameLeftFunc()
 {
     qint64 position = player->position();
     position -= 1000;
     player->setPosition(position);
 }
 
-void mainFrame::peatHelp()
+void MWTest::peatHelp()
 {
     QString link = "http://trace.umd.edu/peat/help/";
     QDesktopServices::openUrl(QUrl(link));
 }
 
-void mainFrame::aboutPEAT()
+void MWTest::aboutPEAT()
 {
     QString link = "http://trace.umd.edu/peat/";
     QDesktopServices::openUrl(QUrl(link));
 }
 
-void mainFrame::traceHome()
+void MWTest::traceHome()
 {
     QString link = "http://trace.umd.edu/";
     QDesktopServices::openUrl(QUrl(link));
 }
 
-string mainFrame::execute(const char * cmd) {
+string MWTest::execute(const char * cmd) {
 
     std::array<char, 128> buffer;
     std::string result;
