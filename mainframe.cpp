@@ -20,7 +20,7 @@ using namespace std;
 using namespace cv;
 
 mainFrame::mainFrame(QWidget *parent) :
-    QMainWindow(parent),
+    QMainWindow(),
     ui(new Ui::mainFrame)
 {
     ui->setupUi(this);
@@ -67,7 +67,7 @@ mainFrame::mainFrame(QWidget *parent) :
     section->setClipToAxisRect(true); // is by default true already, but this will change in QCP 2.0.0
     section->topLeft->setCoords(0, 1.0); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
     section->bottomRight->setCoords(100000, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
-    section->setBrush(QBrush(QColor(200,200,200,255)));
+    //section->setBrush(QBrush(QColor(200,200,200,255)));
     section->setPen(Qt::NoPen);
     QCPItemLine *line = new QCPItemLine(ui->customPlot);
     line->start->setCoords(0 , 0.25);
@@ -1639,4 +1639,152 @@ string mainFrame::replaceChar(string str, char ch1, char ch2) {
   }
 
   return str;
+}
+
+void mainFrame::on_actionLight_Blue_triggered()
+{
+    if (ui->actionLight_Blue->isChecked() == true) {
+        ui->actionLight_Blue->setChecked(true);
+        ui->actionTurquoise->setChecked(false);
+        ui->actionPale->setChecked(false);
+        ui->actionBeige->setChecked(false);
+        ui->actionCharcoal_Grey->setChecked(false);
+        ui->actionLight_Grey->setChecked(false);
+        ui->actionWhite->setChecked(false);
+        ui->customPlot->setBackground(QBrush(QColor(190, 212, 221, 255)));
+        ui->customPlot->repaint();
+    }
+    else {
+        ui->actionLight_Blue->setChecked(true);
+    }
+}
+
+void mainFrame::on_actionBeige_triggered()
+{
+    if (ui->actionBeige->isChecked() == true) {
+        ui->actionBeige->setChecked(true);
+        ui->actionTurquoise->setChecked(false);
+        ui->actionPale->setChecked(false);
+        ui->actionLight_Blue->setChecked(false);
+        ui->actionCharcoal_Grey->setChecked(false);
+        ui->actionLight_Grey->setChecked(false);
+        ui->actionWhite->setChecked(false);
+        ui->customPlot->setBackground(QBrush(QColor(216, 201, 184, 255)));
+        ui->customPlot->repaint();
+    }
+    else {
+        ui->actionBeige->setChecked(true);
+    }
+
+}
+
+void mainFrame::on_actionPale_triggered()
+{
+    if (ui->actionPale->isChecked() == true) {
+        ui->actionPale->setChecked(true);
+        ui->actionTurquoise->setChecked(false);
+        ui->actionLight_Blue->setChecked(false);
+        ui->actionBeige->setChecked(false);
+        ui->actionCharcoal_Grey->setChecked(false);
+        ui->actionLight_Grey->setChecked(false);
+        ui->actionWhite->setChecked(false);
+        ui->customPlot->setBackground(QBrush(QColor(247, 243, 239, 255)));
+        ui->customPlot->repaint();
+    }
+    else {
+        ui->actionPale->setChecked(true);
+    }
+
+}
+
+void mainFrame::on_actionTurquoise_triggered()
+{
+    if (ui->actionTurquoise->isChecked() == true) {
+        ui->actionTurquoise->setChecked(true);
+        ui->actionLight_Blue->setChecked(false);
+        ui->actionPale->setChecked(false);
+        ui->actionBeige->setChecked(false);
+        ui->actionCharcoal_Grey->setChecked(false);
+        ui->actionLight_Grey->setChecked(false);
+        ui->actionWhite->setChecked(false);
+        ui->customPlot->setBackground(QBrush(QColor(192, 219, 217, 255)));
+        ui->customPlot->repaint();
+    }
+    else {
+        ui->actionTurquoise->setChecked(true);
+    }
+
+}
+
+void mainFrame::on_actionCharcoal_Grey_triggered()
+{
+    if (ui->actionCharcoal_Grey->isChecked() == true) {
+        ui->actionCharcoal_Grey->setChecked(true);
+        ui->actionTurquoise->setChecked(false);
+        ui->actionPale->setChecked(false);
+        ui->actionBeige->setChecked(false);
+        ui->actionLight_Blue->setChecked(false);
+        ui->actionLight_Grey->setChecked(false);
+        ui->actionWhite->setChecked(false);
+        ui->customPlot->setBackground(QBrush(QColor(140, 144, 145, 255)));
+        ui->customPlot->repaint();
+    }
+    else {
+        ui->actionCharcoal_Grey->setChecked(true);
+    }
+
+}
+
+void mainFrame::on_actionLight_Grey_triggered()
+{
+    if (ui->actionLight_Grey->isChecked() == true) {
+        ui->actionLight_Grey->setChecked(true);
+        ui->actionTurquoise->setChecked(false);
+        ui->actionPale->setChecked(false);
+        ui->actionBeige->setChecked(false);
+        ui->actionCharcoal_Grey->setChecked(false);
+        ui->actionLight_Blue->setChecked(false);
+        ui->actionWhite->setChecked(false);
+        ui->customPlot->setBackground(QBrush(QColor(214,214,214,255)));
+        ui->customPlot->repaint();
+    }
+    else {
+        ui->actionLight_Grey->setChecked(true);
+    }
+
+}
+
+void mainFrame::on_actionWhite_triggered()
+{
+    if (ui->actionWhite->isChecked() == true) {
+        ui->actionWhite->setChecked(true);
+        ui->actionTurquoise->setChecked(false);
+        ui->actionPale->setChecked(false);
+        ui->actionBeige->setChecked(false);
+        ui->actionCharcoal_Grey->setChecked(false);
+        ui->actionLight_Blue->setChecked(false);
+        ui->actionLight_Grey->setChecked(false);
+        ui->customPlot->setBackground(QBrush(QColor(252,252,252,255)));
+        ui->customPlot->repaint();
+    }
+    else {
+        ui->actionWhite->setChecked(true);
+    }
+
+
+}
+
+void mainFrame::on_actionInvert_UI_Colour_triggered()
+{
+    if (ui->actionInvert_UI_Colour->isChecked() == true) {
+        this->setStyleSheet("background-color: rgb(66, 65, 64);");
+        ui->customPlot->repaint();
+        ui->label_14->setStyleSheet("QLabel { color : white; }");
+        ui->label_7->setStyleSheet("QLabel { color : white; }");
+    }
+    else {
+        this->setStyleSheet("");
+        ui->label_14->setStyleSheet("QLabel { color : black; }");
+        ui->label_7->setStyleSheet("QLabel { color : black; }");
+    }
 }

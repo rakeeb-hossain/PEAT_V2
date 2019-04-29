@@ -98,6 +98,22 @@ private slots:
 
     string replaceChar(string str, char ch1, char ch2);
 
+    void on_actionLight_Blue_triggered();
+
+    void on_actionBeige_triggered();
+
+    void on_actionPale_triggered();
+
+    void on_actionTurquoise_triggered();
+
+    void on_actionCharcoal_Grey_triggered();
+
+    void on_actionLight_Grey_triggered();
+
+    void on_actionWhite_triggered();
+
+    void on_actionInvert_UI_Colour_triggered();
+
 private:
     Ui::mainFrame *ui;
 

@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
 
     //av_register_all();
 
-    a.setWindowIcon(QIcon(":/Res/PEAT.ico"));
+    a.setWindowIcon(QIcon(":/images/Res/PEAT.ico"));
 
     QApplication::setQuitOnLastWindowClosed(false);
 
