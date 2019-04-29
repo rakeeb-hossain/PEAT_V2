@@ -955,11 +955,26 @@ QSlider::handle:horizontal {
     <property name="title">
      <string>Controls</string>
     </property>
+    <widget class="QMenu" name="menuChange_Paper_Colour">
+     <property name="title">
+      <string>Change Paper Colour</string>
+     </property>
+     <addaction name="actionLight_Grey"/>
+     <addaction name="actionCharcoal_Grey"/>
+     <addaction name="actionLight_Blue"/>
+     <addaction name="actionTurquoise"/>
+     <addaction name="actionBeige"/>
+     <addaction name="actionWhite"/>
+    </widget>
     <addaction name="actionForward_5_Seconds"/>
     <addaction name="actionBack_5_Seconds"/>
     <addaction name="actionPlay_Pause"/>
+    <addaction name="separator"/>
     <addaction name="actionForward_30_Frames"/>
     <addaction name="actionBack_30_Frames"/>
+    <addaction name="separator"/>
+    <addaction name="menuChange_Paper_Colour"/>
+    <addaction name="actionInvert_UI_Colour"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -1008,7 +1023,7 @@ QSlider::handle:horizontal {
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Forward 5 Seconds...          L</string>
+    <string>Step Forward...                   L</string>
    </property>
   </action>
   <action name="actionBack_5_Seconds">
@@ -1016,7 +1031,7 @@ QSlider::handle:horizontal {
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Back 5 Seconds...                J</string>
+    <string>Step Back...                         J</string>
    </property>
   </action>
   <action name="actionPlay_Pause">
@@ -1056,6 +1071,65 @@ QSlider::handle:horizontal {
   <action name="actionTrace_Center_Homepage">
    <property name="text">
     <string>Trace Center Homepage...</string>
+   </property>
+  </action>
+  <action name="actionInvert_UI_Colour">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Invert UI Colour</string>
+   </property>
+  </action>
+  <action name="actionLight_Blue">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Light Blue</string>
+   </property>
+  </action>
+  <action name="actionBeige">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Beige</string>
+   </property>
+  </action>
+  <action name="actionWhite">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>White</string>
+   </property>
+  </action>
+  <action name="actionTurquoise">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Sea Green</string>
+   </property>
+  </action>
+  <action name="actionCharcoal_Grey">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Charcoal Grey</string>
+   </property>
+  </action>
+  <action name="actionLight_Grey">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Light Grey</string>
    </property>
   </action>
  </widget>
