@@ -1788,3 +1788,22 @@ void mainFrame::on_actionInvert_UI_Colour_triggered()
         ui->label_7->setStyleSheet("QLabel { color : black; }");
     }
 }
+
+void mainFrame::on_actionPrint_Report_triggered()
+{
+
+    QString text =
+            "Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do\n"
+            "eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut\n"
+            "enim ad minim veniam, quis nostrud exercitation ullamco laboris\n"
+            "nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor\n"
+            "in reprehenderit in voluptate velit esse cillum dolore eu fugiat\n"
+            "nulla pariatur. Excepteur sint occaecat cupidatat non proident,\n"
+            "sunt in culpa qui officia deserunt mollit anim id est laborum.\n";
+
+    QPrinter printer;
+
+    printer.setPrinterName("Printer name");
+    QPrintDialog dialog(&printer, this);
+    if (dialog.exec() == QDialog::Rejected) return;
+}

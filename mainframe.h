@@ -22,6 +22,8 @@
 #include <QMenuBar>
 #include <QStatusBar>
 #include "rkbprotool.h"
+#include <QPrintDialog>
+#include <QPrinter>
 
 using namespace std;
 
@@ -113,6 +115,8 @@ private slots:
     void on_actionWhite_triggered();
 
     void on_actionInvert_UI_Colour_triggered();
+
+    void on_actionPrint_Report_triggered();
 
 private:
     Ui::mainFrame *ui;

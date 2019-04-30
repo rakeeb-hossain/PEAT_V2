@@ -27,7 +27,7 @@
      </rect>
     </property>
     <property name="autoFillBackground">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="styleSheet">
      <string notr="true">border-color:black;
@@ -948,6 +948,8 @@ QSlider::handle:horizontal {
     <addaction name="actionOpen_Video"/>
     <addaction name="actionOpen_Report"/>
     <addaction name="separator"/>
+    <addaction name="actionPrint_Report"/>
+    <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
@@ -1145,6 +1147,11 @@ QSlider::handle:horizontal {
    </property>
    <property name="text">
     <string>White</string>
+   </property>
+  </action>
+  <action name="actionPrint_Report">
+   <property name="text">
+    <string>Print Report...</string>
    </property>
   </action>
  </widget>
