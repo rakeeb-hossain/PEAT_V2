@@ -938,7 +938,7 @@ QSlider::handle:horizontal {
      <x>0</x>
      <y>0</y>
      <width>871</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -948,6 +948,7 @@ QSlider::handle:horizontal {
     <addaction name="actionOpen_Video"/>
     <addaction name="actionOpen_Report"/>
     <addaction name="separator"/>
+    <addaction name="actionSave_Report"/>
     <addaction name="actionPrint_Report"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
@@ -1150,8 +1151,19 @@ QSlider::handle:horizontal {
    </property>
   </action>
   <action name="actionPrint_Report">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Print Report...</string>
+   </property>
+  </action>
+  <action name="actionSave_Report">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Save Report...</string>
    </property>
   </action>
  </widget>

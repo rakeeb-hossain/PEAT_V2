@@ -126,6 +126,20 @@ mainFrame::~mainFrame()
     delete ui;
 }
 
+void mainFrame::closeEvent(QCloseEvent *event) {
+    if (saved == false) {
+        QMessageBox messageBox;
+        QMessageBox::StandardButton reply;
+        reply = messageBox.question(this, "Report unsaved", "Would you like to save your report before quitting?", QMessageBox::Yes|QMessageBox::No);
+        messageBox.setFixedSize(600,400);
+
+        if (reply == QMessageBox::Yes) {
+            if (!on_actionSave_Report_triggered()) {
+                event->ignore();
+            }
+        }
+    }
+}
 
 void mainFrame::on_folderButton_clicked()
 {
@@ -177,6 +191,13 @@ void mainFrame::on_folderButton_clicked()
             }
             else
             {
+                //RESET PLOT/UI IF A NEW VIDEO IS UPLOADED
+                vid_data.clear();
+                saved = true;
+                for (int i = 0; i < ui->customPlot->graphCount(); i++) {
+                    ui->customPlot->graph(i)->data()->clear();
+                }
+
                 playlist->clear();
                 playlist->addMedia(QUrl::fromLocalFile(filename));
                 playlist->setCurrentIndex(1);
@@ -225,7 +246,8 @@ void mainFrame::on_folderButton_clicked()
                 auto fpsS = atof(fps.c_str());
                 ui->label_9->setText(QString::number(fpsS));
 
-                if (round(fpsS) != 30)
+                // To-do: allow videos of any FPS
+                if (round(fpsS) < 5)
                 {
                     playlist->clear();
                     ui->label_8->setText("");
@@ -235,7 +257,7 @@ void mainFrame::on_folderButton_clicked()
                     ui->label_12->setText("");
                     ui->label_13->setText("");
                     QMessageBox messageBox;
-                    messageBox.information(this, "Error", "PEAT only supports videos with a framerate that rounds to 30.");
+                    messageBox.information(this, "Error", "PEAT only supports videos with an FPS of at least 5.");
                     messageBox.setFixedSize(600,400);
                 }
                 else {
@@ -395,6 +417,7 @@ void mainFrame::on_rewindButton_clicked()
         player->setPlaybackRate(x);
     }
 }
+// Replace {
 vector<int> mainFrame::frameSplit(string filename, string location)
 {
 
@@ -490,6 +513,7 @@ vector<int> mainFrame::frameSplit(string filename, string location)
 
         return props;
 }
+// }
 void mainFrame::horzScrollBarChanged(int value)
 {
   if (qAbs(ui->customPlot->xAxis->range().center()-value) > 0.01) // if user is dragging plot, we don't want to replot twice
@@ -504,511 +528,161 @@ void mainFrame::xAxisChanged(QCPRange range)
 {
   ui->horizontalScrollBar->setPageStep(qRound(range.size())); // adjust size of scroll bar slider
 }
-void mainFrame::on_reportButton_clicked()
-{
-    QMessageBox messageBox;
-    QMessageBox::StandardButton reply;
-    reply = messageBox.question(this, "Begin analysis", "Are you sure you would like to begin the analysis? \nThis may take some time.", QMessageBox::Yes|QMessageBox::No);
-    messageBox.setFixedSize(600,400);
 
-    if (reply == QMessageBox::Yes)
-    {
 
+void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<double > > points_y) {
+    //Plot
+    qDebug() << "graphs: " << ui->customPlot->graphCount();
+    qDebug() << "data: " << points_x[0][0];
+
+    ui->customPlot->graph(0)->addData(points_x[0], points_y[0]);
+    ui->customPlot->graph(1)->addData(points_x[1], points_y[1]);
+    ui->customPlot->graph(2)->addData(points_x[2], points_y[2]);
+    ui->customPlot->graph(3)->addData(points_x[3], points_y[3]);
+    ui->customPlot->replot();
+
+    //Slider
+}
+
+void mainFrame::on_reportButton_clicked() {
+    try {
         QString filename = ui->label->text();
         std::string stringedFile = filename.toLocal8Bit().constData();
-        player->pause();
+        VideoCapture cap(stringedFile);
+        int frameNum = cap.get(CAP_PROP_FRAME_COUNT);
+        if (frameNum == 0) throw 200;
+        Mat frame;
+        cap >> frame;
+        if (frame.empty()) throw 210;
+        cap.release();
 
-        // Get valid folder name
-        bool ok;
-        QString folderName = QInputDialog::getText(this, "",
-                                                 tr("Set a name for this report"), QLineEdit::Normal,
-                                                 QDir::home().dirName(), &ok);
-        QMessageBox messageBox2;
+        //Initialize slider and scrollbar
+        ui->horizontalSlider->setEnabled(true);
+        ui->horizontalSlider->setValue(0);
+        ui->horizontalScrollBar->setEnabled(true);
+        ui->horizontalScrollBar->setRange(0, frameNum);
 
-        std::string stringedFolder = folderName.toLocal8Bit().constData();
+        //Initialize graphs
+        ui->customPlot->xAxis->scaleRange(8.0, ui->customPlot->xAxis->range().center());
+        ui->customPlot->addGraph();
+        ui->customPlot->addGraph();
+        ui->customPlot->addGraph();
+        ui->customPlot->addGraph();
 
-        if (stringedFolder.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_") != std::string::npos)
+        ui->customPlot->yAxis->setRange(0.0, 1.0);
+        ui->customPlot->xAxis->setLabel("Frame Number");
+        ui->customPlot->yAxis->setVisible(false);
+        section->bottomRight->setCoords(frameNum, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
+        ui->customPlot->replot();
+
+        //Graph 1 style
+        QPen solid;
+        solid.setStyle(Qt::DotLine);
+        solid.setWidthF(2);
+        solid.setColor(Qt::black);
+        ui->customPlot->graph(0)->setPen(solid);
+        ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
+        ui->customPlot->graph(0)->addData(0.0, 0.0);
+        //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+
+        //Graph 2 style
+        QPen solidRed;
+        solidRed.setStyle(Qt::DotLine);
+        solidRed.setWidthF(2);
+        solidRed.setColor(Qt::red);
+        ui->customPlot->graph(1)->setPen(solidRed);
+        ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
+        ui->customPlot->graph(1)->addData(0.0, 0.0);
+        //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+
+        //Graph 3 style
+        QPen dotted;
+        dotted.setStyle(Qt::SolidLine);
+        dotted.setWidthF(4);
+        dotted.setColor(Qt::white);
+        ui->customPlot->graph(2)->setPen(dotted);
+        ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsLine);
+        ui->customPlot->graph(2)->addData(0.0, 0.0);
+        //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+
+        //Graph 4 style
+        QPen dottedRed;
+        dottedRed.setStyle(Qt::SolidLine);
+        dottedRed.setWidthF(4);
+        dottedRed.setColor(Qt::red);
+        ui->customPlot->graph(3)->setPen(dottedRed);
+        ui->customPlot->graph(3)->setLineStyle(QCPGraph::lsLine);
+        ui->customPlot->graph(3)->addData(0.0, 0.0);
+        ui->customPlot->replot();
+        //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+
+        //Connect slider and scrollbar with graph
+        connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
+        connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
+        connect(ui->horizontalSlider, &QSlider::valueChanged, this, [&](int moved)
         {
-            ok = false;
-        }
-
-        if (QDir(folderName).exists() == true)
-        {
-            ok = false;
-        }
-
-        if (ok && !folderName.isEmpty())
-        {
-
-            // Split video into frames
-            QDir().mkdir(folderName);
-            QDir().mkdir(folderName + "/frames");
-            QApplication::processEvents();
-
-            vector<int> properties = frameSplit(stringedFile, stringedFolder);
-            QApplication::processEvents();
-
-            qDebug() << properties.size();
-            if (properties.size() != 0)
+            double alpha = 1.0;
+            int delta = moved - lastValue;
+            if (delta > 0)
             {
-                // Run RKBCore analysis
-
-                cout << "properties: " << endl;
-
-                cout << properties[0] << endl;
-                cout << properties[1] << endl;
-                cout << properties[2] << endl;
-                cout << properties[3] << endl;
-                qDebug() << "bs0.75";
-
-                rkbcore(stringedFolder + "/frames/", folderName, properties);
-                //waitdialog->hide();
-                QMessageBox messageBox3;
-                messageBox3.information(this, "Success!", "The analysis was completed successfully and your report is available in the project directory.", QMessageBox::NoButton);
-                messageBox3.setFixedSize(600,400);
-
-                //Initialize plot and scrolling
-                ui->horizontalScrollBar->setEnabled(true);
-                ui->horizontalScrollBar->setRange(0, properties[0]);
-                ui->customPlot->yAxis->setRange(0.0, 1.0);
-                ui->customPlot->yAxis->setVisible(false);
-                ui->customPlot->xAxis->setLabel("Frame Number");
-                connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
-                connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
-                ui->customPlot->replot();
-
-                QFile reportFile(folderName + "/" + folderName + ".txt");
-                if (!reportFile.open(QIODevice::ReadOnly))
-                    QMessageBox::critical(0, "Error", "Error opening report. Please try generating the report again.");
-                else {
-                    /*
-                    QVector<double> x(101), y(101); // initialize with entries 0..100
-                    for (int i=0; i<101; ++i)
-                    {
-                      x[i] = i/50.0 - 1; // x goes from -1 to 1
-                      y[i] = x[i]*x[i]; // let's plot a quadratic function
-                    }
-                    // create graph and assign data to it:
-                    ui->customPlot->addGraph();
-                    ui->customPlot->graph(0)->setData(x, y);
-                    // give the axes some labels:
-                    ui->customPlot->xAxis->setLabel("x");
-                    ui->customPlot->yAxis->setLabel("y");
-                    // set axes ranges, so we see all data:
-                    ui->customPlot->xAxis->setRange(-1, 1);
-                    ui->customPlot->yAxis->setRange(0, 1);
-                    ui->customPlot->replot();
-                    */
-
-
-
-                    QTextStream in(&reportFile);
-                    QString line;
-                    int counter = 0;
-                    bool atStart = true;
-                    int start = 0;
-                    int end = 0;
-                    int frameN = 0;
-                    int frameDiagValue = 0;
-                    int redFrameDiagValue = 0;
-                    //double ynum;
-                    int ynum;
-                    vector<double> y;
-                    vector<double> yRed;
-                    vector<double> x;
-                    vector<double> xRed;
-
-
-                    vector<double> yDiag;
-                    vector<double> yRedDiag;
-                    vector<double> xDiag;
-                    vector<double> xRedDiag;
-                    int64 frameNum = 0;
-
-                    double startOfRed = 0.0;
-                    double endOfRed = 0.0;
-                    vector<double> redPortions = {};
-                    //QString stylesheet = "QSlider::groove:horizontal { border: 1px solid #999999; height: 10px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #B1B1B1, stop: 1.0 #c4c4c4); margin: 2px 0; } QSlider::handle:horizontal { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f); border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 3px; }";
-                    QString firstHalfStylesheet = "QSlider::groove:horizontal { border: 1px solid #999999; height: 10px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #0025c660, ";
-                    QString secondHalfStylesheet = "stop: 1.0 #0025c660); margin: 2px 0; } QSlider::handle:horizontal { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f); border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 3px; }";
-
-                    QString firstRedHalfStylesheet = "QSlider::groove:horizontal { border: 1px solid #999999; height: 10px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #25c660, ";
-                    QString secondRedHalfStylesheet = "stop: 1.0 #25c660); margin: 2px 0; } QSlider::handle:horizontal { background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #00b4b4b4, stop:1 #008f8f8f); border: 0px solid #005c5c5c; width: 0px; margin: 0px 0; border-radius: 3px; }";
-
-                    bool isDiagnostic = false;
-                    bool isRed = false;
-                    bool isRedDiagnostic = false;
-                    vector<double> generalBoundaries;
-                    int n = 0;
-                    int skipRedCount = 0;
-                    int skipRedDiagnosticCount = 0;
-                    while (!in.atEnd())
-                    {
-                        line = in.readLine();
-                        ynum = line.toInt();
-                        if (line == "Diagnostic")
-                        {
-                            if (xRed.size() != 0)
-                            {
-                                for (int j = xRed[xRed.size() - 1]; j < frameNum; j++)
-                                {
-                                    yRed.push_back(0.0);
-                                    xRed.push_back(j);
-                                }
-                            }
-                            isDiagnostic = true;
-                        }
-                        if (line == "RedSeizure")
-                        {
-                            if (x.size() != 0)
-                            {
-                                for (int k = x[x.size() - 1]; k < frameNum; k++)
-                                {
-                                    y.push_back(0.0);
-                                    x.push_back(k);
-                                }
-                            }
-                            isRed = true;
-                        }
-                        if (line == "RedDiagnostic")
-                        {
-                            isRedDiagnostic = true;
-                        }
-                        if (counter > 0)
-                        {
-                            if (isDiagnostic == false && isRed == false)
-                            {
-                                if(atStart == true)
-                                {
-                                    start = ynum;
-                                    for (int i = end; i < start; i++)
-                                    {
-
-                                        y.push_back(0.0);
-                                        x.push_back(static_cast<double>(i));
-                                    }
-                                    atStart = !atStart;
-                                }
-                                else {
-                                    end = ynum;
-                                    startOfRed = static_cast<double>(start)/frameNum;
-                                    endOfRed = static_cast<double>(end)/frameNum;
-                                    generalBoundaries.push_back(startOfRed - 0.0001);
-                                    generalBoundaries.push_back(startOfRed);
-                                    generalBoundaries.push_back(endOfRed);
-                                    generalBoundaries.push_back(endOfRed + 0.0001);
-
-                                    for (int i = start; i < end + 1; i++)
-                                    {
-
-                                        y.push_back(1.0);
-                                        x.push_back(static_cast<double>(i));
-                                    }
-                                    atStart = !atStart;
-                                }
-                            }
-                            if (isDiagnostic == false && isRed == true && skipRedCount > 0)
-                            {
-                                if(atStart == true)
-                                {
-                                    start = ynum;
-                                    for (int i = end; i < start; i++)
-                                    {
-                                        yRed.push_back(0.0);
-                                        xRed.push_back(static_cast<double>(i));
-                                    }
-                                    atStart = !atStart;
-                                }
-                                else {
-                                    end = ynum;
-                                    startOfRed = static_cast<double>(start)/frameNum;
-                                    endOfRed = static_cast<double>(end)/frameNum;
-
-                                    redPortions.push_back(startOfRed - 0.0001);
-                                    redPortions.push_back(startOfRed);
-                                    redPortions.push_back(endOfRed);
-                                    redPortions.push_back(endOfRed + 0.0001);
-
-
-                                    for (int i = start; i < end + 1; i++)
-                                    {
-
-                                        yRed.push_back(1.0);
-                                        xRed.push_back(static_cast<double>(i));
-                                    }
-                                    atStart = !atStart;
-                                }
-                            }
-                            else if (isDiagnostic == false && isRed == true && skipRedCount == 0)
-                            {
-                                end = 0;
-                                atStart = true;
-                                skipRedCount++;
-                            }
-                        }
-                        else {
-                            frameNum = line.toInt();
-                        }
-
-                        if(isDiagnostic == true && isRedDiagnostic == false && n > 0)
-                        {
-                            if(atStart == true)
-                            {
-                                for(int a = frameN; a < ynum; a++)
-                                {
-                                    if(ynum - frameN < 30)
-                                    {
-                                        xDiag.push_back(static_cast<double>(a));
-                                        yDiag.push_back(frameDiagValue/10.0);
-                                    }
-
-                                    else {
-                                        xDiag.push_back(static_cast<double>(a));
-                                        yDiag.push_back(0.0);
-                                    }
-                                }
-                                frameN = ynum;
-                                xDiag.push_back(frameN/1.0);
-                                atStart = !atStart;
-                            }
-                            else{
-                                frameDiagValue = ynum;
-                                if (frameDiagValue > 10)
-                                {
-                                    frameDiagValue = 10;
-                                }
-                                yDiag.push_back(frameDiagValue/10.0);
-                                atStart = !atStart;
-                                /*
-                                if (redPortions.size() == 0)
-                                {
-                                    for (int k = 0; k < generalBoundaries.size(); k++)
-                                    {
-                                        redPortions.push_back(generalBoundaries[k][0] - 0.0001);
-                                        redPortions.push_back(generalBoundaries[k][0]);
-                                        redPortions.push_back(generalBoundaries[k][1]);
-                                        redPortions.push_back(generalBoundaries[k][1] + 0.0001);
-                                    }
-                                }
-                                */
-                            }
-                        }
-                        else if(isDiagnostic == true && n == 0)
-                        {
-                            atStart = true;
-                            n++;
-                        }
-                        if (isDiagnostic == true && isRedDiagnostic == true && skipRedDiagnosticCount > 0)
-                        {
-                            if(atStart == true)
-                            {
-                                for(int a = frameN; a < ynum; a++)
-                                {
-                                    if(ynum - frameN < 30)
-                                    {
-                                        xRedDiag.push_back(static_cast<double>(a));
-                                        yRedDiag.push_back(redFrameDiagValue/10.0);
-                                    }
-
-                                    else {
-                                        xRedDiag.push_back(static_cast<double>(a));
-                                        yRedDiag.push_back(0.0);
-                                    }
-                                }
-                                frameN = ynum;
-                                xRedDiag.push_back(frameN/1.0);
-                                atStart = !atStart;
-                            }
-                            else{
-                                redFrameDiagValue = ynum;
-                                if (redFrameDiagValue > 10)
-                                {
-                                    redFrameDiagValue = 10;
-                                }
-                                yRedDiag.push_back(redFrameDiagValue/10.0);
-                                atStart = !atStart;
-                            }
-                        }
-                        else if (isDiagnostic == true && isRedDiagnostic == true && skipRedDiagnosticCount == 0)
-                        {
-                            atStart = true;
-                            skipRedDiagnosticCount++;
-                        }
-                        counter++;
-                    }
-
-
-
-                    for (int x = 0; x < redPortions.size(); x += 4)
-                    {
-                        firstHalfStylesheet += "stop: " + QString::number(redPortions[x]) + " #0025c660, ";
-                        firstHalfStylesheet += "stop: " + QString::number(redPortions[x+1]) + " #c10707, ";
-                        firstHalfStylesheet += "stop: " + QString::number(redPortions[x+2]) + " #c10707, ";
-                        firstHalfStylesheet += "stop: " + QString::number(redPortions[x+3]) + " #0025c660, ";
-                    }
-                    for (int x = 0; x < generalBoundaries.size(); x += 4)
-                    {
-                        firstRedHalfStylesheet += "stop: " + QString::number(generalBoundaries[x]) + " #25c660, ";
-                        firstRedHalfStylesheet += "stop: " + QString::number(generalBoundaries[x+1]) + " #c10707, ";
-                        firstRedHalfStylesheet += "stop: " + QString::number(generalBoundaries[x+2]) + " #c10707, ";
-                        firstRedHalfStylesheet += "stop: " + QString::number(generalBoundaries[x+3]) + " #25c660, ";
-                    }
-                    QString stylesheet = firstHalfStylesheet + secondHalfStylesheet;
-                    QString redStylesheet = firstRedHalfStylesheet + secondRedHalfStylesheet;
-                    ui->slider->setStyleSheet(stylesheet);
-                    ui->slider_2->setStyleSheet(redStylesheet);
-
-
-                    /*
-                    while (!in.atEnd())
-                    {
-                        line = in.readLine();
-                        ynum = line.toDouble();
-                        if (counter > 0)
-                        {
-                            for (int i = 0 + n; i < 30 + n; i++)
-                            {
-
-                                y.push_back(ynum);
-                                x.push_back(i);
-
-
-                            }
-                            n += 30;
-                        }
-                        else {
-                            frameNum = line.toInt();
-                        }
-                        counter++;
-                    }
-                    if(in.atEnd())
-                    {
-                        for (int a = 1; a <= (frameNum % 30); a++)
-                        {
-                            y.push_back(0.15);
-                            x.push_back(floor(frameNum/30) * 30 + a);
-                        }
-                    }
-                    */
-                    ui->horizontalSlider->setEnabled(true);
-                    ui->horizontalSlider->setValue(0);
-                    QVector<double> xx = QVector<double>::fromStdVector(x);
-                    QVector<double> yy = QVector<double>::fromStdVector(y);
-                    QVector<double> xxRed = QVector<double>::fromStdVector(xRed);
-                    QVector<double> yyRed = QVector<double>::fromStdVector(yRed);
-                    for (int z = 0; z < xx.size(); z++)
-                    {
-                        qDebug() << xx[z] << ", " << yy[z];
-                    }
-                    QVector<double> xxDiag = QVector<double>::fromStdVector(xDiag);
-                    QVector<double> yyDiag = QVector<double>::fromStdVector(yDiag);
-                    QVector<double> xxRedDiag = QVector<double>::fromStdVector(xRedDiag);
-                    QVector<double> yyRedDiag = QVector<double>::fromStdVector(yRedDiag);
-                    ui->customPlot->xAxis->scaleRange(8.0, ui->customPlot->xAxis->range().center());
-
-                    ui->customPlot->addGraph();
-                    QPen dotted;
-                    dotted.setStyle(Qt::SolidLine);
-                    dotted.setWidthF(4);
-                    dotted.setColor(Qt::white);
-                    ui->customPlot->graph(0)->setPen(dotted);
-                    ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
-                    //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-                    ui->customPlot->graph(0)->setData(xx, yy);
-                    //ADDED
-                    ui->customPlot->addGraph();
-                    QPen solid;
-                    solid.setStyle(Qt::DotLine);
-                    solid.setWidthF(2);
-                    solid.setColor(Qt::black);
-                    ui->customPlot->graph(1)->setPen(solid);
-                    ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
-                    //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-                    ui->customPlot->graph(1)->setData(xxDiag, yyDiag);
-
-                    ui->customPlot->addGraph();
-                    QPen dottedRed;
-                    dottedRed.setStyle(Qt::SolidLine);
-                    dottedRed.setWidthF(4);
-                    dottedRed.setColor(Qt::red);
-                    ui->customPlot->graph(2)->setPen(dottedRed);
-                    ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsLine);
-                    //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-                    ui->customPlot->graph(2)->setData(xxRed, yyRed);
-
-                    ui->customPlot->addGraph();
-                    QPen solidRed;
-                    solidRed.setStyle(Qt::DotLine);
-                    solidRed.setWidthF(2);
-                    solidRed.setColor(Qt::red);
-                    ui->customPlot->graph(3)->setPen(solidRed);
-                    ui->customPlot->graph(3)->setLineStyle(QCPGraph::lsLine);
-                    //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-                    ui->customPlot->graph(3)->setData(xxRedDiag, yyRedDiag);
-                    ui->horizontalScrollBar->setEnabled(true);
-                    ui->horizontalScrollBar->setRange(0, frameNum);
-                    ui->customPlot->yAxis->setRange(0.0, 1.0);
-                    ui->customPlot->xAxis->setLabel("Frame Number");
-                    ui->customPlot->replot();
-                    ui->customPlot->yAxis->setVisible(false);
-                    section->bottomRight->setCoords(frameNum, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
-                    connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
-                    connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
-
-                    ui->customPlot->replot();
-                    connect(ui->horizontalSlider, &QSlider::valueChanged, this, [&](int moved)
-                    {
-                        //FIX THIS
-                        double alpha = 1.0;
-                        int delta = moved - lastValue;
-                        if (delta > 0)
-                        {
-                            for (int x = lastValue + 1; x < moved + 1; x++)
-                            {
-                                alpha *= 1/(1.1);
-                            }
-                        }
-                        else {
-                            for (int x = lastValue - 1; x > moved - 1; x--)
-                            {
-                                alpha *= 1.1;
-                            }
-                        }
-
-                        ui->customPlot->xAxis->scaleRange(alpha, ui->customPlot->xAxis->range().center());
-                        ui->customPlot->replot();
-                        lastValue = moved;
-                    });
-                    // Load warnings
-                    ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
-                    ui->forwardWarning->setStyleSheet("#forwardWarning { background-image: url(:/images/Res/NextvWarningUp.png); border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
-                    ui->backWarning->setEnabled(true);
-                    ui->forwardWarning->setEnabled(true);
-                    warnings.clear();
-
-                    for (int a = 0; a < generalBoundaries.size(); a += 4)
-                    {
-                        warnings.push_back(generalBoundaries[a + 1] * frameNum);
-                    }
-                    for (int a = 0; a < redPortions.size(); a += 4)
-                    {
-                        warnings.push_back(redPortions[a + 1] * frameNum);
-                    }
-
-                    ui->label_6->setText(QString::number(warnings.size()));
+                for (int x = lastValue + 1; x < moved + 1; x++)
+                {
+                    alpha *= 1/(1.1);
                 }
             }
             else {
-                QMessageBox mb;
-                mb.critical(this, "Error", "There was an error in decoding the video stream. Please try and install the appropriate codecs and try again.");
-                mb.setFixedSize(600,400);
+                for (int x = lastValue - 1; x > moved - 1; x--)
+                {
+                    alpha *= 1.1;
+                }
             }
+
+            ui->customPlot->xAxis->scaleRange(alpha, ui->customPlot->xAxis->range().center());
+            ui->customPlot->replot();
+            lastValue = moved;
+        });
+
+        //Analyze video and set data points
+        rObject* r_instance = new rObject;
+        connect(r_instance, SIGNAL(updateUI(vector<QVector<double> >,vector<QVector<double> >)), this, SLOT(updatePlot(vector<QVector<double> >, vector<QVector<double> >)));
+        vid_data = r_instance->rkbcore(stringedFile);
+
+        //Check to see vid_data has valid arrays of data points
+        if (vid_data.size() < 4) {
+            throw 220;
         }
-        else if (folderName.isEmpty() || ok == false)
-        {
-            messageBox2.information(this, "Failed", "Please input a valid folder name", QMessageBox::NoButton);
-            messageBox2.setFixedSize(600,400);
+        else {
+            if (vid_data[0].size() < 2 || vid_data[1].size() < 2 || vid_data[2].size() < 2 || vid_data[3].size() < 2) throw 230;
         }
+
+        // To-do:
+        // Load warnings
+        ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
+        ui->forwardWarning->setStyleSheet("#forwardWarning { background-image: url(:/images/Res/NextvWarningUp.png); border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
+        ui->backWarning->setEnabled(true);
+        ui->forwardWarning->setEnabled(true);
+        warnings.clear();
+
+        //Set warnings from seizure_frames (vid_data[2] and vid_data[3])
+        int previous = vid_data[2][0] | vid_data[3][0];
+        for (int i = 1; i < vid_data[2].size(); i++) {
+            int current = vid_data[2][i] | vid_data[3][i];
+            if (current == 1 && previous == 0) {
+                warnings.push_back(i);
+            }
+            previous = current;
+        }
+        ui->label_6->setText(QString::number(warnings.size()));
+        ui->actionSave_Report->setEnabled(true);
+        ui->actionPrint_Report->setEnabled(true);
+
+        //Set report data to unsaved
+        saved = false;
+    }
+    catch(int e) {
+        QMessageBox mb;
+        mb.critical(this, "Error: " + QString::number(e), "There was an error in decoding the video stream. Please try and install the appropriate codecs and try again.");
+        mb.setFixedSize(600,400);
     }
 }
 
@@ -1806,4 +1480,62 @@ void mainFrame::on_actionPrint_Report_triggered()
     printer.setPrinterName("Printer name");
     QPrintDialog dialog(&printer, this);
     if (dialog.exec() == QDialog::Rejected) return;
+}
+
+bool mainFrame::on_actionSave_Report_triggered()
+{
+    //Get path to save file
+    QString savefile = QFileDialog::getSaveFileName(this, tr("Save PEAT Report"), "untitled.peat", tr("PEAT Report File (*.peat)"));
+    QFile file(savefile);
+    try {
+        file.open(QIODevice::WriteOnly);
+        //Check if file is open
+        if (!file.isOpen()) throw 600;
+        QDataStream stream(&file);
+
+        // Write an ID header, file path, FPS, frame count, and set serialization version
+        QString filename = ui->label->text();
+        // Check if filename is a valid path
+        if (!QFile::exists(filename)) throw 610;
+
+        stream << (quint32)0xA46BF100 << filename << (quint32)vid_data[4][0] << (quint32)vid_data[4][1];
+        stream.setVersion(QDataStream::Qt_5_11);
+
+        //Write data to file
+        stream << (QString)"flash_diag";
+        for (unsigned int i = 0; i < vid_data[0].size(); i++) {
+            stream << (quint32)vid_data[0][i];
+        }
+        stream << (QString)"red_flash_diag";
+        for (unsigned int i = 0; i < vid_data[1].size(); i++) {
+            stream << (quint32)vid_data[1][i];
+        }
+        stream << (QString)"seizure_frames";
+        for (unsigned int i = 0; i < vid_data[2].size(); i++) {
+            stream << (quint32)vid_data[2][i];
+        }
+        stream << (QString)"red_seizure_frames";
+        for (unsigned int i = 0; i < vid_data[3].size(); i++) {
+            stream << (quint32)vid_data[3][i];
+        }
+        saved = true;
+        file.close();
+    }
+    catch (int e) {
+        file.remove();
+        QString error;
+        switch(e)
+        {
+            case 600:
+                error = "The report file could not be written. Please try again and check the directory";
+                break;
+            case 610:
+                error = "The loaded video file is not valid. Please add the video back to the loaded path or reload the video and try again.";
+                break;
+        }
+        QMessageBox mb;
+        mb.critical(this, "Error: " + QString::number(e), error);
+        mb.setFixedSize(600,400);
+    }
+    return saved;
 }

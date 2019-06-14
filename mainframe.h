@@ -50,6 +50,11 @@ public:
     bool forwardWarningJustPressed = false;
     int lastValue = 0;
     bool firstOpen = true;
+    vector<vector<int > > vid_data;
+    bool saved = true;
+
+public slots:
+    void updatePlot(vector<QVector<double > > points_x, vector<QVector<double > > points_y);
 
 private slots:
     void on_folderButton_clicked();
@@ -117,6 +122,10 @@ private slots:
     void on_actionInvert_UI_Colour_triggered();
 
     void on_actionPrint_Report_triggered();
+
+    bool on_actionSave_Report_triggered();
+
+    void closeEvent(QCloseEvent *event);
 
 private:
     Ui::mainFrame *ui;

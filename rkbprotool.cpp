@@ -104,7 +104,8 @@ void rkbProTool::on_buttonBox_accepted()
     if (decision != 0)
     {
         qDebug() << (ui->label_4->text()).toDouble();
-        proTool(ui->lineEdit->text(), ui->lineEdit_2->text(), decision, (ui->label_4->text()).toDouble());
+        rObject r_instance;
+        r_instance.proTool(ui->lineEdit->text(), ui->lineEdit_2->text(), decision, (ui->label_4->text()).toDouble());
     }
     else {
         QMessageBox::critical(0, "Error", "Please input valid values.");
