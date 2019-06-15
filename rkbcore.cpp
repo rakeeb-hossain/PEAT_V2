@@ -246,7 +246,6 @@ float rObject::red_saturation(float R, float G, float B) {
 }
 
 vector<vector<int > > rObject::rkbcore(string filename) {
-    mainFrame *main_instance = new mainFrame;
     int count = 1;
     VideoCapture cap(filename);
 
@@ -491,8 +490,9 @@ vector<vector<int > > rObject::rkbcore(string filename) {
             red_seizure_frames.push_back(is_red_sat);
         }
         cout << "Count: " << count << endl;
-        //Plot points***
-        updateUI(points_x, points_y);
+        //Plot points and update signals
+        emit updateUI(points_x, points_y);
+        emit progressCount(count);
 
         //Set frame to next_frame
         frame = next_frame.clone();
@@ -501,7 +501,7 @@ vector<vector<int > > rObject::rkbcore(string filename) {
         red_first = red_next;
         count++;
     }
-
+    //emit finished();
     return {lum_diag, red_diag, seizure_frames, red_seizure_frames, {round(cap.get(CAP_PROP_FPS)), cap.get(CAP_PROP_FRAME_COUNT)}};
 }
 

@@ -25,13 +25,12 @@ mainFrame::mainFrame(QWidget *parent) :
 {
     ui->setupUi(this);
     this->setWindowTitle("UW Trace Center Photosensitive Epilepsy Analysis Tool (PEAT)");
-    setWindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
+    setWindowFlags(Qt::Widget | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
     this->resize(QSize(870,591));
     this->setFixedSize(QSize(870,591));
 
     //QVBoxLayout *layout = new QVBoxLayout;
     //this->setLayout(layout);
-
     connect(ui->actionOpen_Video, &QAction::triggered, this, &mainFrame::on_folderButton_clicked);
     connect(ui->actionOpen_Report, &QAction::triggered, this, &mainFrame::openReport);
     connect(ui->actionGenerate_Report, &QAction::triggered, this, &mainFrame::on_reportButton_clicked);
@@ -98,14 +97,16 @@ mainFrame::mainFrame(QWidget *parent) :
     player->setNotifyInterval(50);
     connect(player, &QMediaPlayer::durationChanged, ui->slider, &QSlider::setMaximum);
     connect(player, &QMediaPlayer::positionChanged, ui->slider, &QSlider::setValue);
-    connect(ui->slider, &QSlider::sliderMoved, player, &QMediaPlayer::setPosition);
-
+    connect(ui->slider, &QSlider::valueChanged, player, &QMediaPlayer::setPosition);
     connect(ui->slider, &QSlider::valueChanged, ui->horizontalScrollBar, [&](qint64 move) {
         qint64 sliderMax = ui->slider->maximum();
         qint64 scrollMax = ui->horizontalScrollBar->maximum();
         double percent = move/(double)(sliderMax);
         ui->horizontalScrollBar->setValue(percent*(double)scrollMax);
     });
+
+    ui->customPlot->xAxis->scaleRange(24.0, ui->customPlot->xAxis->range().center());
+
     //Removed due to bug
 /*
     connect(ui->horizontalScrollBar, &QScrollBar::valueChanged, ui->slider, [&](qint64 move2) {
@@ -216,11 +217,32 @@ void mainFrame::on_folderButton_clicked()
                 if (continue_loading == true)
                 {
                     //RESET PLOT/UI IF A NEW VIDEO IS UPLOADED
-                    vid_data.clear();
-                    saved = true;
-                    for (int i = 0; i < ui->customPlot->graphCount(); i++) {
-                        ui->customPlot->graph(i)->data()->clear();
-                    }
+                    no_report_loaded();
+
+                    ui->horizontalSlider->setEnabled(true);
+                    ui->horizontalSlider->setValue(0);
+                    connect(ui->horizontalSlider, &QSlider::valueChanged, this, [&](int moved)
+                    {
+                        double alpha = 1.0;
+                        int delta = moved - lastValue;
+                        if (delta > 0)
+                        {
+                            for (int x = lastValue + 1; x < moved + 1; x++)
+                            {
+                                alpha *= 1/(1.1);
+                            }
+                        }
+                        else {
+                            for (int x = lastValue - 1; x > moved - 1; x--)
+                            {
+                                alpha *= 1.1;
+                            }
+                        }
+
+                        ui->customPlot->xAxis->scaleRange(alpha, ui->customPlot->xAxis->range().center());
+                        ui->customPlot->replot();
+                        lastValue = moved;
+                    });
 
                     playlist->clear();
                     playlist->addMedia(QUrl::fromLocalFile(filename));
@@ -395,8 +417,14 @@ void mainFrame::on_folderButton_clicked()
                         ui->actionForward_5_Seconds->setEnabled(true);
                         ui->actionForward_30_Frames->setEnabled(true);
                         ui->actionPlay_Pause->setEnabled(true);
-
-                        player->play();
+                        ui->statusbar->showMessage(tr("Loading"));
+                        connect(player, &QMediaPlayer::mediaStatusChanged,
+                                [&](QMediaPlayer::MediaStatus status){
+                            if(status == QMediaPlayer::LoadedMedia) {
+                                ui->statusbar->showMessage(tr("Ready"));
+                                player->play();
+                            }
+                        });
                     }
                 }
             }
@@ -442,103 +470,7 @@ void mainFrame::on_rewindButton_clicked()
         player->setPlaybackRate(x);
     }
 }
-// Replace {
-vector<int> mainFrame::frameSplit(string filename, string location)
-{
 
-    //Extract + Save Frames
-    //THIS STUFF USED TO EXIST
-    QString QcurrentDir = QDir::currentPath();
-    string currentDir = QcurrentDir.toUtf8().constData();
-
-    string locationDir = currentDir + "/" + location + "/frames/";
-
-    string fpsCMD = "RKBVidCore.exe -i \"" + filename + "\" -hide_banner 2>&1";
-
-    const char * f = fpsCMD.c_str();
-    string output = execute(f);
-
-    string fileCMD = "RKBVidCore.exe -i \"" + filename + "\" -r 30 " + locationDir + "%01d.jpg";
-    const char * c = fileCMD.c_str();
-    system(c);
-    int count = 0;
-    string fps = output;
-    string duration = output;
-    cout << "A1" << endl;
-    cout << output << endl;
-
-    size_t pos = output.find("Duration: ");
-    if (pos != string::npos)
-    {
-        duration = output.substr(pos);
-        duration = duration.substr(10,11);
-        cout << "Time: " + duration << endl;
-    }
-    else {
-        QMessageBox::critical(0, "Error", "Error in decoding video. Please try again or try another video.");
-        count++;
-    }
-    cout << "A2" << endl;
-
-    pos = output.find("Video:");
-
-    if (pos != string::npos)
-        output = output.substr(pos);
-
-    if (pos != string::npos){
-        pos = output.find("kb/s");
-        fps = output.substr(pos);
-        fps.erase(0, 6);
-        if (pos != string::npos){
-            pos = fps.find(" ");
-            fps.erase(pos, fps.length());
-            cout << "A3" << endl;
-        }
-        else {
-            QMessageBox::critical(0, "Error", "Error in decoding video. Please try again or try another video.");
-            count++;
-        }
-    }
-    else{
-        QMessageBox::critical(0, "Error", "Error in decoding video. Please try again or try another video.");
-        count++;
-    }
-
-    auto fpsS = atof(fps.c_str());
-    cout << fpsS << endl;
-
-    int d, h, m, s= 0;
-    double secs = 0.0;
-
-    if (sscanf(duration.c_str(), "%d:%d:%d:%d", &d, &h, &m, &s) >= 2)
-    {
-      secs = d * 3600 + h *60 + m + s * 0.01;
-    }
-    int numOfFrames = floor(secs*fpsS);
-    cout << numOfFrames << endl;
-    cout << "A4" << endl;
-
-        Mat dimensions = imread(locationDir + "1.jpg");
-        int width = dimensions.cols;
-        int height = dimensions.rows;
-
-        vector<int> props;
-        if (count != 0)
-        {
-            props = {};
-        }
-        else {
-            props.push_back(numOfFrames);
-            props.push_back(round(fpsS));
-            props.push_back(width);
-            props.push_back(height);
-        }
-
-        qDebug() << props[0];
-
-        return props;
-}
-// }
 void mainFrame::horzScrollBarChanged(int value)
 {
   if (qAbs(ui->customPlot->xAxis->range().center()-value) > 0.01) // if user is dragging plot, we don't want to replot twice
@@ -557,23 +489,26 @@ void mainFrame::xAxisChanged(QCPRange range)
 
 void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<double > > points_y) {
     //Plot
-    qDebug() << "graphs: " << ui->customPlot->graphCount();
-    qDebug() << "data: " << points_x[0][0];
-
     ui->customPlot->graph(0)->addData(points_x[0], points_y[0]);
     ui->customPlot->graph(1)->addData(points_x[1], points_y[1]);
     ui->customPlot->graph(2)->addData(points_x[2], points_y[2]);
     ui->customPlot->graph(3)->addData(points_x[3], points_y[3]);
-    ui->slider->setValue(points_x[0][0]);
     ui->customPlot->replot();
 
     //Slider
+    //if ((int)points_x[0][points_x[0].size()-1] % 10 == 0) ui->slider->setValue(points_x[0][0]);
 }
 
 void mainFrame::on_reportButton_clicked() {
     try {
+        for (int i = 0; i < ui->customPlot->graphCount(); i++) {
+            ui->customPlot->graph(i)->data()->clear();
+        }
+        for (int i = 0; i < 2000; i++) {
+            player->play();
+        }
+        player->play();
         player->pause();
-        ui->slider->setValue(0);
         QString filename = ui->label->text();
         std::string stringedFile = filename.toLocal8Bit().constData();
         VideoCapture cap(stringedFile);
@@ -584,14 +519,13 @@ void mainFrame::on_reportButton_clicked() {
         if (frame.empty()) throw 210;
         cap.release();
 
-        //Initialize slider and scrollbar
-        ui->horizontalSlider->setEnabled(true);
-        ui->horizontalSlider->setValue(0);
+        //Initialize scrollbar
         ui->horizontalScrollBar->setEnabled(true);
         ui->horizontalScrollBar->setRange(0, frameNum);
+        connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
+        connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
 
         //Initialize graphs
-        ui->customPlot->xAxis->scaleRange(8.0, ui->customPlot->xAxis->range().center());
         ui->customPlot->addGraph();
         ui->customPlot->addGraph();
         ui->customPlot->addGraph();
@@ -644,35 +578,13 @@ void mainFrame::on_reportButton_clicked() {
         ui->customPlot->replot();
         //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
-        //Connect slider and scrollbar with graph
-        connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
-        connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
-        connect(ui->horizontalSlider, &QSlider::valueChanged, this, [&](int moved)
-        {
-            double alpha = 1.0;
-            int delta = moved - lastValue;
-            if (delta > 0)
-            {
-                for (int x = lastValue + 1; x < moved + 1; x++)
-                {
-                    alpha *= 1/(1.1);
-                }
-            }
-            else {
-                for (int x = lastValue - 1; x > moved - 1; x--)
-                {
-                    alpha *= 1.1;
-                }
-            }
-
-            ui->customPlot->xAxis->scaleRange(alpha, ui->customPlot->xAxis->range().center());
-            ui->customPlot->replot();
-            lastValue = moved;
-        });
-
-        //Analyze video and set data points
+        //Connect slots (slider and QCP) and analyze video
         rObject* r_instance = new rObject;
-        connect(r_instance, SIGNAL(updateUI(vector<QVector<double> >,vector<QVector<double> >)), this, SLOT(updatePlot(vector<QVector<double> >, vector<QVector<double> >)));
+        connect(r_instance, &rObject::updateUI, this, updatePlot);
+        connect(r_instance, &rObject::progressCount, this, [&](int moved) {
+            int delta = (int)(((double)moved/frameNum)*ui->slider->maximum());
+            ui->slider->setValue(delta);
+        });
         vid_data = r_instance->rkbcore(stringedFile);
 
         //Check to see vid_data has valid arrays of data points
@@ -687,6 +599,7 @@ void mainFrame::on_reportButton_clicked() {
         ui->customPlot->graph(1)->addData(frameNum, 0);
         ui->customPlot->graph(2)->addData(frameNum, 0);
         ui->customPlot->graph(3)->addData(frameNum, 0);
+        ui->customPlot->replot();
 
         // Load warnings
         ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
@@ -697,7 +610,7 @@ void mainFrame::on_reportButton_clicked() {
 
         //Set warnings from seizure_frames (vid_data[2] and vid_data[3])
         int previous = vid_data[2][0] | vid_data[3][0];
-        for (int i = 1; i < vid_data[2].size(); i++) {
+        for (unsigned int i = 1; i < vid_data[2].size(); i++) {
             int current = vid_data[2][i] | vid_data[3][i];
             if (current == 1 && previous == 0) {
                 warnings.push_back(i);
@@ -707,6 +620,7 @@ void mainFrame::on_reportButton_clicked() {
         ui->label_6->setText(QString::number(warnings.size()));
         ui->actionSave_Report->setEnabled(true);
         ui->actionPrint_Report->setEnabled(true);
+        ui->actionRun_Prophylactic_Tool->setEnabled(true);
 
         //Set report data to unsaved
         saved = false;
@@ -853,32 +767,6 @@ void mainFrame::openReport()
 
             //TO-DO: Write data to graph, copy vid_data_t to vid_data, open video file + information
 
-            //Connect slider and scrollbar with graph
-            connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
-            connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
-            connect(ui->horizontalSlider, &QSlider::valueChanged, this, [&](int moved)
-            {
-                double alpha = 1.0;
-                int delta = moved - lastValue;
-                if (delta > 0)
-                {
-                    for (int x = lastValue + 1; x < moved + 1; x++)
-                    {
-                        alpha *= 1/(1.1);
-                    }
-                }
-                else {
-                    for (int x = lastValue - 1; x > moved - 1; x--)
-                    {
-                        alpha *= 1.1;
-                    }
-                }
-
-                ui->customPlot->xAxis->scaleRange(alpha, ui->customPlot->xAxis->range().center());
-                ui->customPlot->replot();
-                lastValue = moved;
-            });
-
             //Check to see vid_data has valid arrays of data points
             if (vid_data.size() < 4) {
                 throw 220;
@@ -911,6 +799,7 @@ void mainFrame::openReport()
             ui->label_6->setText(QString::number(warnings.size()));
             ui->actionSave_Report->setEnabled(true);
             ui->actionPrint_Report->setEnabled(true);
+            ui->actionRun_Prophylactic_Tool->setEnabled(true);
 
             file.close();
         }
@@ -1299,6 +1188,9 @@ bool mainFrame::on_actionSave_Report_triggered()
             if (!file.isOpen()) throw 600;
             QDataStream stream(&file);
 
+            //Check if a report is loaded
+            if (vid_data.size() != 5) throw 605;
+
             // Write an ID header, file path, FPS, frame count, and set serialization version
             QString filename = ui->label->text();
             // Check if filename is a valid path
@@ -1335,6 +1227,9 @@ bool mainFrame::on_actionSave_Report_triggered()
                 case 600:
                     error = "The report file could not be written. Please try again and check the directory";
                     break;
+                case 605:
+                    error = "No report file loaded.";
+                    break;
                 case 610:
                     error = "The loaded video file is not valid. Please add the video back to the loaded path or reload the video and try again.";
                     break;
@@ -1345,4 +1240,26 @@ bool mainFrame::on_actionSave_Report_triggered()
         }
     }
     return saved;
+}
+
+void mainFrame::no_report_loaded() {
+    vid_data.clear();
+    saved = true;
+    for (int i = 0; i < ui->customPlot->graphCount(); i++) {
+        ui->customPlot->graph(i)->data()->clear();
+    }
+    warnings.clear();
+    ui->label_6->setText("0");
+    ui->backWarning->setEnabled(false);
+    ui->forwardWarning->setEnabled(false);
+    ui->actionPrint_Report->setEnabled(false);
+    ui->actionSave_Report->setEnabled(false);
+    ui->actionRun_Prophylactic_Tool->setEnabled(false);
+
+    ui->horizontalScrollBar->setEnabled(false);
+    ui->horizontalScrollBar->setRange(0, 100);
+    ui->horizontalScrollBar->setValue(0);
+    disconnect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
+    disconnect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
+
 }

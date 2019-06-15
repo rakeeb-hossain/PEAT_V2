@@ -24,6 +24,7 @@
 #include "rkbprotool.h"
 #include <QPrintDialog>
 #include <QPrinter>
+#include <QThread>
 
 using namespace std;
 
@@ -34,6 +35,7 @@ class mainFrame;
 class mainFrame : public QMainWindow
 {
     Q_OBJECT
+    QThread workerThread;
 
 public:
     explicit mainFrame(QWidget *parent = nullptr);
@@ -81,8 +83,6 @@ private slots:
 
     void on_backWarning_clicked();
 
-    vector<int> frameSplit(string filename, string location);
-
     void skipLeftFunc();
 
     void skipRightFunc();
@@ -126,6 +126,8 @@ private slots:
     bool on_actionSave_Report_triggered();
 
     void closeEvent(QCloseEvent *event);
+
+    void no_report_loaded();
 
 private:
     Ui::mainFrame *ui;

@@ -1016,6 +1016,9 @@ QSlider::handle:horizontal {
    </property>
   </action>
   <action name="actionRun_Prophylactic_Tool">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Run Prophylactic Tool...</string>
    </property>

@@ -37,8 +37,13 @@ private:
     float saturation(float R, float G, float B);
     float red_saturation(float R, float G, float B);
 
+//public slots:
+//    rkbcore(string filename);
+
 signals:
     void updateUI(vector<QVector<double> >,vector<QVector<double> >);
+    void progressCount(int);
+    void finished();
 
 };
 
