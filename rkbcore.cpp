@@ -31,6 +31,8 @@ const int CHUNK = 32;
 const int SCALE = 4;
 const int N = CHUNK/SCALE;
 const int AREA = N*N;
+const float ST = 0.80;
+const int RTT = 20;
 
 rObject::rObject(QObject *parent) : QObject(parent) {
 }
@@ -246,8 +248,8 @@ float rObject::red_saturation(float R, float G, float B) {
 vector<vector<int > > rObject::rkbcore(string filename) {
     mainFrame *main_instance = new mainFrame;
     int count = 1;
-
     VideoCapture cap(filename);
+
     if (!cap.isOpened()) return {};
 
     //Load first frame
@@ -304,7 +306,7 @@ vector<vector<int > > rObject::rkbcore(string filename) {
     parallel_for_(Range(0, num_chunks), [&](const Range& range) {
         for (int r = range.start; r < range.end; r++) {
             lum_first[r] = lum_first[r] / (float) AREA;
-            sat_first[r] = ((sat_first[r] / (float) AREA) >= 0.80 ? sat_first[r] / (float) AREA : 0);
+            sat_first[r] = ((sat_first[r] / (float) AREA) >= ST ? sat_first[r] / (float) AREA : 0);
             red_first[r] = (sat_first[r] != 0 ? red_next[r] / (float) AREA : 0);
         }
     });
@@ -324,7 +326,7 @@ vector<vector<int > > rObject::rkbcore(string filename) {
         //Load new frame and resize
         Mat next_frame;
         cap >> next_frame;
-        if (next_frame.empty()) return {};
+        if (frame.empty() || next_frame.empty()) return {};
         resize(next_frame, next_frame, Size(), scale, scale);
 
         //Parallel loop through pixels in NxN chunks to get lum. and red sat. values
@@ -355,7 +357,7 @@ vector<vector<int > > rObject::rkbcore(string filename) {
         parallel_for_(Range(0, num_chunks), [&](const Range& range) {
             for (int r = range.start; r < range.end; r++) {
                 lum_next[r] = lum_next[r] / (float) AREA;
-                sat_next[r] = ((sat_next[r] / (float) AREA) >= 0.80 ? sat_next[r] / (float) AREA : 0);
+                sat_next[r] = ((sat_next[r] / (float) AREA) >= ST ? sat_next[r] / (float) AREA : 0);
                 red_next[r] = (sat_next[r] != 0 ? red_next[r] / (float) AREA : 0);
 
                 if (just_flashed == false) {
@@ -374,14 +376,14 @@ vector<vector<int > > rObject::rkbcore(string filename) {
                     //INVESTIGATE: WCAG 2.0 Guidelines say that both states should be saturated
                     //if (sat_first[r] != 0 && sat_next[r] != 0)
                     if (sat_next[r] != 0) {
-                        if (red_next[r] - red_first[r] > 20) {
+                        if (red_next[r] > RTT) {
                             red_count++;
                         }
                     }
                 }
                 else {
                     if (sat_first[r] != 0) {
-                        if (red_first[r] - red_next[r] > 20) {
+                        if (red_first[r] > RTT) {
                             red_count++;
                         }
                     }
