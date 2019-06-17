@@ -152,5 +152,6 @@
         <file>Res/HardingFPADoc.ico</file>
         <file>Res/HardingFPA.ico</file>
         <file>Res/cage.png</file>
+        <file>Res/logoLARGE.bmp</file>
     </qresource>
 </RCC>

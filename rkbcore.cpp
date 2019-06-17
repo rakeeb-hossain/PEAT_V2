@@ -31,7 +31,7 @@ const int CHUNK = 32;
 const int SCALE = 4;
 const int N = CHUNK/SCALE;
 const int AREA = N*N;
-const float ST = 0.80;
+const float ST = 0.85;
 const int RTT = 20;
 
 rObject::rObject(QObject *parent) : QObject(parent) {
@@ -245,16 +245,17 @@ float rObject::red_saturation(float R, float G, float B) {
     return (red >= 0 ? red : 0);
 }
 
-vector<vector<int > > rObject::rkbcore(string filename) {
+int rObject::rkbcore(string filename) {
     int count = 1;
+
     VideoCapture cap(filename);
 
-    if (!cap.isOpened()) return {};
+    if (!cap.isOpened()) emit error();
 
     //Load first frame
     Mat frame;
     cap >> frame;
-    if (frame.empty()) return {};
+    if (frame.empty()) emit error();
 
     //Resize first frame
     auto scale = 1.0 / SCALE;
@@ -325,7 +326,7 @@ vector<vector<int > > rObject::rkbcore(string filename) {
         //Load new frame and resize
         Mat next_frame;
         cap >> next_frame;
-        if (frame.empty() || next_frame.empty()) return {};
+        if (frame.empty() || next_frame.empty()) emit error();
         resize(next_frame, next_frame, Size(), scale, scale);
 
         //Parallel loop through pixels in NxN chunks to get lum. and red sat. values
@@ -406,7 +407,7 @@ vector<vector<int > > rObject::rkbcore(string filename) {
         }
 
         //Increment flash counts if a valid flash occurs in the transition to the next frame
-        if (seizure_count*AREA >= 341*256/AREA) {
+        if (seizure_count*AREA >= 0.03*frame.cols*frame.rows) {
             if (just_flashed == false) {
                 flash_count++;
                 just_flashed = true;
@@ -416,7 +417,7 @@ vector<vector<int > > rObject::rkbcore(string filename) {
             }
         }
 
-        if (red_count*AREA >= 341*256/AREA) {
+        if (red_count*AREA >= 0.03*frame.cols*frame.rows) {
             if (just_red_flashed == false) {
                 red_flash_count++;
                 just_red_flashed = true;
@@ -492,7 +493,9 @@ vector<vector<int > > rObject::rkbcore(string filename) {
         cout << "Count: " << count << endl;
         //Plot points and update signals
         emit updateUI(points_x, points_y);
-        emit progressCount(count);
+        if (count % 3 == 0) {
+            emit progressCount(count);
+        }
 
         //Set frame to next_frame
         frame = next_frame.clone();
@@ -501,8 +504,6 @@ vector<vector<int > > rObject::rkbcore(string filename) {
         red_first = red_next;
         count++;
     }
-    //emit finished();
-    return {lum_diag, red_diag, seizure_frames, red_seizure_frames, {round(cap.get(CAP_PROP_FPS)), cap.get(CAP_PROP_FRAME_COUNT)}};
 }
 
 void rObject::proTool(QString ndir, QString report, int decision, double alpha)

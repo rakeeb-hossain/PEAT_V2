@@ -10,6 +10,11 @@
     <height>594</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>Segoe UI</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
@@ -35,42 +40,27 @@ border-style: solid;
 border-width: 1px;
 </string>
     </property>
-    <widget class="QFrame" name="frame_3">
+    <widget class="Line" name="line_5">
      <property name="geometry">
       <rect>
-       <x>0</x>
+       <x>290</x>
        <y>0</y>
-       <width>581</width>
-       <height>351</height>
+       <width>3</width>
+       <height>312</height>
       </rect>
      </property>
      <property name="autoFillBackground">
       <bool>false</bool>
      </property>
-     <property name="styleSheet">
-      <string notr="true">border-color: black;
-border-width: 3px;
-border-style: solid;</string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
      <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+      <enum>QFrame::Sunken</enum>
      </property>
-     <widget class="Line" name="line_4">
-      <property name="geometry">
-       <rect>
-        <x>290</x>
-        <y>0</y>
-        <width>3</width>
-        <height>350</height>
-       </rect>
-      </property>
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-     </widget>
+     <property name="midLineWidth">
+      <number>0</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
     </widget>
    </widget>
    <widget class="QLabel" name="label_10">
@@ -81,6 +71,11 @@ border-style: solid;</string>
       <width>111</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+     </font>
     </property>
     <property name="mouseTracking">
      <bool>false</bool>
@@ -116,6 +111,7 @@ border-style: solid;</string>
     </property>
     <property name="font">
      <font>
+      <family>Segoe UI</family>
       <pointsize>10</pointsize>
      </font>
     </property>
@@ -137,6 +133,11 @@ border-style: solid;</string>
       <width>121</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+     </font>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color:rgb(220, 220, 220);
@@ -191,6 +192,11 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       <height>20</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+     </font>
+    </property>
     <property name="styleSheet">
      <string notr="true">background-color:rgb(220, 220, 220);
 </string>
@@ -219,6 +225,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
     </property>
     <property name="font">
      <font>
+      <family>Segoe UI</family>
       <pointsize>11</pointsize>
      </font>
     </property>
@@ -262,6 +269,11 @@ border-radius: 10px;</string>
       <height>91</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+     </font>
+    </property>
     <property name="autoFillBackground">
      <bool>true</bool>
     </property>
@@ -286,7 +298,8 @@ border-radius: 10px;</string>
     </property>
     <property name="font">
      <font>
-      <pointsize>11</pointsize>
+      <family>Segoe UI</family>
+      <pointsize>10</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -298,10 +311,14 @@ border-color:black;
 border-width:1px;
 -webkit-border-radius: 5px;
 -moz-border-radius: 5px;
-border-radius: 7px;</string>
+border-radius: 7px;
+font-size: 10pt;</string>
     </property>
     <property name="text">
      <string>(No file open)</string>
+    </property>
+    <property name="textFormat">
+     <enum>Qt::AutoText</enum>
     </property>
     <property name="scaledContents">
      <bool>false</bool>
@@ -396,6 +413,11 @@ border-image: url(:/images/Res/AnalyzeDisabled.png);</string>
       <height>20</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+     </font>
+    </property>
     <property name="styleSheet">
      <string notr="true">background-color:rgb(200, 200, 210);
 </string>
@@ -429,13 +451,13 @@ border-image: url(:/images/Res/AnalyzeDisabled.png);</string>
      <string notr="true">QSlider::groove:horizontal {
     border: 1px solid #999999;
     height: 5px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
-   background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #B1B1B1, stop: 1.0 #c4c4c4);
+   background: rgba(140,140,140,200);
     margin: 2px 0;
 }
 
 QSlider::handle:horizontal {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f);
-    border: 1px solid #5c5c5c;
+    background:rgba(143,143,143,210);
+    border: 1px solid rgb(143,143,143);
     width: 8px;
     margin: -6px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
     border-radius: 3px;
@@ -463,6 +485,11 @@ QSlider::handle:horizontal {
       <width>251</width>
       <height>111</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+     </font>
     </property>
     <property name="autoFillBackground">
      <bool>true</bool>
@@ -545,6 +572,11 @@ border-image: url(:/images/Res/PlayDisabled.png);</string>
       <height>31</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+     </font>
+    </property>
     <property name="text">
      <string/>
     </property>
@@ -594,35 +626,47 @@ background: transparent;</string>
      <property name="styleSheet">
       <string notr="true"/>
      </property>
-     <widget class="QLabel" name="label_14">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>251</width>
-        <height>151</height>
-       </rect>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>13</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="styleSheet">
-       <string notr="true"/>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="text">
-       <string>(No file open)</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
+    </widget>
+    <widget class="QLabel" name="label_14">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>251</width>
+       <height>151</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>13</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::StrongFocus</enum>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background: black;</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>false</bool>
+     </property>
     </widget>
    </widget>
    <widget class="Line" name="line">
@@ -646,6 +690,11 @@ background: transparent;</string>
       <width>111</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+     </font>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color:rgb(200, 200, 210);
@@ -672,6 +721,11 @@ background: transparent;</string>
       <width>91</width>
       <height>20</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Segoe UI</family>
+     </font>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color:rgb(200, 200, 210);
@@ -751,6 +805,7 @@ border-image: url(:/images/Res/FFwdDisabled.png);</string>
     </property>
     <property name="font">
      <font>
+      <family>Segoe UI</family>
       <pointsize>13</pointsize>
       <weight>50</weight>
       <bold>false</bold>
@@ -775,7 +830,7 @@ border-radius: 10px;
    </widget>
    <widget class="QSlider" name="slider">
     <property name="enabled">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
     <property name="geometry">
      <rect>
@@ -785,20 +840,22 @@ border-radius: 10px;
       <height>22</height>
      </rect>
     </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
     <property name="styleSheet">
      <string notr="true">QSlider::groove:horizontal {
-    border: 1px solid #999999;
     height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
-   background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #B1B1B1, stop: 1.0 #c4c4c4);
+   background-color: rgba(109, 107, 107, 140);
     margin: 2px 0;
 }
 
 QSlider::handle:horizontal {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #b4b4b4, stop:1 #8f8f8f);
-    border: 1px solid #5c5c5c;
+    background-color: rgba(143,143,143, 200);
+    border: 1px solid rgb(143,143,143);
     width: 8px;
     margin: -6px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
-    border-radius: 3px;
+    border-radius: 5px;
 }
 </string>
     </property>
@@ -866,71 +923,6 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
      <string/>
     </property>
    </widget>
-   <widget class="QSlider" name="slider_2">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>80</x>
-      <y>420</y>
-      <width>771</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="focusPolicy">
-     <enum>Qt::NoFocus</enum>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QSlider::groove:horizontal {
-    border: 1px solid #999999;
-    height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
-   background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #00B1B1B1, stop: 1.0 #00c4c4c4);
-    margin: 2px 0;
-}
-
-QSlider::handle:horizontal {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #00b4b4b4, stop:1 #008f8f8f);
-    border: 1px solid #5c5c5c;
-    width:0px;
-    margin: 0px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
-    border-radius: 3px;
-}</string>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <zorder>slider_2</zorder>
-   <zorder>customPlot</zorder>
-   <zorder>label_10</zorder>
-   <zorder>label_7</zorder>
-   <zorder>label_8</zorder>
-   <zorder>backWarning</zorder>
-   <zorder>label_9</zorder>
-   <zorder>timeLabel</zorder>
-   <zorder>label_3</zorder>
-   <zorder>label</zorder>
-   <zorder>folderButton</zorder>
-   <zorder>restartButton</zorder>
-   <zorder>reportButton</zorder>
-   <zorder>label_11</zorder>
-   <zorder>horizontalSlider</zorder>
-   <zorder>label_2</zorder>
-   <zorder>line_2</zorder>
-   <zorder>pauseButton</zorder>
-   <zorder>playButton</zorder>
-   <zorder>label_5</zorder>
-   <zorder>frame</zorder>
-   <zorder>line</zorder>
-   <zorder>label_13</zorder>
-   <zorder>label_12</zorder>
-   <zorder>rewindButton</zorder>
-   <zorder>forwardButton</zorder>
-   <zorder>label_6</zorder>
-   <zorder>slider</zorder>
-   <zorder>horizontalScrollBar</zorder>
-   <zorder>forwardWarning</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -1004,15 +996,30 @@ QSlider::handle:horizontal {
    <property name="text">
     <string>Open Video...</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionOpen_Report">
    <property name="text">
     <string>Open Report...</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionQuit">
    <property name="text">
     <string>Quit...                  Alt+F4</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
   <action name="actionRun_Prophylactic_Tool">
@@ -1022,6 +1029,11 @@ QSlider::handle:horizontal {
    <property name="text">
     <string>Run Prophylactic Tool...</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionGenerate_Report">
    <property name="enabled">
@@ -1029,6 +1041,11 @@ QSlider::handle:horizontal {
    </property>
    <property name="text">
     <string>Generate Report...</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
   <action name="actionForward_5_Seconds">
@@ -1038,6 +1055,11 @@ QSlider::handle:horizontal {
    <property name="text">
     <string>Step Forward...                   L</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionBack_5_Seconds">
    <property name="enabled">
@@ -1045,6 +1067,11 @@ QSlider::handle:horizontal {
    </property>
    <property name="text">
     <string>Step Back...                         J</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
   <action name="actionPlay_Pause">
@@ -1054,6 +1081,11 @@ QSlider::handle:horizontal {
    <property name="text">
     <string>Play/Pause...                       Space</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionForward_30_Frames">
    <property name="enabled">
@@ -1061,6 +1093,11 @@ QSlider::handle:horizontal {
    </property>
    <property name="text">
     <string>Forward 30 Frames...         Right</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
   <action name="actionBack_30_Frames">
@@ -1070,20 +1107,40 @@ QSlider::handle:horizontal {
    <property name="text">
     <string>Back 30 Frames...               Left</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionPEAT_Help">
    <property name="text">
     <string>PEAT Help...</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
   <action name="actionAbout_PEAT">
    <property name="text">
     <string>About PEAT...</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionTrace_Center_Homepage">
    <property name="text">
     <string>Trace Center Homepage...</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
   <action name="actionInvert_UI_Colour">
@@ -1093,6 +1150,11 @@ QSlider::handle:horizontal {
    <property name="text">
     <string>Invert UI Colour</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionLight_Blue">
    <property name="checkable">
@@ -1100,6 +1162,11 @@ QSlider::handle:horizontal {
    </property>
    <property name="text">
     <string>Light Blue</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
   <action name="actionBeige">
@@ -1109,6 +1176,11 @@ QSlider::handle:horizontal {
    <property name="text">
     <string>Beige</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionPale">
    <property name="checkable">
@@ -1116,6 +1188,11 @@ QSlider::handle:horizontal {
    </property>
    <property name="text">
     <string>Pale</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
   <action name="actionTurquoise">
@@ -1125,6 +1202,11 @@ QSlider::handle:horizontal {
    <property name="text">
     <string>Sea Green</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionCharcoal_Grey">
    <property name="checkable">
@@ -1132,6 +1214,11 @@ QSlider::handle:horizontal {
    </property>
    <property name="text">
     <string>Charcoal Grey</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
   <action name="actionLight_Grey">
@@ -1144,6 +1231,11 @@ QSlider::handle:horizontal {
    <property name="text">
     <string>Light Grey</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionWhite">
    <property name="checkable">
@@ -1151,6 +1243,11 @@ QSlider::handle:horizontal {
    </property>
    <property name="text">
     <string>White</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
   <action name="actionPrint_Report">
@@ -1160,6 +1257,11 @@ QSlider::handle:horizontal {
    <property name="text">
     <string>Print Report...</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
+   </property>
   </action>
   <action name="actionSave_Report">
    <property name="enabled">
@@ -1167,6 +1269,11 @@ QSlider::handle:horizontal {
    </property>
    <property name="text">
     <string>Save Report...</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
   </action>
  </widget>

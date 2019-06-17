@@ -15,6 +15,7 @@
 #include <cstdio>
 #include <memory>
 #include <stdexcept>
+#include <QDate>
 
 using namespace std;
 using namespace cv;
@@ -29,8 +30,7 @@ mainFrame::mainFrame(QWidget *parent) :
     this->resize(QSize(870,591));
     this->setFixedSize(QSize(870,591));
 
-    //QVBoxLayout *layout = new QVBoxLayout;
-    //this->setLayout(layout);
+    //Connect toolbar actions
     connect(ui->actionOpen_Video, &QAction::triggered, this, &mainFrame::on_folderButton_clicked);
     connect(ui->actionOpen_Report, &QAction::triggered, this, &mainFrame::openReport);
     connect(ui->actionGenerate_Report, &QAction::triggered, this, &mainFrame::on_reportButton_clicked);
@@ -47,6 +47,7 @@ mainFrame::mainFrame(QWidget *parent) :
     connect(ui->actionAbout_PEAT, &QAction::triggered, this, &mainFrame::aboutPEAT);
     connect(ui->actionTrace_Center_Homepage, &QAction::triggered, this, &mainFrame::traceHome);
 
+    //Setup plot
     ui->customPlot->yAxis->setRange(0,1);
     ui->customPlot->yAxis->setVisible(false);
     ui->customPlot->xAxis->setLabel("Frame Number");
@@ -89,12 +90,21 @@ mainFrame::mainFrame(QWidget *parent) :
     textLabel2->setFont(QFont(font().family(), 12)); // make font a bit larger
     textLabel2->setPen(QPen(Qt::black)); // show black border around text
 
+    ui->customPlot->xAxis->scaleRange(32.0, ui->customPlot->xAxis->range().center());
+
     ui->customPlot->replot();
 
+    //Set frame for QCP
+    QPainterPath path;
+    path.addRoundedRect(ui->customPlot->rect(), 10, 10);
+    QRegion mask = QRegion(path.toFillPolygon().toPolygon());
+    ui->customPlot->setMask(mask);
+
+    //Declare player and set properties
     player = new QMediaPlayer;
     playlist = new QMediaPlaylist;
 
-    player->setNotifyInterval(50);
+    player->setNotifyInterval(40);
     connect(player, &QMediaPlayer::durationChanged, ui->slider, &QSlider::setMaximum);
     connect(player, &QMediaPlayer::positionChanged, ui->slider, &QSlider::setValue);
     connect(ui->slider, &QSlider::valueChanged, player, &QMediaPlayer::setPosition);
@@ -104,22 +114,106 @@ mainFrame::mainFrame(QWidget *parent) :
         double percent = move/(double)(sliderMax);
         ui->horizontalScrollBar->setValue(percent*(double)scrollMax);
     });
+    QImage image(":/images/Res/logoLARGE.bmp");
+    QImage out(image.width(), image.height(), QImage::Format_ARGB32);
+    out.fill(Qt::transparent);
 
-    ui->customPlot->xAxis->scaleRange(24.0, ui->customPlot->xAxis->range().center());
+    QBrush brush(image);
 
-    //Removed due to bug
-/*
-    connect(ui->horizontalScrollBar, &QScrollBar::valueChanged, ui->slider, [&](qint64 move2) {
-        qint64 sliderMax = ui->slider->maximum();
-        qint64 scrollMax = ui->horizontalScrollBar->maximum();
-        double percent = move2/(double)(scrollMax);
-        qDebug() << move2;
+    QPen pen;
+    pen.setColor(Qt::darkGray);
+    pen.setJoinStyle(Qt::RoundJoin);
 
-        ui->slider->setValue(percent*(double)sliderMax);
+    QPainter painter(&out);
+    painter.setBrush(brush);
+    painter.setPen(pen);
+    painter.drawRoundedRect(0, 0, image.width(), image.height(), 15, 15);
+
+    ui->label_14->setPixmap(QPixmap::fromImage(out.scaled(35,35)));
+
+    //player status handling
+    connect(player, &QMediaPlayer::stateChanged, this, [&](QMediaPlayer::State state) {
+        if (state == QMediaPlayer::StoppedState) {
+            ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackDisabled.png); border-image: url(:/images/Res/FastBackDisabled.png); }");
+            ui->pauseButton->setStyleSheet("background-image: url(:/images/Res/StopDisabled.png); border-image: url(:/images/Res/StopDisabled.png);");
+            ui->forwardButton->setStyleSheet("background-image: url(:/images/Res/FFwdDisabled.png); border-image: url(:/images/Res/FFwdDisabled.png);");
+            ui->reportButton->setStyleSheet("background-image: url(:/images/Res/AnalyzeDisabled.png); border-image: url(:/images/Res/AnalyzeDisabled.png);");
+            ui->restartButton->setStyleSheet("background-image: url(:/images/Res/RewindDisabled.png); border-image: url(:/images/Res/RewindDisabled.png);");
+
+            ui->restartButton->setEnabled(false);
+            ui->rewindButton->setEnabled(false);
+            ui->pauseButton->setEnabled(false);
+            ui->forwardButton->setEnabled(false);
+            ui->reportButton->setEnabled(false);
+
+            ui->actionGenerate_Report->setEnabled(false);
+            ui->actionBack_5_Seconds->setEnabled(false);
+            ui->actionBack_30_Frames->setEnabled(false);
+            ui->actionForward_5_Seconds->setEnabled(false);
+            ui->actionForward_30_Frames->setEnabled(false);
+            ui->actionPlay_Pause->setEnabled(false);
+
+            ui->label_14->setVisible(true);
+            vidLabel->setText(tr("Stopped"));
+        }
+        else if (state == QMediaPlayer::PausedState){
+            vidLabel->setText(tr("Paused"));
+        }
+        else if (state == QMediaPlayer::PlayingState) {
+            vidLabel->setText(tr("Playing"));
+            ui->label_10->setText(QString::number(player->duration()));
+        }
     });
-*/
-    connect(player, &QMediaPlayer::durationChanged, ui->slider, &QSlider::setMaximum);
-    connect(player, &QMediaPlayer::positionChanged, ui->slider, &QSlider::setValue);
+    connect(player, &QMediaPlayer::mediaStatusChanged,
+            [&](QMediaPlayer::MediaStatus status){
+        qDebug() << status;
+        if(status == QMediaPlayer::BufferedMedia) {
+            ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
+            ui->pauseButton->setStyleSheet("#pauseButton { background-image: url(:/images/Res/StopUp.png); border-image: url(:/images/Res/StopUp.png); } #pauseButton:hover { border-image: url(:/images/Res/StopDownHilite.png); } #pauseButton:pressed { border-image: url(:/images/Res/StopPressed.png); }");
+            ui->forwardButton->setStyleSheet("#forwardButton { background-image: url(:/images/Res/FFwdUp.png); border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
+            ui->reportButton->setStyleSheet("#reportButton { background-image: url(:/images/Res/AnalyzeUp.png); border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
+            ui->restartButton->setStyleSheet("#restartButton { background-image: url(:/images/Res/RewindUp.png); border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
+
+            ui->restartButton->setEnabled(true);
+            ui->rewindButton->setEnabled(true);
+            ui->pauseButton->setEnabled(true);
+            ui->forwardButton->setEnabled(true);
+            ui->reportButton->setEnabled(true);
+
+            ui->actionGenerate_Report->setEnabled(true);
+            ui->actionBack_5_Seconds->setEnabled(true);
+            ui->actionBack_30_Frames->setEnabled(true);
+            ui->actionForward_5_Seconds->setEnabled(true);
+            ui->actionForward_30_Frames->setEnabled(true);
+            ui->actionPlay_Pause->setEnabled(true);
+
+            //TO-DO: Format time
+            if (media_first_load == true) {
+                player->play();
+                ui->label_10->setText(QString::number(player->duration()));
+            }
+
+            ui->label_14->setVisible(false);
+        }
+        else if (status == QMediaPlayer::LoadedMedia) {
+            if (media_first_load == true) {
+                player->play();
+                media_first_load = false;
+                ui->label_10->setText(QString::number(player->duration()));
+            }
+        }
+        else if (status == QMediaPlayer::NoMedia || status == QMediaPlayer::EndOfMedia) player->stop();
+    });
+
+    //Create statusbar
+    vidLabel = new QLabel;
+    vidLabel->setText("No media loaded");
+    vidLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    descriptionLabel = new QLabel;
+    descriptionLabel->setText("");
+    descriptionLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    ui->statusbar->addPermanentWidget(vidLabel, 1);
+    ui->statusbar->addPermanentWidget(descriptionLabel, 6);
 }
 
 mainFrame::~mainFrame()
@@ -159,6 +253,13 @@ void mainFrame::on_folderButton_clicked()
     string fileString = filename.toUtf8().constData();
     size_t pos = fileString.find("WebCourseVideo");
 
+    bool vid_is_valid = true;
+    VideoCapture cap(fileString);
+    if (!cap.isOpened()) vid_is_valid = false;
+    Mat frame;
+    cap >> frame;
+    if (frame.empty()) vid_is_valid = false;
+
     if (ext == "avi" || ext == "AVI")
     {
         QMessageBox messageBox;
@@ -173,7 +274,10 @@ void mainFrame::on_folderButton_clicked()
     else if (ext != ""){
         didSelect = true;
     }
-
+    if (vid_is_valid == false) {
+        isVideo = false;
+        didSelect = true;
+    }
     if(!filename.isEmpty() && isVideo == true){
         if (pos != string::npos)
         {
@@ -218,6 +322,12 @@ void mainFrame::on_folderButton_clicked()
                 {
                     //RESET PLOT/UI IF A NEW VIDEO IS UPLOADED
                     no_report_loaded();
+                    QString dimensions = QString::number(frame.cols) + "x" + QString::number(frame.rows);
+                    double fps = cap.get(CAP_PROP_FPS);
+                    quint32 frame_count = cap.get(CAP_PROP_FRAME_COUNT);
+                    int fourcc = cap.get(CAP_PROP_FOURCC);
+                    string fourcc_str = format("%c%c%c%c", fourcc & 255, (fourcc >> 8) & 255, (fourcc >> 16) & 255, (fourcc >> 24) & 255);
+                    cap.release();
 
                     ui->horizontalSlider->setEnabled(true);
                     ui->horizontalSlider->setValue(0);
@@ -247,185 +357,86 @@ void mainFrame::on_folderButton_clicked()
                     playlist->clear();
                     playlist->addMedia(QUrl::fromLocalFile(filename));
                     playlist->setCurrentIndex(1);
+                    media_first_load = true;
 
                     player->setPlaylist(playlist);
                     player->setVideoOutput(ui->videoWidget_2);
                     ui->videoWidget_2->show();
-                    ui->label_14->setEnabled(false);
-                    ui->label_14->setText("Press play");
+                    ui->label_14->setVisible(false);
                     ui->label->setText(filename);
                     ui->timeLabel->setStyleSheet("background-color:rgb(210, 255, 189); border-style:solid; border-color:black; border-width:1px;");
 
-                    ui->label_8->setText("." + ext);
-                    string fpsCMD = "RKBVidCore.exe -i \"" + (fileString) + "\" -hide_banner 2>&1";
+                    ui->label_8->setText(QString::number(frame_count));
+                    ui->label_9->setText(QString::number(fps));
+                    ui->label_11->setText(dimensions);
+                    ui->label_12->setText(QString::fromStdString(fourcc_str));
 
-                    cout << fpsCMD;
+                    //***
+                    connect(player, &QMediaPlayer::positionChanged, this, [&](qint64 dur) {
+                        QString hours, minutes, seconds, milliseconds;
 
-                    const char * f = fpsCMD.c_str();
-                    string output = execute(f);
-
-                    string duration = output;
-                    pos = output.find("Duration: ");
-                    if (pos != string::npos)
-                    {
-                        duration = output.substr(pos);
-                        duration = duration.substr(10,11);
-                    }
-                    ui->label_10->setText(QString::fromStdString(duration));
-
-                    pos = output.find("Video:");
-                    string fps = output;
-
-                    if (pos != string::npos)
-                        output = output.substr(pos);
-
-                    if (pos != string::npos){
-                        pos = output.find("kb/s");
-                        fps = output.substr(pos);
-                        fps.erase(0, 6);
-                        if (pos != string::npos){
-                            pos = fps.find(" ");
-                            fps.erase(pos, fps.length());
-                            cout << "A3" << endl;
-                        }
-                    }
-                    auto fpsS = atof(fps.c_str());
-                    ui->label_9->setText(QString::number(fpsS));
-
-                    // To-do: allow videos of any FPS
-                    if (round(fpsS) < 5)
-                    {
-                        playlist->clear();
-                        ui->label_8->setText("");
-                        ui->label_9->setText("");
-                        ui->label_10->setText("");
-                        ui->label_11->setText("");
-                        ui->label_12->setText("");
-                        ui->label_13->setText("");
-                        QMessageBox messageBox;
-                        messageBox.information(this, "Error", "PEAT only supports videos with an FPS of at least 5.");
-                        messageBox.setFixedSize(600,400);
-                    }
-                    else {
-                        string codec;
-                        pos = output.find(" / 0x");
-                        codec = output;
-                        codec.erase(pos, codec.length());
-                        pos = codec.find(" (");
-                        codec = codec.substr(pos + 2);
-                        pos = codec.find(") (");
-                        if (pos != string::npos){
-                            codec.erase(0, pos + 3);
-                        }
-                        ui->label_13->setText(QString::fromStdString(codec));
-
-                        string nextCodec = output;
-                        pos = output.find(" / 0x");
-                        nextCodec.erase(pos, nextCodec.length());
-                        pos = nextCodec.find(" (");
-                        nextCodec.erase(pos, nextCodec.length());
-                        nextCodec = nextCodec.substr(7, nextCodec.length());
-                        ui->label_12->setText(QString::fromStdString(nextCodec));
-
-                        string dimensions = output;
-                        pos = dimensions.find("kb/s");
-                        dimensions = dimensions.substr(0, pos);
-                        qDebug() << QString::fromStdString(dimensions);
-                        pos = dimensions.find(", ");
-                        dimensions = dimensions.substr(pos + 2, dimensions.length());
-                        pos = dimensions.find("), ");
-                        if (pos != string::npos)
+                        auto hrs = qFloor(dur / 3600000.0);
+                        if (hrs < 10)
                         {
-                            dimensions = dimensions.substr(pos + 3, dimensions.length());
+                            hours = "0" + QString::number(hrs);
                         }
                         else {
-                            pos = dimensions.find(", ");
-                            dimensions = dimensions.substr(pos + 2, dimensions.length());
+                            hours = QString::number(hrs);
                         }
-                        pos = dimensions.find("[");
-                        if (pos != string::npos)
+                        auto mins = qFloor((dur - hrs*3600000.0) / 60000.0);
+                        if (mins < 10)
                         {
-                            dimensions = dimensions.substr(0, pos - 1);
+                            minutes = "0" + QString::number(mins);
                         }
-                        else{
-                            pos = dimensions.find(", ");
-                            dimensions = dimensions.substr(0, pos);
+                        else {
+                            minutes = QString::number(mins);
                         }
-                        ui->label_11->setText(QString::fromStdString(dimensions));
+                        auto secs = qFloor((dur - hrs*3600000.0 - mins*60000.0) / 1000.0);
+                        if (secs < 10)
+                        {
+                            seconds = "0" + QString::number(secs);
+                        }
+                        else {
+                            seconds = QString::number(secs);
+                        }
+                        auto ms = (dur - hrs*3600000 - mins*60000 - secs*1000);
+                        if (ms < 10)
+                        {
+                            milliseconds = "0" + QString::number(ms);
+                        }
+                        else if (100 < ms && ms >= 10)
+                        {
+                            milliseconds = "" + QString::number(ms);
+                        }
+                        else {
+                            milliseconds = QString::number(ms);
+                        }
+                        ui->timeLabel->setText(hours + ":" + minutes +":" + seconds + ":" + milliseconds);
+                    });
 
-                        //***
-                        connect(player, &QMediaPlayer::positionChanged, this, [&](qint64 dur) {
-                            QString hours, minutes, seconds, milliseconds;
+                    player->setVolume(5);
+                    ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
+                    ui->playButton->setStyleSheet("#playButton { background-image: url(:/images/Res/PlayUp.png); border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
+                    ui->pauseButton->setStyleSheet("#pauseButton { background-image: url(:/images/Res/StopUp.png); border-image: url(:/images/Res/StopUp.png); } #pauseButton:hover { border-image: url(:/images/Res/StopDownHilite.png); } #pauseButton:pressed { border-image: url(:/images/Res/StopPressed.png); }");
+                    ui->forwardButton->setStyleSheet("#forwardButton { background-image: url(:/images/Res/FFwdUp.png); border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
+                    ui->reportButton->setStyleSheet("#reportButton { background-image: url(:/images/Res/AnalyzeUp.png); border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
+                    ui->restartButton->setStyleSheet("#restartButton { background-image: url(:/images/Res/RewindUp.png); border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
 
-                            auto hrs = qFloor(dur / 3600000.0);
-                            if (hrs < 10)
-                            {
-                                hours = "0" + QString::number(hrs);
-                            }
-                            else {
-                                hours = QString::number(hrs);
-                            }
-                            auto mins = qFloor((dur - hrs*3600000.0) / 60000.0);
-                            if (mins < 10)
-                            {
-                                minutes = "0" + QString::number(mins);
-                            }
-                            else {
-                                minutes = QString::number(mins);
-                            }
-                            auto secs = qFloor((dur - hrs*3600000.0 - mins*60000.0) / 1000.0);
-                            if (secs < 10)
-                            {
-                                seconds = "0" + QString::number(secs);
-                            }
-                            else {
-                                seconds = QString::number(secs);
-                            }
-                            auto ms = (dur - hrs*3600000 - mins*60000 - secs*1000);
-                            if (ms < 10)
-                            {
-                                milliseconds = "0" + QString::number(ms);
-                            }
-                            else if (100 < ms && ms >= 10)
-                            {
-                                milliseconds = "" + QString::number(ms);
-                            }
-                            else {
-                                milliseconds = QString::number(ms);
-                            }
-                            ui->timeLabel->setText(hours + ":" + minutes +":" + seconds + ":" + milliseconds);
-                        });
+                    ui->restartButton->setEnabled(true);
+                    ui->rewindButton->setEnabled(true);
+                    ui->playButton->setEnabled(true);
+                    ui->pauseButton->setEnabled(true);
+                    ui->forwardButton->setEnabled(true);
+                    ui->reportButton->setEnabled(true);
 
-                        player->setVolume(5);
-                        ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
-                        ui->playButton->setStyleSheet("#playButton { background-image: url(:/images/Res/PlayUp.png); border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
-                        ui->pauseButton->setStyleSheet("#pauseButton { background-image: url(:/images/Res/StopUp.png); border-image: url(:/images/Res/StopUp.png); } #pauseButton:hover { border-image: url(:/images/Res/StopDownHilite.png); } #pauseButton:pressed { border-image: url(:/images/Res/StopPressed.png); }");
-                        ui->forwardButton->setStyleSheet("#forwardButton { background-image: url(:/images/Res/FFwdUp.png); border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
-                        ui->reportButton->setStyleSheet("#reportButton { background-image: url(:/images/Res/AnalyzeUp.png); border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
-                        ui->restartButton->setStyleSheet("#restartButton { background-image: url(:/images/Res/RewindUp.png); border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
+                    ui->actionGenerate_Report->setEnabled(true);
+                    ui->actionBack_5_Seconds->setEnabled(true);
+                    ui->actionBack_30_Frames->setEnabled(true);
+                    ui->actionForward_5_Seconds->setEnabled(true);
+                    ui->actionForward_30_Frames->setEnabled(true);
+                    ui->actionPlay_Pause->setEnabled(true);
 
-                        ui->restartButton->setEnabled(true);
-                        ui->rewindButton->setEnabled(true);
-                        ui->playButton->setEnabled(true);
-                        ui->pauseButton->setEnabled(true);
-                        ui->forwardButton->setEnabled(true);
-                        ui->reportButton->setEnabled(true);
-
-                        ui->actionGenerate_Report->setEnabled(true);
-                        ui->actionBack_5_Seconds->setEnabled(true);
-                        ui->actionBack_30_Frames->setEnabled(true);
-                        ui->actionForward_5_Seconds->setEnabled(true);
-                        ui->actionForward_30_Frames->setEnabled(true);
-                        ui->actionPlay_Pause->setEnabled(true);
-                        ui->statusbar->showMessage(tr("Loading"));
-                        connect(player, &QMediaPlayer::mediaStatusChanged,
-                                [&](QMediaPlayer::MediaStatus status){
-                            if(status == QMediaPlayer::LoadedMedia) {
-                                ui->statusbar->showMessage(tr("Ready"));
-                                player->play();
-                            }
-                        });
-                    }
+                    vidLabel->setText("Ready");
                 }
             }
         }
@@ -489,13 +500,39 @@ void mainFrame::xAxisChanged(QCPRange range)
 
 void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<double > > points_y) {
     //Plot
+    qDebug() << "DATA: " << points_x[0][0];
     ui->customPlot->graph(0)->addData(points_x[0], points_y[0]);
     ui->customPlot->graph(1)->addData(points_x[1], points_y[1]);
     ui->customPlot->graph(2)->addData(points_x[2], points_y[2]);
     ui->customPlot->graph(3)->addData(points_x[3], points_y[3]);
-    ui->customPlot->replot();
+    if ((int)points_x[0][0] % 3 == 0) ui->customPlot->replot();
 
-    //Slider
+    vid_data[0].push_back(points_y[0][points_y[0].size()-1]);
+    vid_data[1].push_back(points_y[1][points_y[1].size()-1]);
+    vid_data[2].push_back(points_y[2][points_y[2].size()-1]);
+    vid_data[3].push_back(points_y[3][points_y[3].size()-1]);
+
+    //Update slider and warnings
+    int previous = vid_data[2][vid_data[2].size()-2] | vid_data[3][vid_data[3].size()-2];
+    int current = vid_data[2][vid_data[2].size()-1] | vid_data[3][vid_data[3].size()-1];
+    double ind = points_x[0][0];
+    firstHalfStylesheet = firstHalfStylesheet.substr(0, firstHalfStylesheet.length()-21);
+    if (previous == 0 && current == 1) {
+        warnings.push_back(points_x[2][0]);
+        ui->label_6->setText(QString::number(ui->label_6->text().toInt() + 1));
+        firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*((ind-1)/vid_data[4][1]+0.001))/1000.0) + "#c10707,stop:" + to_string(ind/vid_data[4][1]) + "#c10707,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
+    }
+    else if (previous == 1 && current == 0) {
+        firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*((ind-1)/vid_data[4][1]+0.001))/1000.0) + "#25c660,stop:" + to_string(ind/vid_data[4][1]) + "#25c660,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
+    }
+    else if (previous == 0 && current == 0) {
+        firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*ind/vid_data[4][1])/1000.0) + "#25c660,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
+    }
+    else {
+        firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*ind/vid_data[4][1])/1000.0) + "#c10707,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
+    }
+    ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + secondHalfStylesheet);
+
     //if ((int)points_x[0][points_x[0].size()-1] % 10 == 0) ui->slider->setValue(points_x[0][0]);
 }
 
@@ -504,15 +541,14 @@ void mainFrame::on_reportButton_clicked() {
         for (int i = 0; i < ui->customPlot->graphCount(); i++) {
             ui->customPlot->graph(i)->data()->clear();
         }
-        for (int i = 0; i < 2000; i++) {
-            player->play();
-        }
-        player->play();
         player->pause();
+        ui->label_6->setText("0");
+        reset_slider();
         QString filename = ui->label->text();
         std::string stringedFile = filename.toLocal8Bit().constData();
         VideoCapture cap(stringedFile);
         int frameNum = cap.get(CAP_PROP_FRAME_COUNT);
+        int fps = round(cap.get(CAP_PROP_FPS));
         if (frameNum == 0) throw 200;
         Mat frame;
         cap >> frame;
@@ -540,7 +576,7 @@ void mainFrame::on_reportButton_clicked() {
         //Graph 1 style
         QPen solid;
         solid.setStyle(Qt::DotLine);
-        solid.setWidthF(2);
+        solid.setWidthF(1.5);
         solid.setColor(Qt::black);
         ui->customPlot->graph(0)->setPen(solid);
         ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
@@ -550,7 +586,7 @@ void mainFrame::on_reportButton_clicked() {
         //Graph 2 style
         QPen solidRed;
         solidRed.setStyle(Qt::DotLine);
-        solidRed.setWidthF(2);
+        solidRed.setWidthF(1.5);
         solidRed.setColor(Qt::red);
         ui->customPlot->graph(1)->setPen(solidRed);
         ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
@@ -560,7 +596,7 @@ void mainFrame::on_reportButton_clicked() {
         //Graph 3 style
         QPen dotted;
         dotted.setStyle(Qt::SolidLine);
-        dotted.setWidthF(4);
+        dotted.setWidthF(3);
         dotted.setColor(Qt::white);
         ui->customPlot->graph(2)->setPen(dotted);
         ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsLine);
@@ -570,7 +606,7 @@ void mainFrame::on_reportButton_clicked() {
         //Graph 4 style
         QPen dottedRed;
         dottedRed.setStyle(Qt::SolidLine);
-        dottedRed.setWidthF(4);
+        dottedRed.setWidthF(3);
         dottedRed.setColor(Qt::red);
         ui->customPlot->graph(3)->setPen(dottedRed);
         ui->customPlot->graph(3)->setLineStyle(QCPGraph::lsLine);
@@ -578,21 +614,46 @@ void mainFrame::on_reportButton_clicked() {
         ui->customPlot->replot();
         //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
-        //Connect slots (slider and QCP) and analyze video
+        //Connect slots (slider and QCP)
+        vidLabel->setText("Analysing...");
         rObject* r_instance = new rObject;
         connect(r_instance, &rObject::updateUI, this, updatePlot);
         connect(r_instance, &rObject::progressCount, this, [&](int moved) {
             int delta = (int)(((double)moved/frameNum)*ui->slider->maximum());
             ui->slider->setValue(delta);
         });
-        vid_data = r_instance->rkbcore(stringedFile);
+
+
+        connect(r_instance, &rObject::error, this, [&]() {
+           throw 221;
+        });
+        vid_data.clear();
+        vid_data.resize(5);
+        vid_data[4].push_back(fps);
+        vid_data[4].push_back(frameNum);
+        vid_data[0].push_back(0);
+        vid_data[1].push_back(0);
+        vid_data[2].push_back(0);
+        vid_data[3].push_back(0);
+
+        r_instance->rkbcore(stringedFile);
+        //Threading attempt
+        /*
+        QThread* thread;
+        r_instance->moveToThread(thread);
+        connect(thread, &QThread::started, r_instance, &rObject::rkbcore);
+        connect(r_instance, &rObject::finished, thread, &QThread::quit);
+        connect(r_instance, &rObject::finished, r_instance, &rObject::deleteLater);
+        connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+        thread->start();
+        */
 
         //Check to see vid_data has valid arrays of data points
         if (vid_data.size() < 4) {
             throw 220;
         }
-        else {
-            if (vid_data[0].size() < 2 || vid_data[1].size() < 2 || vid_data[2].size() < 2 || vid_data[3].size() < 2) throw 230;
+        else if (vid_data[0].size() != frameNum || vid_data[1].size() != frameNum || vid_data[2].size() != frameNum || vid_data[3].size() != frameNum) {
+            throw 230;
         }
 
         ui->customPlot->graph(0)->addData(frameNum, 0);
@@ -606,8 +667,8 @@ void mainFrame::on_reportButton_clicked() {
         ui->forwardWarning->setStyleSheet("#forwardWarning { background-image: url(:/images/Res/NextvWarningUp.png); border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
         ui->backWarning->setEnabled(true);
         ui->forwardWarning->setEnabled(true);
-        warnings.clear();
 
+        /*
         //Set warnings from seizure_frames (vid_data[2] and vid_data[3])
         int previous = vid_data[2][0] | vid_data[3][0];
         for (unsigned int i = 1; i < vid_data[2].size(); i++) {
@@ -618,14 +679,31 @@ void mainFrame::on_reportButton_clicked() {
             previous = current;
         }
         ui->label_6->setText(QString::number(warnings.size()));
+        */
         ui->actionSave_Report->setEnabled(true);
         ui->actionPrint_Report->setEnabled(true);
         ui->actionRun_Prophylactic_Tool->setEnabled(true);
 
+        QDate date = QDate::currentDate();
+        qDebug() << date;
+        ui->label_13->setText(date.toString("dd.MM.yyyy"));
+
         //Set report data to unsaved
         saved = false;
+        vidLabel->setText("Done");
+        //Set worker thread
+        //QThread* thread = new QThread;
+        //r_instance->moveToThread(thread);
+        //connect(thread, &QThread::started, r_instance, &rObject::rkbcore);
+        //connect(r_instance, &rObject::finished, this, [&](vector<vector<int > > data) {
+        //});
+        //connect(r_instance, &rObject::finished, thread, &QThread::quit);
+        //connect(r_instance, &rObject::finished, r_instance, &rObject::deleteLater);
+        //connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+        //thread->start();
     }
     catch(int e) {
+        vidLabel->setText(tr("Error"));
         QMessageBox mb;
         mb.critical(this, "Error: " + QString::number(e), "There was an error in decoding the video stream. Please try and install the appropriate codecs and try again.");
         mb.setFixedSize(600,400);
@@ -636,172 +714,325 @@ void mainFrame::openReport()
 {
     QString filename = QFileDialog::getOpenFileName(this, "Open a report file", "", "Open PEAT Report (*.peat)");
     QFile file(filename);
+    bool continue_loading = true;
 
     if (!filename.isNull()) {
         try {
-            file.open(QIODevice::ReadOnly);
+            if (saved == false) {
+                QMessageBox messageBox;
+                QMessageBox::StandardButton reply;
+                reply = messageBox.question(this, "Report unsaved", "Would you like to save your report?", QMessageBox::Yes|QMessageBox::No|QMessageBox::Cancel);
+                messageBox.setFixedSize(600,400);
 
-            //CHECK if file is open
-            if (!file.isOpen()) throw 500;
-            QDataStream stream(&file);
-
-            //Check id
-            quint32 id;
-            stream >> id;
-            if (id != 0x0A46BF100) throw 510;
-
-            // Check video file
-            QString filename;
-            stream >> filename;
-            if (!QFile::exists(filename)) throw 511;
-            VideoCapture cap(filename.toStdString());
-            Mat frame;
-            cap >> frame;
-            if (frame.empty()) throw 512;
-
-            // Check video specs
-            quint32 fps;
-            stream >> fps;
-            if (fps != round(cap.get(CAP_PROP_FPS))) throw 513;
-            quint32 frame_count;
-            stream >> frame_count;
-            if (frame_count != cap.get(CAP_PROP_FRAME_COUNT)) throw 514;
-            cap.release();
-
-            //Declare vid_data template
-            vector<vector<int > > vid_data_t(5);
-            vid_data_t[4].push_back(fps);
-            vid_data_t[4].push_back(frame_count);
-
-            //READ data from file TO-DO: Write data to QCP
-            QString header;
-            stream >> header;
-            if (header != "flash_diag") throw 520;
-            for (unsigned int i = 0; i < frame_count; i++) {
-                quint32 n;
-                stream >> n;
-                vid_data_t[0].push_back((int)n);
-            }
-            stream >> header;
-            if (header != "red_flash_diag") throw 521;
-            for (unsigned int i = 0; i < frame_count; i++) {
-                quint32 n;
-                stream >> n;
-                vid_data_t[1].push_back((int)n);
-            }
-            stream >> header;
-            if (header != "seizure_frames") throw 522;
-            for (unsigned int i = 0; i < frame_count; i++) {
-                quint32 n;
-                stream >> n;
-                vid_data_t[2].push_back((int)n);
-            }
-            stream >> header;
-            if (header != "red_seizure_frames") throw 523;
-            for (unsigned int i = 0; i < frame_count; i++) {
-                quint32 n;
-                stream >> n;
-                vid_data_t[3].push_back((int)n);
-            }
-            qDebug() << "success";
-
-            //Initialize slider and scrollbar
-            ui->horizontalSlider->setEnabled(true);
-            ui->horizontalSlider->setValue(0);
-            ui->horizontalScrollBar->setEnabled(true);
-            ui->horizontalScrollBar->setRange(0, frame_count);
-
-            //Initialize graphs
-            ui->customPlot->xAxis->scaleRange(8.0, ui->customPlot->xAxis->range().center());
-            ui->customPlot->addGraph();
-            ui->customPlot->addGraph();
-            ui->customPlot->addGraph();
-            ui->customPlot->addGraph();
-
-            ui->customPlot->yAxis->setRange(0.0, 1.0);
-            ui->customPlot->xAxis->setLabel("Frame Number");
-            ui->customPlot->yAxis->setVisible(false);
-            section->bottomRight->setCoords(frame_count, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
-            ui->customPlot->replot();
-
-            //Graph 1 style
-            QPen solid;
-            solid.setStyle(Qt::DotLine);
-            solid.setWidthF(2);
-            solid.setColor(Qt::black);
-            ui->customPlot->graph(0)->setPen(solid);
-            ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
-            ui->customPlot->graph(0)->addData(0.0, 0.0);
-            //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-
-            //Graph 2 style
-            QPen solidRed;
-            solidRed.setStyle(Qt::DotLine);
-            solidRed.setWidthF(2);
-            solidRed.setColor(Qt::red);
-            ui->customPlot->graph(1)->setPen(solidRed);
-            ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
-            ui->customPlot->graph(1)->addData(0.0, 0.0);
-            //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-
-            //Graph 3 style
-            QPen dotted;
-            dotted.setStyle(Qt::SolidLine);
-            dotted.setWidthF(4);
-            dotted.setColor(Qt::white);
-            ui->customPlot->graph(2)->setPen(dotted);
-            ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsLine);
-            ui->customPlot->graph(2)->addData(0.0, 0.0);
-            //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-
-            //Graph 4 style
-            QPen dottedRed;
-            dottedRed.setStyle(Qt::SolidLine);
-            dottedRed.setWidthF(4);
-            dottedRed.setColor(Qt::red);
-            ui->customPlot->graph(3)->setPen(dottedRed);
-            ui->customPlot->graph(3)->setLineStyle(QCPGraph::lsLine);
-            ui->customPlot->graph(3)->addData(0.0, 0.0);
-            ui->customPlot->replot();
-            //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-
-            //TO-DO: Write data to graph, copy vid_data_t to vid_data, open video file + information
-
-            //Check to see vid_data has valid arrays of data points
-            if (vid_data.size() < 4) {
-                throw 220;
-            }
-            else {
-                if (vid_data[0].size() < 2 || vid_data[1].size() < 2 || vid_data[2].size() < 2 || vid_data[3].size() < 2) throw 230;
-            }
-
-            ui->customPlot->graph(0)->addData(frame_count, 0);
-            ui->customPlot->graph(1)->addData(frame_count, 0);
-            ui->customPlot->graph(2)->addData(frame_count, 0);
-            ui->customPlot->graph(3)->addData(frame_count, 0);
-
-            // Load warnings
-            ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
-            ui->forwardWarning->setStyleSheet("#forwardWarning { background-image: url(:/images/Res/NextvWarningUp.png); border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
-            ui->backWarning->setEnabled(true);
-            ui->forwardWarning->setEnabled(true);
-            warnings.clear();
-
-            //Set warnings from seizure_frames (vid_data[2] and vid_data[3])
-            int previous = vid_data[2][0] | vid_data[3][0];
-            for (int i = 1; i < vid_data[2].size(); i++) {
-                int current = vid_data[2][i] | vid_data[3][i];
-                if (current == 1 && previous == 0) {
-                    warnings.push_back(i);
+                if (reply == QMessageBox::Yes) {
+                    if (!on_actionSave_Report_triggered()) {
+                        continue_loading = false;
+                    }
+                } else if (reply == QMessageBox::No) {
+                    continue_loading = true;
                 }
-                previous = current;
+                else {
+                    continue_loading = false;
+                }
             }
-            ui->label_6->setText(QString::number(warnings.size()));
-            ui->actionSave_Report->setEnabled(true);
-            ui->actionPrint_Report->setEnabled(true);
-            ui->actionRun_Prophylactic_Tool->setEnabled(true);
+            if (continue_loading == true)
+            {
+                vidLabel->setText("Loading report...");
+                player->pause();
+                file.open(QIODevice::ReadOnly);
 
-            file.close();
+                //CHECK if file is open
+                if (!file.isOpen()) throw 500;
+                QDataStream stream(&file);
+
+                //Check id
+                quint32 id;
+                stream >> id;
+                if (id != 0x0A46BF100) throw 510;
+
+                // Check video file
+                QString filename;
+                stream >> filename;
+                if (!QFile::exists(filename)) throw 511;
+                VideoCapture cap(filename.toStdString());
+                Mat frame;
+                cap >> frame;
+                if (frame.empty()) throw 512;
+                QString dimensions = QString::number(frame.cols) + "x" + QString::number(frame.rows);
+
+                // Check video specs
+                quint32 fps;
+                stream >> fps;
+                if (fps != round(cap.get(CAP_PROP_FPS))) throw 513;
+                quint32 frame_count;
+                stream >> frame_count;
+                if (frame_count != cap.get(CAP_PROP_FRAME_COUNT)) throw 514;
+                int fourcc = cap.get(CAP_PROP_FOURCC);
+                string fourcc_str = format("%c%c%c%c", fourcc & 255, (fourcc >> 8) & 255, (fourcc >> 16) & 255, (fourcc >> 24) & 255);
+                cap.release();
+
+                //Get date of analysis
+                QString date;
+                stream >> date;
+                if (date.isEmpty()) throw 514;
+
+                //Declare vid_data template
+                vector<vector<int > > vid_data_t(5);
+                vid_data_t[4].push_back(fps);
+                vid_data_t[4].push_back(frame_count);
+
+                //READ data from file TO-DO: Write data to QCP
+                QString header;
+                stream >> header;
+                if (header != "flash_diag") throw 520;
+                for (unsigned int i = 0; i < frame_count; i++) {
+                    quint32 n;
+                    stream >> n;
+                    vid_data_t[0].push_back((int)n);
+                }
+                stream >> header;
+                if (header != "red_flash_diag") throw 521;
+                for (unsigned int i = 0; i < frame_count; i++) {
+                    quint32 n;
+                    stream >> n;
+                    vid_data_t[1].push_back((int)n);
+                }
+                stream >> header;
+                if (header != "seizure_frames") throw 522;
+                for (unsigned int i = 0; i < frame_count; i++) {
+                    quint32 n;
+                    stream >> n;
+                    vid_data_t[2].push_back((int)n);
+                }
+                stream >> header;
+                if (header != "red_seizure_frames") throw 523;
+                for (unsigned int i = 0; i < frame_count; i++) {
+                    quint32 n;
+                    stream >> n;
+                    vid_data_t[3].push_back((int)n);
+                }
+                qDebug() << "success";
+
+
+                //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+
+                //TO-DO: Write data to graph, copy vid_data_t to vid_data, open video file + information
+
+                //Check to see vid_data has valid arrays of data points
+                if (vid_data_t.size() < 4) {
+                    throw 220;
+                }
+                else {
+                    if (vid_data_t[0].size() != frame_count || vid_data_t[1].size() != frame_count || vid_data_t[2].size() != frame_count || vid_data_t[3].size() != frame_count) throw 230;
+                }
+                vid_data = vid_data_t;
+                vid_data_t.clear();
+
+                //Load video
+                ui->horizontalSlider->setEnabled(true);
+                ui->horizontalSlider->setValue(0);
+                connect(ui->horizontalSlider, &QSlider::valueChanged, this, [&](int moved)
+                {
+                    double alpha = 1.0;
+                    int delta = moved - lastValue;
+                    if (delta > 0)
+                    {
+                        for (int x = lastValue + 1; x < moved + 1; x++)
+                        {
+                            alpha *= 1/(1.1);
+                        }
+                    }
+                    else {
+                        for (int x = lastValue - 1; x > moved - 1; x--)
+                        {
+                            alpha *= 1.1;
+                        }
+                    }
+
+                    ui->customPlot->xAxis->scaleRange(alpha, ui->customPlot->xAxis->range().center());
+                    ui->customPlot->replot();
+                    lastValue = moved;
+                });
+
+                media_first_load = true;
+                playlist->clear();
+                playlist->addMedia(QUrl::fromLocalFile(filename));
+                playlist->setCurrentIndex(1);
+
+                player->setPlaylist(playlist);
+                player->setVideoOutput(ui->videoWidget_2);
+                ui->videoWidget_2->show();
+                ui->label_14->setVisible(false);
+                ui->label->setText(filename);
+                ui->timeLabel->setStyleSheet("background-color:rgb(210, 255, 189); border-style:solid; border-color:black; border-width:1px;");
+
+                connect(player, &QMediaPlayer::positionChanged, this, [&](qint64 dur) {
+                    QString hours, minutes, seconds, milliseconds;
+
+                    auto hrs = qFloor(dur / 3600000.0);
+                    if (hrs < 10)
+                    {
+                        hours = "0" + QString::number(hrs);
+                    }
+                    else {
+                        hours = QString::number(hrs);
+                    }
+                    auto mins = qFloor((dur - hrs*3600000.0) / 60000.0);
+                    if (mins < 10)
+                    {
+                        minutes = "0" + QString::number(mins);
+                    }
+                    else {
+                        minutes = QString::number(mins);
+                    }
+                    auto secs = qFloor((dur - hrs*3600000.0 - mins*60000.0) / 1000.0);
+                    if (secs < 10)
+                    {
+                        seconds = "0" + QString::number(secs);
+                    }
+                    else {
+                        seconds = QString::number(secs);
+                    }
+                    auto ms = (dur - hrs*3600000 - mins*60000 - secs*1000);
+                    if (ms < 10)
+                    {
+                        milliseconds = "0" + QString::number(ms);
+                    }
+                    else if (100 < ms && ms >= 10)
+                    {
+                        milliseconds = "" + QString::number(ms);
+                    }
+                    else {
+                        milliseconds = QString::number(ms);
+                    }
+                    ui->timeLabel->setText(hours + ":" + minutes +":" + seconds + ":" + milliseconds);
+                });
+
+
+                //Plot data
+                //Initialize slider and scrollbar
+                ui->horizontalSlider->setEnabled(true);
+                ui->horizontalSlider->setValue(0);
+                ui->horizontalScrollBar->setEnabled(true);
+                ui->horizontalScrollBar->setRange(0, frame_count);
+
+                //Initialize graphs
+                ui->customPlot->xAxis->scaleRange(8.0, ui->customPlot->xAxis->range().center());
+                ui->customPlot->addGraph();
+                ui->customPlot->addGraph();
+                ui->customPlot->addGraph();
+                ui->customPlot->addGraph();
+
+                ui->customPlot->yAxis->setRange(0.0, 1.0);
+                ui->customPlot->xAxis->setLabel("Frame Number");
+                ui->customPlot->yAxis->setVisible(false);
+                section->bottomRight->setCoords(frame_count, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
+                ui->customPlot->replot();
+
+                //Graph 1 style
+                QPen solid;
+                solid.setStyle(Qt::DotLine);
+                solid.setWidthF(1.5);
+                solid.setColor(Qt::black);
+                ui->customPlot->graph(0)->setPen(solid);
+                ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
+                ui->customPlot->graph(0)->addData(0.0, 0.0);
+                //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+
+                //Graph 2 style
+                QPen solidRed;
+                solidRed.setStyle(Qt::DotLine);
+                solidRed.setWidthF(1.5);
+                solidRed.setColor(Qt::red);
+                ui->customPlot->graph(1)->setPen(solidRed);
+                ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
+                ui->customPlot->graph(1)->addData(0.0, 0.0);
+                //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+
+                //Graph 3 style
+                QPen dotted;
+                dotted.setStyle(Qt::SolidLine);
+                dotted.setWidthF(3);
+                dotted.setColor(Qt::white);
+                ui->customPlot->graph(2)->setPen(dotted);
+                ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsLine);
+                ui->customPlot->graph(2)->addData(0.0, 0.0);
+                //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+
+                //Graph 4 style
+                QPen dottedRed;
+                dottedRed.setStyle(Qt::SolidLine);
+                dottedRed.setWidthF(3);
+                dottedRed.setColor(Qt::red);
+                ui->customPlot->graph(3)->setPen(dottedRed);
+                ui->customPlot->graph(3)->setLineStyle(QCPGraph::lsLine);
+                ui->customPlot->graph(3)->addData(0.0, 0.0);
+                ui->customPlot->replot();
+                for (int i = 0; i < ui->customPlot->graphCount(); i++) {
+                    ui->customPlot->graph(i)->data()->clear();
+                }
+                reset_slider();
+
+                //Plot data HERE
+
+                ui->customPlot->graph(0)->addData(frame_count, 0);
+                ui->customPlot->graph(1)->addData(frame_count, 0);
+                ui->customPlot->graph(2)->addData(frame_count, 0);
+                ui->customPlot->graph(3)->addData(frame_count, 0);
+
+                ui->label_8->setText(QString::number(frame_count));
+                ui->label_9->setText(QString::number(fps));
+                ui->label_10->setText(QString::number(player->duration()));
+                ui->label_11->setText(dimensions);
+                ui->label_12->setText(QString::fromStdString(fourcc_str));
+                ui->label_13->setText(date);
+
+                player->setVolume(5);
+                ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
+                ui->playButton->setStyleSheet("#playButton { background-image: url(:/images/Res/PlayUp.png); border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
+                ui->pauseButton->setStyleSheet("#pauseButton { background-image: url(:/images/Res/StopUp.png); border-image: url(:/images/Res/StopUp.png); } #pauseButton:hover { border-image: url(:/images/Res/StopDownHilite.png); } #pauseButton:pressed { border-image: url(:/images/Res/StopPressed.png); }");
+                ui->forwardButton->setStyleSheet("#forwardButton { background-image: url(:/images/Res/FFwdUp.png); border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
+                ui->reportButton->setStyleSheet("#reportButton { background-image: url(:/images/Res/AnalyzeUp.png); border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
+                ui->restartButton->setStyleSheet("#restartButton { background-image: url(:/images/Res/RewindUp.png); border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
+
+                ui->restartButton->setEnabled(true);
+                ui->rewindButton->setEnabled(true);
+                ui->playButton->setEnabled(true);
+                ui->pauseButton->setEnabled(true);
+                ui->forwardButton->setEnabled(true);
+                ui->reportButton->setEnabled(true);
+
+                ui->actionGenerate_Report->setEnabled(true);
+                ui->actionBack_5_Seconds->setEnabled(true);
+                ui->actionBack_30_Frames->setEnabled(true);
+                ui->actionForward_5_Seconds->setEnabled(true);
+                ui->actionForward_30_Frames->setEnabled(true);
+                ui->actionPlay_Pause->setEnabled(true);
+
+                // Load warnings
+                ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
+                ui->forwardWarning->setStyleSheet("#forwardWarning { background-image: url(:/images/Res/NextvWarningUp.png); border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
+                ui->backWarning->setEnabled(true);
+                ui->forwardWarning->setEnabled(true);
+                warnings.clear();
+
+                //Set warnings from seizure_frames (vid_data[2] and vid_data[3])
+                int previous = vid_data[2][0] | vid_data[3][0];
+                for (int i = 1; i < vid_data[2].size(); i++) {
+                    int current = vid_data[2][i] | vid_data[3][i];
+                    if (current == 1 && previous == 0) {
+                        warnings.push_back(i);
+                    }
+                    previous = current;
+                }
+                ui->label_6->setText(QString::number(warnings.size()));
+                ui->actionSave_Report->setEnabled(true);
+                ui->actionPrint_Report->setEnabled(true);
+                ui->actionRun_Prophylactic_Tool->setEnabled(true);
+
+                vidLabel->setText("Done");
+                file.close();
+            }
         }
         catch (int e) {
             //TO-DO: Complete errors
@@ -809,13 +1040,17 @@ void mainFrame::openReport()
             switch(e)
             {
                 case 600:
-                    error = "The report file could not be written. Please try again and check the directory";
+                    error = "The report file could not be read. Please try again and check the directory";
                     break;
                 case 610:
                     error = "The loaded video file is not valid. Please add the video back to the loaded path or reload the video and try again.";
                     break;
                 default:
-                    error = "The report file could not be written. Please try again and check the directory";
+                    error = "The report file could not be read. Please try again and check the directory";
+            }
+            vidLabel->setText("Error");
+            for (int i = 0; i < ui->customPlot->graphCount(); i++) {
+                ui->customPlot->graph(i)->data()->clear();
             }
             QMessageBox mb;
             mb.critical(this, "Error: " + QString::number(e), error);
@@ -1196,7 +1431,10 @@ bool mainFrame::on_actionSave_Report_triggered()
             // Check if filename is a valid path
             if (!QFile::exists(filename)) throw 610;
 
-            stream << (quint32)0xA46BF100 << filename << (quint32)vid_data[4][0] << (quint32)vid_data[4][1];
+            QString date = ui->label_13->text();
+            if (date.isEmpty()) throw 605;
+
+            stream << (quint32)0xA46BF100 << filename << (quint32)vid_data[4][0] << (quint32)vid_data[4][1] << date;
             stream.setVersion(QDataStream::Qt_5_11);
 
             //Write data to file
@@ -1249,6 +1487,7 @@ void mainFrame::no_report_loaded() {
         ui->customPlot->graph(i)->data()->clear();
     }
     warnings.clear();
+    reset_slider();
     ui->label_6->setText("0");
     ui->backWarning->setEnabled(false);
     ui->forwardWarning->setEnabled(false);
@@ -1256,10 +1495,22 @@ void mainFrame::no_report_loaded() {
     ui->actionSave_Report->setEnabled(false);
     ui->actionRun_Prophylactic_Tool->setEnabled(false);
 
+    ui->label_13->setText("");
+
     ui->horizontalScrollBar->setEnabled(false);
     ui->horizontalScrollBar->setRange(0, 100);
     ui->horizontalScrollBar->setValue(0);
     disconnect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
     disconnect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
 
+    ui->slider->setEnabled(true);
+    ui->slider->setStyleSheet("QSlider::groove:horizontal { height: 8px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #6d6b6b, stop: 1.0 #6d6b6b); margin: 2px 0; } QSlider::handle:horizontal { background-color: #8f8f8f; border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 5px; }");
+    ui->horizontalSlider->setEnabled(true);
+    ui->horizontalSlider->setStyleSheet("QSlider::groove:horizontal { border: 1px solid #999999; height: 5px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #B1B1B1, stop: 1.0 #c4c4c4); margin: 2px 0; } QSlider::handle:horizontal { background: #8f8f8f; border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 3px; }");
+}
+
+void mainFrame::reset_slider() {
+    firstHalfStylesheet = "QSlider::groove:horizontal { height: 8px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0,stop:0.000000#6d6b6b,";
+    secondHalfStylesheet = "stop:1.0#6d6b6b); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 200); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }";
+    ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + secondHalfStylesheet);
 }

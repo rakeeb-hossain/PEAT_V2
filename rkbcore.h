@@ -25,7 +25,6 @@ public:
     explicit rObject(QObject *parent = Q_NULLPTR);
     ~rObject();
     void proTool(QString dir, QString report, int decision, double alpha);
-    vector<vector<int > > rkbcore(string filename);
 
 private:
     void makeFrameGradient(int lowerBound, int upperBound, string gradientFolder, string vidDir);
@@ -36,14 +35,15 @@ private:
     float relative_luminance(float R, float G, float B);
     float saturation(float R, float G, float B);
     float red_saturation(float R, float G, float B);
+    string filename;
 
-//public slots:
-//    rkbcore(string filename);
+public slots:
+    int rkbcore(string filename);
 
 signals:
     void updateUI(vector<QVector<double> >,vector<QVector<double> >);
     void progressCount(int);
-    void finished();
+    void error();
 
 };
 
