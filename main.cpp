@@ -19,6 +19,9 @@ int main(int argc, char *argv[])
 
     QApplication::setQuitOnLastWindowClosed(false);
 
+    qRegisterMetaType<vector<QVector<double > >>("vector<QVector<double > >");
+    qRegisterMetaType<int>("int");
+
     MainWindow w;
 
     w.show();

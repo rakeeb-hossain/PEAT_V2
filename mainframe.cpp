@@ -233,11 +233,15 @@ void mainFrame::closeEvent(QCloseEvent *event) {
                 event->ignore();
             }
         } else if (reply == QMessageBox::No) {
+            delete player;
             event->accept();
         }
         else {
             event->ignore();
         }
+    }
+    else {
+        delete player;
     }
 }
 
@@ -252,13 +256,10 @@ void mainFrame::on_folderButton_clicked()
     bool continue_loading = true;
     string fileString = filename.toUtf8().constData();
     size_t pos = fileString.find("WebCourseVideo");
+    Mat frame;
+    VideoCapture cap;
 
     bool vid_is_valid = true;
-    VideoCapture cap(fileString);
-    if (!cap.isOpened()) vid_is_valid = false;
-    Mat frame;
-    cap >> frame;
-    if (frame.empty()) vid_is_valid = false;
 
     if (ext == "avi" || ext == "AVI")
     {
@@ -271,12 +272,12 @@ void mainFrame::on_folderButton_clicked()
         isVideo = true;
         didSelect = true;
     }
-    else if (ext != ""){
+    if (ext != ""){
         didSelect = true;
-    }
-    if (vid_is_valid == false) {
-        isVideo = false;
-        didSelect = true;
+        cap.open(fileString);
+        if (!cap.isOpened()) isVideo = false;
+        cap >> frame;
+        if (frame.empty()) isVideo = false;
     }
     if(!filename.isEmpty() && isVideo == true){
         if (pos != string::npos)
@@ -497,10 +498,15 @@ void mainFrame::xAxisChanged(QCPRange range)
   ui->horizontalScrollBar->setPageStep(qRound(range.size())); // adjust size of scroll bar slider
 }
 
+void mainFrame::updateSlider(int moved, int frameNum) {
+    int delta = (int)(((double)moved/frameNum)*ui->slider->maximum());
+    ui->slider->setValue(delta);
+}
 
 void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<double > > points_y) {
     //Plot
-    qDebug() << "DATA: " << points_x[0][0];
+    //qDebug() << "DATA: " << points_y[0][points_y[0].size()-1];
+
     ui->customPlot->graph(0)->addData(points_x[0], points_y[0]);
     ui->customPlot->graph(1)->addData(points_x[1], points_y[1]);
     ui->customPlot->graph(2)->addData(points_x[2], points_y[2]);
@@ -533,6 +539,8 @@ void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<do
     }
     ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + secondHalfStylesheet);
 
+    emit received();
+
     //if ((int)points_x[0][points_x[0].size()-1] % 10 == 0) ui->slider->setValue(points_x[0][0]);
 }
 
@@ -549,7 +557,7 @@ void mainFrame::on_reportButton_clicked() {
         VideoCapture cap(stringedFile);
         int frameNum = cap.get(CAP_PROP_FRAME_COUNT);
         int fps = round(cap.get(CAP_PROP_FPS));
-        if (frameNum == 0) throw 200;
+        if (frameNum < 1) throw frameNum;
         Mat frame;
         cap >> frame;
         if (frame.empty()) throw 210;
@@ -617,16 +625,9 @@ void mainFrame::on_reportButton_clicked() {
         //Connect slots (slider and QCP)
         vidLabel->setText("Analysing...");
         rObject* r_instance = new rObject;
-        connect(r_instance, &rObject::updateUI, this, updatePlot);
-        connect(r_instance, &rObject::progressCount, this, [&](int moved) {
-            int delta = (int)(((double)moved/frameNum)*ui->slider->maximum());
-            ui->slider->setValue(delta);
-        });
+        connect(r_instance, &rObject::updateUI, this, updatePlot, Qt::QueuedConnection);
+        connect(r_instance, &rObject::progressCount, this, updateSlider, Qt::QueuedConnection);
 
-
-        connect(r_instance, &rObject::error, this, [&]() {
-           throw 221;
-        });
         vid_data.clear();
         vid_data.resize(5);
         vid_data[4].push_back(fps);
@@ -636,19 +637,25 @@ void mainFrame::on_reportButton_clicked() {
         vid_data[2].push_back(0);
         vid_data[3].push_back(0);
 
-        r_instance->rkbcore(stringedFile);
+        //r_instance->rkbcore(stringedFile);
         //Threading attempt
-        /*
-        QThread* thread;
-        r_instance->moveToThread(thread);
-        connect(thread, &QThread::started, r_instance, &rObject::rkbcore);
-        connect(r_instance, &rObject::finished, thread, &QThread::quit);
+        QThread* workerThread = new QThread;
+        r_instance->moveToThread(workerThread);
+        connect(workerThread, &QThread::started, r_instance, [&]{
+            r_instance->rkbcore(stringedFile);
+        });
+        connect(r_instance, &rObject::finished, workerThread, &QThread::quit);
         connect(r_instance, &rObject::finished, r_instance, &rObject::deleteLater);
-        connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-        thread->start();
-        */
+        connect(workerThread, &QThread::finished, workerThread, &QThread::deleteLater);
+
+        QEventLoop loop;
+        workerThread->start();
+        connect(r_instance, &rObject::finished, &loop, &QEventLoop::quit);
+        connect(r_instance, &rObject::error, &loop, &QEventLoop::quit);
+        loop.exec();
 
         //Check to see vid_data has valid arrays of data points
+
         if (vid_data.size() < 4) {
             throw 220;
         }
@@ -668,18 +675,6 @@ void mainFrame::on_reportButton_clicked() {
         ui->backWarning->setEnabled(true);
         ui->forwardWarning->setEnabled(true);
 
-        /*
-        //Set warnings from seizure_frames (vid_data[2] and vid_data[3])
-        int previous = vid_data[2][0] | vid_data[3][0];
-        for (unsigned int i = 1; i < vid_data[2].size(); i++) {
-            int current = vid_data[2][i] | vid_data[3][i];
-            if (current == 1 && previous == 0) {
-                warnings.push_back(i);
-            }
-            previous = current;
-        }
-        ui->label_6->setText(QString::number(warnings.size()));
-        */
         ui->actionSave_Report->setEnabled(true);
         ui->actionPrint_Report->setEnabled(true);
         ui->actionRun_Prophylactic_Tool->setEnabled(true);
@@ -691,16 +686,6 @@ void mainFrame::on_reportButton_clicked() {
         //Set report data to unsaved
         saved = false;
         vidLabel->setText("Done");
-        //Set worker thread
-        //QThread* thread = new QThread;
-        //r_instance->moveToThread(thread);
-        //connect(thread, &QThread::started, r_instance, &rObject::rkbcore);
-        //connect(r_instance, &rObject::finished, this, [&](vector<vector<int > > data) {
-        //});
-        //connect(r_instance, &rObject::finished, thread, &QThread::quit);
-        //connect(r_instance, &rObject::finished, r_instance, &rObject::deleteLater);
-        //connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-        //thread->start();
     }
     catch(int e) {
         vidLabel->setText(tr("Error"));
@@ -1486,6 +1471,7 @@ void mainFrame::no_report_loaded() {
     for (int i = 0; i < ui->customPlot->graphCount(); i++) {
         ui->customPlot->graph(i)->data()->clear();
     }
+    ui->customPlot->replot();
     warnings.clear();
     reset_slider();
     ui->label_6->setText("0");
@@ -1504,13 +1490,13 @@ void mainFrame::no_report_loaded() {
     disconnect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
 
     ui->slider->setEnabled(true);
-    ui->slider->setStyleSheet("QSlider::groove:horizontal { height: 8px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #6d6b6b, stop: 1.0 #6d6b6b); margin: 2px 0; } QSlider::handle:horizontal { background-color: #8f8f8f; border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 5px; }");
+    ui->slider->setStyleSheet("QSlider::groove:horizontal { height: 8px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0,stop:0.000000#6d6b6b,stop:1.0#6d6b6b); margin: 2px 0; } QSlider::handle:horizontal { background-color: #8f8f8f; border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 5px; }");
     ui->horizontalSlider->setEnabled(true);
     ui->horizontalSlider->setStyleSheet("QSlider::groove:horizontal { border: 1px solid #999999; height: 5px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #B1B1B1, stop: 1.0 #c4c4c4); margin: 2px 0; } QSlider::handle:horizontal { background: #8f8f8f; border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 3px; }");
 }
 
 void mainFrame::reset_slider() {
     firstHalfStylesheet = "QSlider::groove:horizontal { height: 8px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0,stop:0.000000#6d6b6b,";
-    secondHalfStylesheet = "stop:1.0#6d6b6b); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 200); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }";
+    secondHalfStylesheet = "stop:1.0#6d6b6b); margin: 2px 0; } QSlider::handle:horizontal { background-color: #8f8f8f; border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 5px; }";
     ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + secondHalfStylesheet);
 }

@@ -35,16 +35,16 @@ private:
     float relative_luminance(float R, float G, float B);
     float saturation(float R, float G, float B);
     float red_saturation(float R, float G, float B);
-    string filename;
 
 public slots:
-    int rkbcore(string filename);
+    void rkbcore(string filename);
 
 signals:
-    void updateUI(vector<QVector<double> >,vector<QVector<double> >);
-    void progressCount(int);
+    void updateUI(vector<QVector<double > >,vector<QVector<double > >);
+    void progressCount(int, int);
     void error();
-
+    void finished();
+    void fileReceived();
 };
 
 

@@ -245,17 +245,19 @@ float rObject::red_saturation(float R, float G, float B) {
     return (red >= 0 ? red : 0);
 }
 
-int rObject::rkbcore(string filename) {
-    int count = 1;
 
+void rObject::rkbcore(string filename) {
+    int count = 1;
     VideoCapture cap(filename);
 
-    if (!cap.isOpened()) emit error();
+    if (!cap.isOpened()) {emit error(); return;};
 
     //Load first frame
     Mat frame;
     cap >> frame;
-    if (frame.empty()) emit error();
+    int frame_count = cap.get(CAP_PROP_FRAME_COUNT);
+    double fps = cap.get(CAP_PROP_FPS);
+    if (frame.empty()) {emit error(); return;};
 
     //Resize first frame
     auto scale = 1.0 / SCALE;
@@ -315,9 +317,9 @@ int rObject::rkbcore(string filename) {
     bool just_red_flashed = false;
 
     //Loop through frames, loading two at a time
-    while(count < cap.get(CAP_PROP_FRAME_COUNT)) {
-        vector<QVector<double> > points_x(4);
-        vector<QVector<double> > points_y(4);
+    while(count < frame_count) {
+        vector<QVector<double > > points_x(4);
+        vector<QVector<double > > points_y(4);
         int seizure_count = 0;
         int red_count = 0;
         int flash_count = 0;
@@ -326,7 +328,7 @@ int rObject::rkbcore(string filename) {
         //Load new frame and resize
         Mat next_frame;
         cap >> next_frame;
-        if (frame.empty() || next_frame.empty()) emit error();
+        if (frame.empty() || next_frame.empty()) {emit error(); return;};
         resize(next_frame, next_frame, Size(), scale, scale);
 
         //Parallel loop through pixels in NxN chunks to get lum. and red sat. values
@@ -393,8 +395,8 @@ int rObject::rkbcore(string filename) {
         });
 
         //Check # of increases (flashes) in diag frames in past 1 second and set flash counts to that
-        if (count >= cap.get(CAP_PROP_FPS)) {
-            for (int i = count-cap.get(CAP_PROP_FPS); i < count-1; i++) {
+        if (count >= fps) {
+            for (int i = count-fps; i < count-1; i++) {
                 if (lum_diag[i] < lum_diag[i+1]) flash_count++;
                 if (red_diag[i] < red_diag[i+1]) red_flash_count++;
             }
@@ -490,11 +492,12 @@ int rObject::rkbcore(string filename) {
             points_y[3].push_back((double)is_red_sat);
             red_seizure_frames.push_back(is_red_sat);
         }
-        cout << "Count: " << count << endl;
+        //cout << "Count: " << count << endl;
         //Plot points and update signals
         emit updateUI(points_x, points_y);
-        if (count % 3 == 0) {
-            emit progressCount(count);
+
+        if (count % 4 == 0) {
+            emit progressCount(count, round(frame_count));
         }
 
         //Set frame to next_frame
@@ -504,6 +507,7 @@ int rObject::rkbcore(string filename) {
         red_first = red_next;
         count++;
     }
+    emit finished();
 }
 
 void rObject::proTool(QString ndir, QString report, int decision, double alpha)

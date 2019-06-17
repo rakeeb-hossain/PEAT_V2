@@ -1,6 +1,9 @@
 #ifndef MAINFRAME_H
 #define MAINFRAME_H
+
 #define QCUSTOMPLOT_USE_OPENGL
+#define QT_FATAL_WARNINGS
+
 #include <QDialog>
 #include <QMediaPlayer>
 #include <QVideoWidget>
@@ -55,8 +58,12 @@ public:
     vector<vector<int > > vid_data;
     bool saved = true;
 
+signals:
+    void received();
+
 public slots:
     void updatePlot(vector<QVector<double > > points_x, vector<QVector<double > > points_y);
+    void updateSlider(int moved, int frameNum);
 
 private slots:
     void on_folderButton_clicked();
