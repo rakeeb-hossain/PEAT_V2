@@ -161,7 +161,6 @@ mainFrame::mainFrame(QWidget *parent) :
         }
         else if (state == QMediaPlayer::PlayingState) {
             vidLabel->setText(tr("Playing"));
-            ui->label_10->setText(QString::number(player->duration()));
         }
     });
     connect(player, &QMediaPlayer::mediaStatusChanged,
@@ -198,8 +197,8 @@ mainFrame::mainFrame(QWidget *parent) :
         else if (status == QMediaPlayer::LoadedMedia) {
             if (media_first_load == true) {
                 player->play();
-                media_first_load = false;
                 ui->label_10->setText(QString::number(player->duration()));
+                media_first_load = false;
             }
         }
         else if (status == QMediaPlayer::NoMedia || status == QMediaPlayer::EndOfMedia) player->stop();
@@ -369,6 +368,7 @@ void mainFrame::on_folderButton_clicked()
 
                     ui->label_8->setText(QString::number(frame_count));
                     ui->label_9->setText(QString::number(fps));
+                    ui->label_10->setText("...");
                     ui->label_11->setText(dimensions);
                     ui->label_12->setText(QString::fromStdString(fourcc_str));
 
@@ -416,26 +416,8 @@ void mainFrame::on_folderButton_clicked()
                     });
 
                     player->setVolume(5);
-                    ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
                     ui->playButton->setStyleSheet("#playButton { background-image: url(:/images/Res/PlayUp.png); border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
-                    ui->pauseButton->setStyleSheet("#pauseButton { background-image: url(:/images/Res/StopUp.png); border-image: url(:/images/Res/StopUp.png); } #pauseButton:hover { border-image: url(:/images/Res/StopDownHilite.png); } #pauseButton:pressed { border-image: url(:/images/Res/StopPressed.png); }");
-                    ui->forwardButton->setStyleSheet("#forwardButton { background-image: url(:/images/Res/FFwdUp.png); border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
-                    ui->reportButton->setStyleSheet("#reportButton { background-image: url(:/images/Res/AnalyzeUp.png); border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
-                    ui->restartButton->setStyleSheet("#restartButton { background-image: url(:/images/Res/RewindUp.png); border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
-
-                    ui->restartButton->setEnabled(true);
-                    ui->rewindButton->setEnabled(true);
                     ui->playButton->setEnabled(true);
-                    ui->pauseButton->setEnabled(true);
-                    ui->forwardButton->setEnabled(true);
-                    ui->reportButton->setEnabled(true);
-
-                    ui->actionGenerate_Report->setEnabled(true);
-                    ui->actionBack_5_Seconds->setEnabled(true);
-                    ui->actionBack_30_Frames->setEnabled(true);
-                    ui->actionForward_5_Seconds->setEnabled(true);
-                    ui->actionForward_30_Frames->setEnabled(true);
-                    ui->actionPlay_Pause->setEnabled(true);
 
                     vidLabel->setText("Ready");
                 }
@@ -513,8 +495,8 @@ void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<do
     ui->customPlot->graph(3)->addData(points_x[3], points_y[3]);
     if ((int)points_x[0][0] % 3 == 0) ui->customPlot->replot();
 
-    vid_data[0].push_back(points_y[0][points_y[0].size()-1]);
-    vid_data[1].push_back(points_y[1][points_y[1].size()-1]);
+    vid_data[0].push_back(points_y[0][points_y[0].size()-1]*10);
+    vid_data[1].push_back(points_y[1][points_y[1].size()-1]*10);
     vid_data[2].push_back(points_y[2][points_y[2].size()-1]);
     vid_data[3].push_back(points_y[3][points_y[3].size()-1]);
 
@@ -568,6 +550,30 @@ void mainFrame::on_reportButton_clicked() {
         ui->horizontalScrollBar->setRange(0, frameNum);
         connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
         connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
+
+        //Disable interaction
+        ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackDisabled.png); border-image: url(:/images/Res/FastBackDisabled.png); }");
+        ui->playButton->setStyleSheet("background-image: url(:/images/Res/PlayDisabled.png); border-image: url(:/images/Res/PlayDisabled.png);");
+        ui->forwardButton->setStyleSheet("background-image: url(:/images/Res/FFwdDisabled.png); border-image: url(:/images/Res/FFwdDisabled.png);");
+        ui->reportButton->setStyleSheet("background-image: url(:/images/Res/AnalyzeDisabled.png); border-image: url(:/images/Res/AnalyzeDisabled.png);");
+        ui->restartButton->setStyleSheet("background-image: url(:/images/Res/RewindDisabled.png); border-image: url(:/images/Res/RewindDisabled.png);");
+        //ui->folderButton->setStyleSheet("background-image: url(:/images/Res/EjectDisabled.png); border-image: url(:/images/Res/EjectDisabled.png);");
+
+        ui->restartButton->setEnabled(false);
+        ui->rewindButton->setEnabled(false);
+        ui->playButton->setEnabled(false);
+        ui->forwardButton->setEnabled(false);
+        ui->reportButton->setEnabled(false);
+        ui->folderButton->setEnabled(false);
+
+        ui->actionGenerate_Report->setEnabled(false);
+        ui->actionBack_5_Seconds->setEnabled(false);
+        ui->actionBack_30_Frames->setEnabled(false);
+        ui->actionForward_5_Seconds->setEnabled(false);
+        ui->actionForward_30_Frames->setEnabled(false);
+        ui->actionPlay_Pause->setEnabled(false);
+        ui->actionOpen_Report->setEnabled(false);
+        ui->actionOpen_Video->setEnabled(false);
 
         //Initialize graphs
         ui->customPlot->addGraph();
@@ -652,10 +658,19 @@ void mainFrame::on_reportButton_clicked() {
         workerThread->start();
         connect(r_instance, &rObject::finished, &loop, &QEventLoop::quit);
         connect(r_instance, &rObject::error, &loop, &QEventLoop::quit);
+        /*
+        // TO-DO: Stopping
+        connect(ui->pauseButton, &QPushButton::clicked, this, &mainFrame::thread_stopped);
+        connect(this, &mainFrame::thread_stopped, [=]{
+            qDebug() << "ZEE";
+            workerThread->terminate();
+            r_instance->~rObject();
+        });
+        connect(this, &mainFrame::thread_stopped, &loop, &QEventLoop::quit);
+        */
         loop.exec();
 
         //Check to see vid_data has valid arrays of data points
-
         if (vid_data.size() < 4) {
             throw 220;
         }
@@ -693,6 +708,30 @@ void mainFrame::on_reportButton_clicked() {
         mb.critical(this, "Error: " + QString::number(e), "There was an error in decoding the video stream. Please try and install the appropriate codecs and try again.");
         mb.setFixedSize(600,400);
     }
+    ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
+    ui->playButton->setStyleSheet("#playButton { background-image: url(:/images/Res/PlayUp.png); border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
+    ui->forwardButton->setStyleSheet("#forwardButton { background-image: url(:/images/Res/FFwdUp.png); border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
+    ui->reportButton->setStyleSheet("#reportButton { background-image: url(:/images/Res/AnalyzeUp.png); border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
+    ui->restartButton->setStyleSheet("#restartButton { background-image: url(:/images/Res/RewindUp.png); border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
+    ui->folderButton->setStyleSheet("#folderButton { background-image: url(:/images/Res/EjectUp.bmp); border-image: url(:/images/Res/EjectUp.bmp); } #folderButton:hover { border-image: url(:/images/Res/EjectDownHilite.png); } #folderButton:pressed { border-image: url(:/images/Res/EjectPressed.png); }");
+
+    ui->restartButton->setEnabled(true);
+    ui->rewindButton->setEnabled(true);
+    ui->playButton->setEnabled(true);
+    ui->forwardButton->setEnabled(true);
+    ui->reportButton->setEnabled(true);
+    ui->folderButton->setEnabled(true);
+
+    ui->actionGenerate_Report->setEnabled(true);
+    ui->actionBack_5_Seconds->setEnabled(true);
+    ui->actionBack_30_Frames->setEnabled(true);
+    ui->actionForward_5_Seconds->setEnabled(true);
+    ui->actionForward_30_Frames->setEnabled(true);
+    ui->actionPlay_Pause->setEnabled(true);
+    ui->actionOpen_Report->setEnabled(true);
+    ui->actionOpen_Video->setEnabled(true);
+    this->repaint();
+    qApp->processEvents();
 }
 
 void mainFrame::openReport()
@@ -766,13 +805,37 @@ void mainFrame::openReport()
                 vid_data_t[4].push_back(fps);
                 vid_data_t[4].push_back(frame_count);
 
-                //READ data from file TO-DO: Write data to QCP
+                //Declare plot data
+                QVector<double> diag_x, diag_y, red_diag_x, red_diag_y, flash_x, flash_y, red_flash_x, red_flash_y;
+                diag_x.push_back(0.0);
+                diag_y.push_back(0.0);
+                red_diag_x.push_back(0.0);
+                red_diag_y.push_back(0.0);
+                flash_x.push_back(0.0);
+                flash_y.push_back(0.0);
+                red_flash_x.push_back(0.0);
+                red_flash_y.push_back(0.0);
+
+                //READ data from file TO-DO: Write data to QCP (BUGGY PLOT)
                 QString header;
                 stream >> header;
                 if (header != "flash_diag") throw 520;
                 for (unsigned int i = 0; i < frame_count; i++) {
                     quint32 n;
                     stream >> n;
+
+                    if (i != 0) {
+                        if (n != diag_y[diag_y.size()-1]*10) {
+                            diag_x.push_back((double)i);
+                            diag_y.push_back(diag_y[diag_y.size()-1]);
+                            diag_x.push_back((double)i);
+                            diag_y.push_back((double)n/10.0);
+                        }
+                        else {
+                            diag_x.push_back((double)i);
+                            diag_y.push_back((double)n/10.0);
+                        }
+                    }
                     vid_data_t[0].push_back((int)n);
                 }
                 stream >> header;
@@ -780,6 +843,18 @@ void mainFrame::openReport()
                 for (unsigned int i = 0; i < frame_count; i++) {
                     quint32 n;
                     stream >> n;
+                    if (i != 0) {
+                        if (n != red_diag_y[red_diag_y.size()-1]*10) {
+                            red_diag_x.push_back((double)i);
+                            red_diag_y.push_back(red_diag_y[red_diag_y.size()-1]);
+                            red_diag_x.push_back((double)i);
+                            red_diag_y.push_back((double)n/10.0);
+                        }
+                        else {
+                            red_diag_x.push_back((double)i);
+                            red_diag_y.push_back((double)n/10.0);
+                        }
+                    }
                     vid_data_t[1].push_back((int)n);
                 }
                 stream >> header;
@@ -787,6 +862,19 @@ void mainFrame::openReport()
                 for (unsigned int i = 0; i < frame_count; i++) {
                     quint32 n;
                     stream >> n;
+
+                    if (i != 0) {
+                        if (n != (int)flash_y[flash_y.size()-1]) {
+                            flash_x.push_back((double)i);
+                            flash_y.push_back(flash_y[flash_y.size()-1]);
+                            flash_x.push_back((double)i);
+                            flash_y.push_back((double)n);
+                        }
+                        else {
+                            flash_x.push_back((double)i);
+                            flash_y.push_back((double)n);
+                        }
+                    }
                     vid_data_t[2].push_back((int)n);
                 }
                 stream >> header;
@@ -794,14 +882,26 @@ void mainFrame::openReport()
                 for (unsigned int i = 0; i < frame_count; i++) {
                     quint32 n;
                     stream >> n;
+
+                    if (i != 0) {
+                        if (n != (int)red_flash_y[red_flash_y.size()-1]) {
+                            red_flash_x.push_back((double)i);
+                            red_flash_y.push_back(red_flash_y[red_flash_y.size()-1]);
+                            red_flash_x.push_back((double)i);
+                            red_flash_y.push_back((double)n);
+                        }
+                        else {
+                            red_flash_x.push_back((double)i);
+                            red_flash_y.push_back((double)n);
+                        }
+                    }
                     vid_data_t[3].push_back((int)n);
                 }
                 qDebug() << "success";
 
 
-                //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
-                //TO-DO: Write data to graph, copy vid_data_t to vid_data, open video file + information
+                //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
                 //Check to see vid_data has valid arrays of data points
                 if (vid_data_t.size() < 4) {
@@ -813,9 +913,44 @@ void mainFrame::openReport()
                 vid_data = vid_data_t;
                 vid_data_t.clear();
 
-                //Load video
+                //Initialize slider and scrollbar
+                ui->horizontalScrollBar->setValue(0);
+                ui->slider->setEnabled(true);
+                ui->slider->setStyleSheet("QSlider::groove:horizontal { height: 8px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0,stop:0.000000#6d6b6b,stop:1.0#6d6b6b); margin: 2px 0; } QSlider::handle:horizontal { background-color: #8f8f8f; border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 5px; }");
+                ui->horizontalSlider->setEnabled(true);
+                ui->horizontalSlider->setStyleSheet("QSlider::groove:horizontal { border: 1px solid #999999; height: 5px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #B1B1B1, stop: 1.0 #c4c4c4); margin: 2px 0; } QSlider::handle:horizontal { background: #8f8f8f; border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 3px; }");
                 ui->horizontalSlider->setEnabled(true);
                 ui->horizontalSlider->setValue(0);
+                ui->horizontalScrollBar->setEnabled(true);
+                ui->horizontalScrollBar->setRange(0, frame_count);
+                connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
+                connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
+
+                //Update slider (NOT WORKING)
+                for (int i = 2; i <= frame_count; i++) {
+                    int previous = vid_data[2][i-2] | vid_data[3][i-2];
+                    int current = vid_data[2][i-1] | vid_data[3][i-1];
+                    double ind = i-1;
+                    firstHalfStylesheet = firstHalfStylesheet.substr(0, firstHalfStylesheet.length()-21);
+                    if (previous == 0 && current == 1) {
+                        warnings.push_back(i-1);
+                        ui->label_6->setText(QString::number(ui->label_6->text().toInt() + 1));
+                        firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*((ind-1)/vid_data[4][1]+0.001))/1000.0) + "#c10707,stop:" + to_string(ind/vid_data[4][1]) + "#c10707,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
+                    }
+                    else if (previous == 1 && current == 0) {
+                        firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*((ind-1)/vid_data[4][1]+0.001))/1000.0) + "#25c660,stop:" + to_string(ind/vid_data[4][1]) + "#25c660,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
+                    }
+                    else if (previous == 0 && current == 0) {
+                        firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*ind/vid_data[4][1])/1000.0) + "#25c660,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
+                    }
+                    else {
+                        firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*ind/vid_data[4][1])/1000.0) + "#c10707,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
+                    }
+                    qDebug() << QString::fromStdString(firstHalfStylesheet);
+                }
+                ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + secondHalfStylesheet);
+
+                //Load video
                 connect(ui->horizontalSlider, &QSlider::valueChanged, this, [&](int moved)
                 {
                     double alpha = 1.0;
@@ -837,6 +972,7 @@ void mainFrame::openReport()
                     ui->customPlot->xAxis->scaleRange(alpha, ui->customPlot->xAxis->range().center());
                     ui->customPlot->replot();
                     lastValue = moved;
+                    qDebug() << lastValue;
                 });
 
                 media_first_load = true;
@@ -893,16 +1029,7 @@ void mainFrame::openReport()
                     ui->timeLabel->setText(hours + ":" + minutes +":" + seconds + ":" + milliseconds);
                 });
 
-
-                //Plot data
-                //Initialize slider and scrollbar
-                ui->horizontalSlider->setEnabled(true);
-                ui->horizontalSlider->setValue(0);
-                ui->horizontalScrollBar->setEnabled(true);
-                ui->horizontalScrollBar->setRange(0, frame_count);
-
                 //Initialize graphs
-                ui->customPlot->xAxis->scaleRange(8.0, ui->customPlot->xAxis->range().center());
                 ui->customPlot->addGraph();
                 ui->customPlot->addGraph();
                 ui->customPlot->addGraph();
@@ -921,7 +1048,6 @@ void mainFrame::openReport()
                 solid.setColor(Qt::black);
                 ui->customPlot->graph(0)->setPen(solid);
                 ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
-                ui->customPlot->graph(0)->addData(0.0, 0.0);
                 //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
                 //Graph 2 style
@@ -931,7 +1057,6 @@ void mainFrame::openReport()
                 solidRed.setColor(Qt::red);
                 ui->customPlot->graph(1)->setPen(solidRed);
                 ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
-                ui->customPlot->graph(1)->addData(0.0, 0.0);
                 //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
                 //Graph 3 style
@@ -941,7 +1066,6 @@ void mainFrame::openReport()
                 dotted.setColor(Qt::white);
                 ui->customPlot->graph(2)->setPen(dotted);
                 ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsLine);
-                ui->customPlot->graph(2)->addData(0.0, 0.0);
                 //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
                 //Graph 4 style
@@ -951,7 +1075,6 @@ void mainFrame::openReport()
                 dottedRed.setColor(Qt::red);
                 ui->customPlot->graph(3)->setPen(dottedRed);
                 ui->customPlot->graph(3)->setLineStyle(QCPGraph::lsLine);
-                ui->customPlot->graph(3)->addData(0.0, 0.0);
                 ui->customPlot->replot();
                 for (int i = 0; i < ui->customPlot->graphCount(); i++) {
                     ui->customPlot->graph(i)->data()->clear();
@@ -959,40 +1082,28 @@ void mainFrame::openReport()
                 reset_slider();
 
                 //Plot data HERE
+                ui->customPlot->graph(0)->setData(diag_x, diag_y);
+                ui->customPlot->graph(1)->setData(red_diag_x, red_diag_y);
+                ui->customPlot->graph(2)->setData(flash_x, flash_y);
+                ui->customPlot->graph(3)->setData(red_flash_x, red_flash_y);
 
                 ui->customPlot->graph(0)->addData(frame_count, 0);
                 ui->customPlot->graph(1)->addData(frame_count, 0);
                 ui->customPlot->graph(2)->addData(frame_count, 0);
                 ui->customPlot->graph(3)->addData(frame_count, 0);
 
+                ui->customPlot->replot();
+
                 ui->label_8->setText(QString::number(frame_count));
                 ui->label_9->setText(QString::number(fps));
-                ui->label_10->setText(QString::number(player->duration()));
+                ui->label_10->setText("...");
                 ui->label_11->setText(dimensions);
                 ui->label_12->setText(QString::fromStdString(fourcc_str));
                 ui->label_13->setText(date);
 
                 player->setVolume(5);
-                ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
                 ui->playButton->setStyleSheet("#playButton { background-image: url(:/images/Res/PlayUp.png); border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
-                ui->pauseButton->setStyleSheet("#pauseButton { background-image: url(:/images/Res/StopUp.png); border-image: url(:/images/Res/StopUp.png); } #pauseButton:hover { border-image: url(:/images/Res/StopDownHilite.png); } #pauseButton:pressed { border-image: url(:/images/Res/StopPressed.png); }");
-                ui->forwardButton->setStyleSheet("#forwardButton { background-image: url(:/images/Res/FFwdUp.png); border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
-                ui->reportButton->setStyleSheet("#reportButton { background-image: url(:/images/Res/AnalyzeUp.png); border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
-                ui->restartButton->setStyleSheet("#restartButton { background-image: url(:/images/Res/RewindUp.png); border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
-
-                ui->restartButton->setEnabled(true);
-                ui->rewindButton->setEnabled(true);
                 ui->playButton->setEnabled(true);
-                ui->pauseButton->setEnabled(true);
-                ui->forwardButton->setEnabled(true);
-                ui->reportButton->setEnabled(true);
-
-                ui->actionGenerate_Report->setEnabled(true);
-                ui->actionBack_5_Seconds->setEnabled(true);
-                ui->actionBack_30_Frames->setEnabled(true);
-                ui->actionForward_5_Seconds->setEnabled(true);
-                ui->actionForward_30_Frames->setEnabled(true);
-                ui->actionPlay_Pause->setEnabled(true);
 
                 // Load warnings
                 ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
@@ -1460,8 +1571,10 @@ bool mainFrame::on_actionSave_Report_triggered()
             QMessageBox mb;
             mb.critical(this, "Error: " + QString::number(e), error);
             mb.setFixedSize(600,400);
+            vidLabel->setText("Error");
         }
     }
+    vidLabel->setText("Saved");
     return saved;
 }
 

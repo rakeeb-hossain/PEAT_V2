@@ -89,13 +89,6 @@ void rkbProTool::on_radioButton_clicked()
 void rkbProTool::on_pushButton_clicked()
 {
     QString folder = QFileDialog::getExistingDirectory(this, tr("Open Directory"), "\\", QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-    ui->lineEdit->setText(folder);
-}
-
-void rkbProTool::on_pushButton_2_clicked()
-{
-    QString report = QFileDialog::getOpenFileName(this, "Open a report file", "", ".txt (*.*)");
-    ui->lineEdit_2->setText(report);
 }
 
 void rkbProTool::on_buttonBox_accepted()

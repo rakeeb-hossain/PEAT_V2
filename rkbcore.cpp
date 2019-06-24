@@ -247,6 +247,7 @@ float rObject::red_saturation(float R, float G, float B) {
 
 
 void rObject::rkbcore(string filename) {
+    mainFrame *main_instance = new mainFrame;
     int count = 1;
     VideoCapture cap(filename);
 
@@ -258,6 +259,11 @@ void rObject::rkbcore(string filename) {
     int frame_count = cap.get(CAP_PROP_FRAME_COUNT);
     double fps = cap.get(CAP_PROP_FPS);
     if (frame.empty()) {emit error(); return;};
+
+    // TO-DO: Stopping
+    connect(main_instance, &mainFrame::thread_stopped, this, [=]{
+        qDebug() << "STOP";
+    });
 
     //Resize first frame
     auto scale = 1.0 / SCALE;

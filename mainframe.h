@@ -60,6 +60,7 @@ public:
 
 signals:
     void received();
+    void thread_stopped();
 
 public slots:
     void updatePlot(vector<QVector<double > > points_x, vector<QVector<double > > points_y);
