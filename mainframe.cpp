@@ -1205,9 +1205,16 @@ void mainFrame::on_backWarning_clicked()
 
 void mainFrame::openProTool()
 {
-    rkbprotool = new rkbProTool(this);
+    if (vid_data.size() < 5) {
+        QMessageBox::critical(this, "Error", "A valid report was not loaded.");
+        return;
+    }
+    else if (vid_data[0].size() != vid_data[4][1]) {
+        QMessageBox::critical(this, "Error", "A valid report was not loaded.");
+        return;
+    }
+    rkbprotool = new rkbProTool(vid_data, ui->label->text(), this);
     rkbprotool->exec();
-
 }
 
 void mainFrame::on_restartButton_clicked()

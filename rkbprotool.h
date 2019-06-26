@@ -2,6 +2,7 @@
 #define RKBPROTOOL_H
 
 #include <QDialog>
+#include <QThread>
 
 namespace Ui {
 class rkbProTool;
@@ -10,13 +11,16 @@ class rkbProTool;
 class rkbProTool : public QDialog
 {
     Q_OBJECT
+    QThread workerThread;
 
 public:
-    explicit rkbProTool(QWidget *parent = 0);
+    explicit rkbProTool(std::vector<std::vector<int > > vid_info, QString vid_file, QWidget *parent = 0);
     ~rkbProTool();
     int decision;
-    QString folder;
+    QString newFile;
     QString report;
+    std::vector<std::vector<int > > vidData;
+    QString vidFile;
 
 private slots:
     void on_radioButton_2_clicked();
@@ -31,10 +35,9 @@ private slots:
 
     void on_pushButton_clicked();
 
-    void on_pushButton_2_clicked();
-
 private:
     Ui::rkbProTool *ui;
+    QTimer *timer;
 };
 
 #endif // RKBPROTOOL_H

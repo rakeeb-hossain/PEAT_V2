@@ -13,6 +13,9 @@ class waitDialog : public QDialog
 
 public:
     explicit waitDialog(QWidget *parent = 0);
+    void setProgressBarValue(int value);
+    void setProgressBarRange(int min, int max);
+    void setImg(QPixmap img);
     ~waitDialog();
 
 private:

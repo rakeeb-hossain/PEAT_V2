@@ -24,13 +24,13 @@ class rObject : public QObject
 public:
     explicit rObject(QObject *parent = Q_NULLPTR);
     ~rObject();
-    void proTool(QString dir, QString report, int decision, double alpha);
+    QString proTool(vector<vector<int> > vidData, QString dir, QString video, int decision, double alpha);
 
 private:
     void makeFrameGradient(int lowerBound, int upperBound, string gradientFolder, string vidDir);
-    void lowerContrast(int lowerBound, int upperBound, string gradientFolder, double alpha);
-    void overlayFilter(int lowerBound, int upperBound, string gradientFolder, double alpha);
-    void blurFilter(int lowerBound, int upperBound, string gradientFolder, double alpha);
+    Mat lowerContrast(Mat frame, double alpha);
+    Mat overlayFilter(Mat frame, double alpha);
+    Mat blurFilter(Mat frame, double alpha);
     void writeVideo(QString ndir, QString nreport);
     float relative_luminance(float R, float G, float B);
     float saturation(float R, float G, float B);

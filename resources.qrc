@@ -153,5 +153,6 @@
         <file>Res/HardingFPA.ico</file>
         <file>Res/cage.png</file>
         <file>Res/logoLARGE.bmp</file>
+        <file>Res/pkmngif.gif</file>
     </qresource>
 </RCC>
