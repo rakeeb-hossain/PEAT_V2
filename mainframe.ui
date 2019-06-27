@@ -19,7 +19,7 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">color: black;</string>
+   <string notr="true"/>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QCustomPlot" name="customPlot" native="true">
@@ -52,11 +52,17 @@ border-width: 1px;
      <property name="autoFillBackground">
       <bool>false</bool>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:black;</string>
+     </property>
      <property name="frameShadow">
       <enum>QFrame::Sunken</enum>
      </property>
+     <property name="lineWidth">
+      <number>3</number>
+     </property>
      <property name="midLineWidth">
-      <number>0</number>
+      <number>3</number>
      </property>
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -258,33 +264,6 @@ border-radius: 10px;</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>140</y>
-      <width>251</width>
-      <height>91</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Segoe UI</family>
-     </font>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="pixmap">
-     <pixmap resource="resources.qrc">:/images/Res/GraphLegend[OLD].bmp</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -923,6 +902,114 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
      <string/>
     </property>
    </widget>
+   <widget class="QFrame" name="frame_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>140</y>
+      <width>251</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(70, 70, 70);</string>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::Panel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Sunken</enum>
+    </property>
+    <widget class="QLabel" name="label_3">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>2</y>
+       <width>191</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Luminance flash:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_4">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>20</y>
+       <width>191</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Red flash:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_15">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>50</y>
+       <width>191</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Lum flash diag:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_16">
+     <property name="geometry">
+      <rect>
+       <x>30</x>
+       <y>68</y>
+       <width>191</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Luminance flash:</string>
+     </property>
+    </widget>
+    <widget class="Line" name="line_3">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>43</y>
+       <width>251</width>
+       <height>3</height>
+      </rect>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -968,14 +1055,15 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
      <addaction name="actionPale"/>
      <addaction name="actionWhite"/>
     </widget>
+    <addaction name="actionPlay_Pause"/>
     <addaction name="actionForward_5_Seconds"/>
     <addaction name="actionBack_5_Seconds"/>
-    <addaction name="actionPlay_Pause"/>
     <addaction name="separator"/>
     <addaction name="actionForward_30_Frames"/>
     <addaction name="actionBack_30_Frames"/>
     <addaction name="separator"/>
     <addaction name="menuChange_Paper_Colour"/>
+    <addaction name="separator"/>
     <addaction name="actionInvert_UI_Colour"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -1014,7 +1102,7 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
   </action>
   <action name="actionQuit">
    <property name="text">
-    <string>Quit...                  Alt+F4</string>
+    <string>Quit...</string>
    </property>
    <property name="font">
     <font>
@@ -1053,7 +1141,7 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Step Forward...                   L</string>
+    <string>Forward 5 seconds...</string>
    </property>
    <property name="font">
     <font>
@@ -1066,7 +1154,7 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Step Back...                         J</string>
+    <string>Back 5 seconds...</string>
    </property>
    <property name="font">
     <font>
@@ -1079,7 +1167,7 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Play/Pause...                       Space</string>
+    <string>Play/Pause...</string>
    </property>
    <property name="font">
     <font>
@@ -1092,7 +1180,7 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Forward 30 Frames...         Right</string>
+    <string>Forward 1 Frame...</string>
    </property>
    <property name="font">
     <font>
@@ -1105,7 +1193,7 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Back 30 Frames...               Left</string>
+    <string>Back 1 Frame...</string>
    </property>
    <property name="font">
     <font>

@@ -39,7 +39,7 @@ mainFrame::mainFrame(QWidget *parent) :
 
     connect(ui->actionBack_5_Seconds, &QAction::triggered, this, &mainFrame::skipLeftFunc);
     connect(ui->actionForward_5_Seconds, &QAction::triggered, this, &mainFrame::skipRightFunc);
-    connect(ui->actionPlay_Pause, &QAction::triggered, this,& mainFrame::playPauseFunc);
+    connect(ui->actionPlay_Pause, &QAction::triggered, this, &mainFrame::playPauseFunc);
     connect(ui->actionForward_30_Frames, &QAction::triggered, this, &mainFrame::skipFrameRightFunc);
     connect(ui->actionBack_30_Frames, &QAction::triggered, this, &mainFrame::skipFrameLeftFunc);
 
@@ -154,6 +154,7 @@ mainFrame::mainFrame(QWidget *parent) :
             ui->actionPlay_Pause->setEnabled(false);
 
             ui->label_14->setVisible(true);
+            ui->slider->setValue(0);
             vidLabel->setText(tr("Stopped"));
         }
         else if (state == QMediaPlayer::PausedState){
@@ -213,6 +214,20 @@ mainFrame::mainFrame(QWidget *parent) :
     descriptionLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
     ui->statusbar->addPermanentWidget(vidLabel, 1);
     ui->statusbar->addPermanentWidget(descriptionLabel, 6);
+
+    //Create shortcuts
+    ui->actionOpen_Video->setShortcut(Qt::Key_V | Qt::CTRL);
+    ui->actionOpen_Report->setShortcut(Qt::Key_R | Qt::CTRL);
+    ui->actionSave_Report->setShortcut(Qt::Key_S | Qt::CTRL);
+    ui->actionPrint_Report->setShortcut(Qt::Key_P | Qt::CTRL);
+    ui->actionRun_Prophylactic_Tool->setShortcut(Qt::Key_X | Qt::CTRL);
+    ui->actionGenerate_Report->setShortcut(Qt::Key_G | Qt::CTRL);
+    ui->actionPlay_Pause->setShortcut(Qt::Key_Space);
+    ui->actionForward_5_Seconds->setShortcut(Qt::Key_L);
+    ui->actionBack_5_Seconds->setShortcut(Qt::Key_J);
+    ui->actionForward_30_Frames->setShortcut(Qt::Key_Right);
+    ui->actionBack_30_Frames->setShortcut(Qt::Key_Left);
+
 }
 
 mainFrame::~mainFrame()
@@ -1226,16 +1241,17 @@ void mainFrame::keyPressEvent(QKeyEvent * event)
 {
     if(event->key() == Qt::Key_Right)
     {
-        qint64 position = player->position();
-        position += 1000;
-        player->setPosition(position);
+        double f_count = ui->label_8->text().toDouble();
+        double position = player->position() / player->duration();
+        position += (1.0/f_count);
+        player->setPosition(position*player->duration());
     }
     if(event->key() == Qt::Key_Left)
     {
-        qDebug() << "thx";
-        qint64 position = player->position();
-        position -= 1000;
-        player->setPosition(position);
+        double f_count = ui->label_8->text().toDouble();
+        double position = player->position() / player->duration();
+        position -= (1.0/f_count);
+        player->setPosition(position*player->duration());
     }
     if(event->key() == Qt::Key_L)
     {
@@ -1253,12 +1269,10 @@ void mainFrame::keyPressEvent(QKeyEvent * event)
     {
         if (player->state() == 1)
         {
-            qDebug() << "playing";
             player->pause();
         }
-        else if (player->state() == 2)
+        else if (player->state() == 2 || player->state() == 0)
         {
-            qDebug() << "paused ";
             player->play();
         }
     }
@@ -1267,13 +1281,13 @@ void mainFrame::keyPressEvent(QKeyEvent * event)
 void mainFrame::skipLeftFunc()
 {
     qint64 position = player->position();
-    position += 5000;
+    position -= 5000;
     player->setPosition(position);
 }
 void mainFrame::skipRightFunc()
 {
     qint64 position = player->position();
-    position -= 5000;
+    position += 5000;
     player->setPosition(position);
 }
 void mainFrame::playPauseFunc()

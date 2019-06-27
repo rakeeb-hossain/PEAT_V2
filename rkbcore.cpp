@@ -31,8 +31,13 @@ const int CHUNK = 32;
 const int SCALE = 4;
 const int N = CHUNK/SCALE;
 const int AREA = N*N;
-const float ST = 0.85;
+const double ST = 0.80;
 const int RTT = 20;
+const double FT = 0.10;
+const double DT = 0.80;
+const double LT = 0.10;
+const double ATH = 0.10; // High sensitivity = 0.05, low = 0.10
+const double RTH = 0.10;
 
 rObject::rObject(QObject *parent) : QObject(parent) {
 }
@@ -123,15 +128,27 @@ Mat rObject::lowerContrast(Mat frame, double alpha)
 {
     Mat updatedFrame = Mat::zeros( frame.size(), frame.type() );
 
+
+    for(int j = 0; j < frame.rows; j++)
+    {
+        const Vec3b* framei = frame.ptr<Vec3b>(j);
+        for(int i = 0; i < frame.cols; i++) {
+            updatedFrame.at<Vec3b>(j,i)[0] = saturate_cast<uchar>((1.0 - alpha)*(frame.at<Vec3b>(j,i)[0]) + 0);
+            updatedFrame.at<Vec3b>(j,i)[1] = saturate_cast<uchar>((1.0 - alpha)*(frame.at<Vec3b>(j,i)[1]) + 0);
+            updatedFrame.at<Vec3b>(j,i)[2] = saturate_cast<uchar>((1.0 - alpha)*(frame.at<Vec3b>(j,i)[2]) + 0);
+        }
+    }
+    /*
     parallel_for_(Range(0, frame.rows*frame.cols), [&](const Range& range) {
         for (int r = range.start; r < range.end; r++) {
-            int x = r % frame.cols;
-            int y = r / frame.cols;
+            int x = r % frame.rows;
+            int y = r / frame.rows;
             updatedFrame.at<Vec3b>(x,y)[0] = saturate_cast<uchar>((1.0 - alpha)*(frame.at<Vec3b>(x,y)[0]) + 0);
             updatedFrame.at<Vec3b>(x,y)[1] = saturate_cast<uchar>((1.0 - alpha)*(frame.at<Vec3b>(x,y)[1]) + 0);
             updatedFrame.at<Vec3b>(x,y)[2] = saturate_cast<uchar>((1.0 - alpha)*(frame.at<Vec3b>(x,y)[2]) + 0);
         }
     });
+    */
     return updatedFrame;
 }
 
@@ -140,7 +157,7 @@ Mat rObject::overlayFilter(Mat frame, double alpha)
     qDebug() << "INT";
     Mat overlay;
     frame.copyTo(overlay);
-    cv::rectangle(overlay, cv::Rect(0, 0, frame.cols, frame.rows), cv::Scalar(50, 50, 50), -1);
+    cv::rectangle(overlay, cv::Rect(0, 0, frame.cols, frame.rows), cv::Scalar(20, 20, 20), -1);
     cv::addWeighted(overlay, alpha, frame, 1.0 - alpha, 0.0, frame);
     return frame;
 }
@@ -351,12 +368,12 @@ void rObject::rkbcore(string filename) {
                 red_next[r] = (sat_next[r] != 0 ? red_next[r] / (float) AREA : 0);
 
                 if (just_flashed == false) {
-                    if (lum_next[r] - lum_first[r] > 0.10 && lum_first[r] < 0.80) {
+                    if (lum_next[r] - lum_first[r] > FT && lum_first[r] < DT) {
                         seizure_count++;
                     }
                 }
                 else {
-                    if (lum_first[r] - lum_next[r] > 0.10 && lum_next[r] < 0.80) {
+                    if (lum_first[r] - lum_next[r] > FT && lum_next[r] < DT) {
                         seizure_count++;
                     }
                 }
@@ -397,7 +414,7 @@ void rObject::rkbcore(string filename) {
         }
 
         //Increment flash counts if a valid flash occurs in the transition to the next frame
-        if (seizure_count*AREA >= 0.03*frame.cols*frame.rows) {
+        if (seizure_count*AREA >= ATH*frame.cols*frame.rows) {
             if (just_flashed == false) {
                 flash_count++;
                 just_flashed = true;
@@ -407,7 +424,7 @@ void rObject::rkbcore(string filename) {
             }
         }
 
-        if (red_count*AREA >= 0.03*frame.cols*frame.rows) {
+        if (red_count*AREA >= RTH*frame.cols*frame.rows) {
             if (just_red_flashed == false) {
                 red_flash_count++;
                 just_red_flashed = true;
@@ -560,10 +577,12 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
             {
                 Mat new_frame = overlayFilter(frame, alpha);
                 video.write(new_frame);
+                cvtColor(new_frame, new_frame, CV_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) new_frame.data, new_frame.cols, new_frame.rows, new_frame.step, QImage::Format_RGB888)));
             }
             else {
                 video.write(frame);
+                cvtColor(frame, frame, CV_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
             }
             progress->setProgressBarValue(i+1);
@@ -571,6 +590,8 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
         }
     }
     else if (decision == 3){
+        QTime time;
+        time.start();
         for (unsigned int i = 0; i < vidData[2].size(); i++)
         {
             if (frame.empty()) {
@@ -580,15 +601,18 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
             {
                 Mat new_frame = lowerContrast(frame, alpha);
                 video.write(new_frame);
+                cvtColor(new_frame, new_frame, CV_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) new_frame.data, new_frame.cols, new_frame.rows, new_frame.step, QImage::Format_RGB888)));
             }
             else {
                 video.write(frame);
+                cvtColor(frame, frame, CV_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
             }
             progress->setProgressBarValue(i+1);
             if (i != vidData[2].size()-1) cap >> frame;
         }
+        qDebug() << time.elapsed();
     }
     else if (decision == 4){
         for (unsigned int i = 0; i < vidData[2].size(); i++)
@@ -600,10 +624,12 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
             {
                 Mat new_frame = blurFilter(frame, alpha);
                 video.write(new_frame);
+                cvtColor(new_frame, new_frame, CV_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) new_frame.data, new_frame.cols, new_frame.rows, new_frame.step, QImage::Format_RGB888)));
             }
             else {
                 video.write(frame);
+                cvtColor(frame, frame, CV_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
             }
             progress->setProgressBarValue(i+1);

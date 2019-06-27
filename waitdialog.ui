@@ -43,9 +43,21 @@
     <rect>
      <x>30</x>
      <y>220</y>
-     <width>331</width>
+     <width>341</width>
      <height>23</height>
     </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QProgressBar {
+	text-align: center;
+	border: 1px solid black;
+    border-radius: 5px;
+}
+
+QProgressBar::chunk {
+    background-color:#083A75;
+}
+</string>
    </property>
    <property name="value">
     <number>0</number>

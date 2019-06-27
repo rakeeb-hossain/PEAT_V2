@@ -16,7 +16,7 @@ class rkbProTool : public QDialog
 public:
     explicit rkbProTool(std::vector<std::vector<int > > vid_info, QString vid_file, QWidget *parent = 0);
     ~rkbProTool();
-    int decision;
+    int decision = 0;
     QString newFile;
     QString report;
     std::vector<std::vector<int > > vidData;
