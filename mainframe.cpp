@@ -27,8 +27,9 @@ mainFrame::mainFrame(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("UW Trace Center Photosensitive Epilepsy Analysis Tool (PEAT)");
     setWindowFlags(Qt::Widget | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
-    this->resize(QSize(870,591));
-    this->setFixedSize(QSize(870,591));
+    this->resize(QSize(863,585));
+    this->setFixedSize(QSize(863,585));
+
 
     //Connect toolbar actions
     connect(ui->actionOpen_Video, &QAction::triggered, this, &mainFrame::on_folderButton_clicked);
@@ -67,6 +68,7 @@ mainFrame::mainFrame(QWidget *parent) :
     section->setClipToAxisRect(true); // is by default true already, but this will change in QCP 2.0.0
     section->topLeft->setCoords(0, 1.0); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
     section->bottomRight->setCoords(100000, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
+
     //section->setBrush(QBrush(QColor(200,200,200,255)));
     section->setPen(Qt::NoPen);
     QCPItemLine *line = new QCPItemLine(ui->customPlot);
@@ -379,7 +381,7 @@ void mainFrame::on_folderButton_clicked()
                     ui->videoWidget_2->show();
                     ui->label_14->setVisible(false);
                     ui->label->setText(filename);
-                    ui->timeLabel->setStyleSheet("background-color:rgb(210, 255, 189); border-style:solid; border-color:black; border-width:1px;");
+                    ui->timeLabel->setStyleSheet("background-color:#EBFFCF; border-style:solid; border-radius:5px; border-color:#406D00; border-width:2px; color: #406D00;");
 
                     ui->label_8->setText(QString::number(frame_count));
                     ui->label_9->setText(QString::number(fps));

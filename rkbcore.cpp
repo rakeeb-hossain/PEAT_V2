@@ -420,6 +420,7 @@ void rObject::rkbcore(string filename) {
                 just_flashed = true;
             }
             else {
+                //flash_count++;
                 just_flashed = false;
             }
         }
@@ -430,6 +431,7 @@ void rObject::rkbcore(string filename) {
                 just_red_flashed = true;
             }
             else {
+                //red_flash_count++;
                 just_red_flashed = false;
             }
         }
