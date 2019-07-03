@@ -147,6 +147,14 @@ private slots:
 
     void plotTooltip(QMouseEvent *event);
 
+    void contextMenuRequest(QPoint pos);
+
+    void hideSelectedGraph();
+
+    void hideDiagGraphs();
+
+    void hideFlashGraphs();
+
 private:
     Ui::mainFrame *ui;
 

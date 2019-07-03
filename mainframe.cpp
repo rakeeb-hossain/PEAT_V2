@@ -315,7 +315,10 @@ mainFrame::mainFrame(QWidget *parent) :
     cautionLayer->setPen(Qt::NoPen);
 
     //Setup x-axis
-    
+
+    //Graph interactions
+    ui->customPlot->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenuRequest(QPoint)));
 }
 
 mainFrame::~mainFrame()
@@ -1695,9 +1698,18 @@ void mainFrame::on_actionPrint_Report_triggered()
 
     QPrinter printer;
 
-    printer.setPrinterName("Printer name");
-    QPrintDialog dialog(&printer, this);
-    if (dialog.exec() == QDialog::Rejected) return;
+    QPrintDialog *dialog = new QPrintDialog(&printer);
+    dialog->setWindowTitle("Print Document");
+
+    if (dialog->exec() != QDialog::Accepted)
+        return -1;
+
+    QPainter painter;
+    painter.begin(&printer);
+
+    painter.drawText(100, 100, 500, 500, Qt::AlignLCenter|Qt::AlignTop, text);
+
+    painter.end();
 }
 
 bool mainFrame::on_actionSave_Report_triggered()
@@ -1922,3 +1934,45 @@ void mainFrame::plotTooltip(QMouseEvent *event) {
         }
     }
 }
+
+// ADDED
+void mainFrame::contextMenuRequest(QPoint pos)
+{
+  QMenu *menu = new QMenu(this);
+  menu->setAttribute(Qt::WA_DeleteOnClose);
+   
+  if (ui->customPlot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
+  {
+    menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignLeft));
+    menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignHCenter));
+    menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignRight));
+    menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignRight));
+    menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignLeft));
+  } else  // general context menu on graphs requested
+  {
+      if (ui->customPlot->selectedGraphs().size() > 0)
+          menu->addAction("Hide selected plot", this, SLOT(hideSelectedGraph()));
+      if (ui->customPlot->graphCount() > 0) {
+          menu->addAction("Hide diagnostic plot", this, SLOT(hideDiagGraphs()));
+          menu->addAction("Hide flash plot", this, SLOT(hideFlashGraphs()));
+      }
+  }
+   
+  menu->popup(ui->customPlot->mapToGlobal(pos));
+}
+
+void mainFrame::hideSelectedGraph() {
+
+}
+
+void mainFrame::hideDiagGraphs() {
+
+}
+
+void mainFrame::hideFlashGraphs() {
+
+}
+
+// ADD Menubar actions to hide graphs (just simple functions), make graphs visible again, complete context menu functions, 
+// make plot labels nice, finish printing, reimplement QCPAxisTicker to get time labels from frames and edit subticks, fix reloading
+// of plots, resizing, final testing!

@@ -5740,6 +5740,7 @@ QVector<QString> QCPAxisTicker::createLabelVector(const QVector<double> &ticks, 
   QVector<QString> result;
   result.reserve(ticks.size());
   for (int i=0; i<ticks.size(); ++i)
+    // RKB: Reimplement QCPAxisTicker and convert i to a time?
     result.append(getTickLabel(ticks.at(i), locale, formatChar, precision));
   return result;
 }
