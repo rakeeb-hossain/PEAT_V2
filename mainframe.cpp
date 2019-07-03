@@ -70,7 +70,7 @@ mainFrame::mainFrame(QWidget *parent) :
     section->topLeft->setCoords(0, 1.0); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
     section->bottomRight->setCoords(100000, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
 
-    //section->setBrush(QBrush(QColor(200,200,200,255)));
+    section->setBrush(QBrush(QColor(200,200,200,255)));
     section->setPen(Qt::NoPen);
     QCPItemLine *line = new QCPItemLine(ui->customPlot);
     line->start->setCoords(0 , 0.25);
@@ -270,20 +270,38 @@ mainFrame::mainFrame(QWidget *parent) :
 
     //Legend
     QFont legendFont = font();
-    legendFont.setPointSize(10);
+    legendFont.setPointSize(8);
     ui->customPlot->legend->setBrush(QBrush(QColor(115,115,115, 115)));
     ui->customPlot->legend->setFont(legendFont);
     ui->customPlot->legend->setSelectedFont(legendFont);
     ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
 
-    /*Tracer
-    QCPItemTracer *phaseTracer = new QCPItemTracer(ui->customPlot);
-    phaseTracer->setGraph(ui->customPlot->graph(0));
+    phaseTracer = new QCPItemTracer(ui->customPlot);
     phaseTracer->setInterpolating(true);
     phaseTracer->setStyle(QCPItemTracer::tsCircle);
-    phaseTracer->setPen(QPen(Qt::red));
-    phaseTracer->setBrush(Qt::red);
+    phaseTracer->setPen(QPen(QColor(8,54,117)));
+    phaseTracer->setBrush(QColor(8,54,117));
     phaseTracer->setSize(7);
+    phaseTracer->setVisible(false);
+
+    // Caution layer
+    /*
+    cautionLayer = new QCPItemRect(ui->customPlot);
+    ui->customPlot->addLayer("cautionLayer", ui->customPlot->layer("grid"), QCustomPlot::limBelow);
+    cautionLayer->setLayer("cautionLayer");
+    cautionLayer->topLeft->setTypeX(QCPItemPosition::ptPlotCoords);
+    cautionLayer->topLeft->setTypeY(QCPItemPosition::ptAxisRectRatio);
+    cautionLayer->topLeft->setAxes(ui->customPlot->xAxis, ui->customPlot->yAxis);
+    cautionLayer->topLeft->setAxisRect(ui->customPlot->axisRect());
+    cautionLayer->bottomRight->setTypeX(QCPItemPosition::ptPlotCoords);
+    cautionLayer->bottomRight->setTypeY(QCPItemPosition::ptAxisRectRatio);
+    cautionLayer->bottomRight->setAxes(ui->customPlot->xAxis, ui->customPlot->yAxis);
+    cautionLayer->bottomRight->setAxisRect(ui->customPlot->axisRect());
+    cautionLayer->setClipToAxisRect(true); // is by default true already, but this will change in QCP 2.0.0
+    cautionLayer->topLeft->setCoords(-1000, 0.35); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
+    cautionLayer->bottomRight->setCoords(100000, 0.20); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
+    cautionLayer->setBrush(QBrush(QColor(150,150,150,150)));
+    cautionLayer->setPen(Qt::NoPen);
     */
 
     //Specify subticks
@@ -662,6 +680,10 @@ void mainFrame::on_reportButton_clicked() {
         ui->customPlot->addGraph();
         ui->customPlot->addGraph();
         ui->customPlot->addGraph();
+        ui->customPlot->graph(0)->setName("Luminance flash diag.");
+        ui->customPlot->graph(1)->setName("Red flash diag.");
+        ui->customPlot->graph(2)->setName("Luminance flash");
+        ui->customPlot->graph(3)->setName("Red flash");
 
         ui->customPlot->yAxis->setRange(0.0, 1.0);
         ui->customPlot->xAxis->setLabel("Frame Number");
@@ -1162,6 +1184,10 @@ void mainFrame::openReport()
                 ui->customPlot->addGraph();
                 ui->customPlot->addGraph();
                 ui->customPlot->addGraph();
+                ui->customPlot->graph(0)->setName("Luminance flash diag.");
+                ui->customPlot->graph(1)->setName("Red flash diag.");
+                ui->customPlot->graph(2)->setName("Luminance flash");
+                ui->customPlot->graph(3)->setName("Red flash");
 
                 ui->customPlot->yAxis->setRange(0.0, 1.0);
                 ui->customPlot->xAxis->setLabel("Frame Number");
@@ -1805,21 +1831,71 @@ void mainFrame::plotTooltip(QMouseEvent *event) {
     if (ui->customPlot->graphCount() == 4) {
         int x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
         //descriptionLabel->setText(QString::number(x) + ", " + QString::number(y));
-        if (x > nFrame) x = nFrame;
-        else if (x < 0) x = 0;
-        double y = ui->customPlot->xAxis->pixelToCoord(event->pos().y());
-        /*
-        QSharedPointer<QCPGraphDataContainer> dataMap1 = ui->customPlot->graph(0)->data();
-        QSharedPointer<QCPGraphDataContainer> dataMap2 = ui->customPlot->graph(1)->data();
-        QSharedPointer<QCPGraphDataContainer> dataMap3 = ui->customPlot->graph(2)->data();
-        QSharedPointer<QCPGraphDataContainer> dataMap4 = ui->customPlot->graph(3)->data();
-        */
+        if (x <= nFrame && x >= 0) {
+            double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
+            /*
+            QSharedPointer<QCPGraphDataContainer> dataMap1 = ui->customPlot->graph(0)->data();
+            QSharedPointer<QCPGraphDataContainer> dataMap2 = ui->customPlot->graph(1)->data();
+            QSharedPointer<QCPGraphDataContainer> dataMap3 = ui->customPlot->graph(2)->data();
+            QSharedPointer<QCPGraphDataContainer> dataMap4 = ui->customPlot->graph(3)->data();
+            */
 
-        // TO-DO
-        QVector<QCPGraphDataContainer::const_iterator> ptrs = {ui->customPlot->graph(0)->data().data()->findBegin(x), ui->customPlot->graph(1)->data().data()->findBegin(x), ui->customPlot->graph(2)->data().data()->findBegin(x), ui->customPlot->graph(3)->data().data()->findBegin(x)};
-        QVector<double> vals = {ptrs[0]->value-y > 0 ? ptrs[0]->value-y : y-ptrs[0]->value, ptrs[1]->value-y > 0 ? ptrs[1]->value-y : y-ptrs[1]->value, ptrs[2]->value-y > 0 ? ptrs[2]->value-y : y-ptrs[2]->value, ptrs[3]->value-y > 0 ? ptrs[3]->value-y : y-ptrs[3]->value};
-        int min_pos = std::min_element(vals.constBegin(), vals.constEnd()) - vals.constBegin();
-
-        descriptionLabel->setText(QString::number(min_pos) + ": " + QString::number(x) + ", " + QString::number(ptrs[min_pos]->value));
+            double min = 2.0;
+            int min_index = -1;
+            double min_val = -1.0;
+            for (int i = 0; i < 4; i++) {
+                QCPGraphDataContainer::const_iterator ptr = ui->customPlot->graph(i)->data().data()->findBegin(x);
+                double val = ptr->value-(double)y;
+                val = val > 0 ? val : -1.0*val;
+                if (val < min) {
+                    min = val;
+                    min_index = i;
+                    min_val = ptr->value;
+                }
+            }
+            if (min < 0.10) {
+                descriptionLabel->setText(QString::number(min_index) + ": " + QString::number(x) + ", " + QString::number(ui->customPlot->graph(min_index)->data().data()->findBegin(x)->value));
+                phaseTracer->setGraph(ui->customPlot->graph(min_index));
+                phaseTracer->setGraphKey(x);
+                phaseTracer->setVisible(true);
+                ui->customPlot->replot();
+                //QApplication::setOverrideCursor(Qt::ArrowCursor);
+                QString status;
+                if (min_index == 2 || min_index == 3) {
+                    status = (int)min_val == 1 ? "FAIL" : "PASS";
+                }
+                switch(min_index) {
+                    case 0:
+                        QToolTip::showText(event->globalPos(), "Luminance flash diag.\nFrame: " + QString::number(x) + "\nFlash #: " + QString::number(min_val*10));
+                    break;
+                    case 1:
+                        QToolTip::showText(event->globalPos(), "Red flash diag.\nFrame: " + QString::number(x) + "\nFlash #: " + QString::number(min_val*10));
+                    break;
+                    case 2:
+                        QToolTip::showText(event->globalPos(), "Luminance flash\nFrame: " + QString::number(x) + "\nStatus: " + status);
+                    break;
+                    case 3:
+                        QToolTip::showText(event->globalPos(), "Red flash.\nFrame: " + QString::number(x) + "\nStatus: " + status);
+                    break;
+                }
+            }
+            else {
+                descriptionLabel->setText("");
+                phaseTracer->setVisible(false);
+                QToolTip::hideText();
+                //QApplication::setOverrideCursor(Qt::ArrowCursor);
+            }
+            /*
+            if (min < 0.05) {
+                QApplication::setOverrideCursor(Qt::PointingHandCursor);
+            }
+            */
+        }
+        else {
+            descriptionLabel->setText("");
+            phaseTracer->setVisible(false);
+            QToolTip::hideText();
+            //QApplication::setOverrideCursor(Qt::ArrowCursor);
+        }
     }
 }
