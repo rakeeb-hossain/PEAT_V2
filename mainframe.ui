@@ -25,11 +25,14 @@
    <widget class="QCustomPlot" name="customPlot" native="true">
     <property name="geometry">
      <rect>
-      <x>270</x>
+      <x>269</x>
       <y>20</y>
       <width>581</width>
       <height>341</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>Analysis plot</string>
     </property>
     <property name="autoFillBackground">
      <bool>false</bool>
@@ -43,7 +46,7 @@ border-width: 1px;
     <widget class="Line" name="line_5">
      <property name="geometry">
       <rect>
-       <x>290</x>
+       <x>288</x>
        <y>0</y>
        <width>3</width>
        <height>302</height>
@@ -86,6 +89,9 @@ border-width: 1px;
     <property name="mouseTracking">
      <bool>false</bool>
     </property>
+    <property name="toolTip">
+     <string>Duration of video (ms)</string>
+    </property>
     <property name="autoFillBackground">
      <bool>false</bool>
     </property>
@@ -101,28 +107,6 @@ border-width: 1px;
     </property>
     <property name="text">
      <string/>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_7">
-    <property name="geometry">
-     <rect>
-      <x>690</x>
-      <y>480</y>
-      <width>61</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Segoe UI</family>
-      <pointsize>10</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Warnings</string>
     </property>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
@@ -144,6 +128,9 @@ border-width: 1px;
      <font>
       <family>Segoe UI</family>
      </font>
+    </property>
+    <property name="toolTip">
+     <string># of frames in video</string>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color:rgb(220, 220, 220);
@@ -177,6 +164,9 @@ border-width: 1px;
     <property name="focusPolicy">
      <enum>Qt::NoFocus</enum>
     </property>
+    <property name="toolTip">
+     <string>Previous warning</string>
+    </property>
     <property name="styleSheet">
      <string notr="true">#backWarning
 {
@@ -202,6 +192,9 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <font>
       <family>Segoe UI</family>
      </font>
+    </property>
+    <property name="toolTip">
+     <string>Frame rate (FPS)</string>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color:rgb(220, 220, 220);
@@ -283,6 +276,9 @@ border-radius: 5px;</string>
       <bold>true</bold>
      </font>
     </property>
+    <property name="toolTip">
+     <string>Loaded file name</string>
+    </property>
     <property name="styleSheet">
      <string notr="true">background-color:rgb(200, 200, 210);
 border-style:solid;
@@ -305,6 +301,9 @@ font-size: 10pt;</string>
     <property name="alignment">
      <set>Qt::AlignCenter</set>
     </property>
+    <property name="wordWrap">
+     <bool>false</bool>
+    </property>
    </widget>
    <widget class="QPushButton" name="restartButton">
     <property name="enabled">
@@ -320,6 +319,12 @@ font-size: 10pt;</string>
     </property>
     <property name="focusPolicy">
      <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Rewind</string>
+    </property>
+    <property name="toolTipDuration">
+     <number>1</number>
     </property>
     <property name="styleSheet">
      <string notr="true">background-image: url(:/images/Res/RewindDisabled.png);
@@ -344,6 +349,9 @@ border-image: url(:/images/Res/RewindDisabled.png);</string>
     <property name="focusPolicy">
      <enum>Qt::NoFocus</enum>
     </property>
+    <property name="toolTip">
+     <string>Generate a PEAT report</string>
+    </property>
     <property name="styleSheet">
      <string notr="true">background-image: url(:/images/Res/AnalyzeDisabled.png);
 border-image: url(:/images/Res/AnalyzeDisabled.png);</string>
@@ -365,6 +373,9 @@ border-image: url(:/images/Res/AnalyzeDisabled.png);</string>
      <font>
       <family>Segoe UI</family>
      </font>
+    </property>
+    <property name="toolTip">
+     <string>Dimensions (length x width)</string>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color:rgb(200, 200, 210);
@@ -394,6 +405,12 @@ border-image: url(:/images/Res/AnalyzeDisabled.png);</string>
       <width>571</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Zoom control</string>
     </property>
     <property name="styleSheet">
      <string notr="true">QSlider::groove:horizontal {
@@ -439,6 +456,9 @@ QSlider::handle:horizontal {
       <family>Segoe UI</family>
      </font>
     </property>
+    <property name="toolTip">
+     <string>Trace R&amp;D Center</string>
+    </property>
     <property name="autoFillBackground">
      <bool>true</bool>
     </property>
@@ -455,11 +475,14 @@ QSlider::handle:horizontal {
    <widget class="Line" name="line_2">
     <property name="geometry">
      <rect>
-      <x>252</x>
-      <y>-2</y>
-      <width>20</width>
+      <x>259</x>
+      <y>0</y>
+      <width>7</width>
       <height>383</height>
      </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>SizeHorCursor</cursorShape>
     </property>
     <property name="lineWidth">
      <number>2</number>
@@ -482,6 +505,9 @@ QSlider::handle:horizontal {
     </property>
     <property name="focusPolicy">
      <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Pause</string>
     </property>
     <property name="styleSheet">
      <string notr="true">background-image: url(:/images/Res/StopDisabled.png);
@@ -506,6 +532,9 @@ border-image: url(:/images/Res/StopDisabled.png);</string>
     <property name="focusPolicy">
      <enum>Qt::NoFocus</enum>
     </property>
+    <property name="toolTip">
+     <string>Play</string>
+    </property>
     <property name="styleSheet">
      <string notr="true">background-image: url(:/images/Res/PlayDisabled.png);
 border-image: url(:/images/Res/PlayDisabled.png);</string>
@@ -513,88 +542,6 @@ border-image: url(:/images/Res/PlayDisabled.png);</string>
     <property name="text">
      <string/>
     </property>
-   </widget>
-   <widget class="QFrame" name="frame">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>220</y>
-      <width>241</width>
-      <height>151</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-color: black;
-border-style: solid;
-border-width: 1px;
-background: transparent;</string>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <widget class="QVideoWidget" name="videoWidget_2" native="true">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>241</width>
-       <height>151</height>
-      </rect>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::StrongFocus</enum>
-     </property>
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="styleSheet">
-      <string notr="true"/>
-     </property>
-    </widget>
-    <widget class="QLabel" name="label_14">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>241</width>
-       <height>151</height>
-      </rect>
-     </property>
-     <property name="font">
-      <font>
-       <pointsize>13</pointsize>
-       <weight>75</weight>
-       <bold>true</bold>
-      </font>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::StrongFocus</enum>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background: black;</string>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::NoFrame</enum>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="scaledContents">
-      <bool>false</bool>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="wordWrap">
-      <bool>false</bool>
-     </property>
-    </widget>
    </widget>
    <widget class="Line" name="line">
     <property name="geometry">
@@ -626,6 +573,9 @@ background: transparent;</string>
       <family>Segoe UI</family>
      </font>
     </property>
+    <property name="toolTip">
+     <string>Date of analysis (dd/mm/yyyy)</string>
+    </property>
     <property name="styleSheet">
      <string notr="true">background-color:rgb(200, 200, 210);
 </string>
@@ -656,6 +606,9 @@ background: transparent;</string>
      <font>
       <family>Segoe UI</family>
      </font>
+    </property>
+    <property name="toolTip">
+     <string>Video decompression type (FourCC)</string>
     </property>
     <property name="styleSheet">
      <string notr="true">background-color:rgb(200, 200, 210);
@@ -689,6 +642,9 @@ background: transparent;</string>
     <property name="focusPolicy">
      <enum>Qt::NoFocus</enum>
     </property>
+    <property name="toolTip">
+     <string>0.5x playback speed</string>
+    </property>
     <property name="styleSheet">
      <string notr="true">#rewindButton
 {
@@ -716,6 +672,9 @@ border-image: url(:/images/Res/FastBackDisabled.png);
     <property name="focusPolicy">
      <enum>Qt::NoFocus</enum>
     </property>
+    <property name="toolTip">
+     <string>2x playback speed</string>
+    </property>
     <property name="styleSheet">
      <string notr="true">background-image: url(:/images/Res/FFwdDisabled.png);
 border-image: url(:/images/Res/FFwdDisabled.png);</string>
@@ -740,6 +699,9 @@ border-image: url(:/images/Res/FFwdDisabled.png);</string>
       <weight>75</weight>
       <bold>true</bold>
      </font>
+    </property>
+    <property name="toolTip">
+     <string># of warnings</string>
     </property>
     <property name="styleSheet">
      <string notr="true">border-color: #C01A00;
@@ -770,6 +732,12 @@ color: #C01A00;</string>
       <width>771</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Video position</string>
     </property>
     <property name="autoFillBackground">
      <bool>false</bool>
@@ -821,6 +789,9 @@ QSlider::handle:horizontal {
       <height>14</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>Plot scrollbar</string>
+    </property>
     <property name="pageStep">
      <number>1</number>
     </property>
@@ -842,6 +813,9 @@ QSlider::handle:horizontal {
     </property>
     <property name="focusPolicy">
      <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Next warning</string>
     </property>
     <property name="styleSheet">
      <string notr="true">#forwardWarning
@@ -887,6 +861,9 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
        <pointsize>8</pointsize>
       </font>
      </property>
+     <property name="toolTip">
+      <string>General flashes &gt; 3 Hz</string>
+     </property>
      <property name="text">
       <string>Luminance flash:</string>
      </property>
@@ -905,6 +882,9 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
        <family>Segoe UI</family>
        <pointsize>8</pointsize>
       </font>
+     </property>
+     <property name="toolTip">
+      <string>Saturated red flashes &gt; 3 Hz</string>
      </property>
      <property name="text">
       <string>Red flash:</string>
@@ -925,6 +905,9 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
        <pointsize>8</pointsize>
       </font>
      </property>
+     <property name="toolTip">
+      <string>General flash diagnostic plot</string>
+     </property>
      <property name="text">
       <string>Lum flash diag:</string>
      </property>
@@ -944,8 +927,11 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
        <pointsize>8</pointsize>
       </font>
      </property>
+     <property name="toolTip">
+      <string>Saturated red flash diagnostic plot</string>
+     </property>
      <property name="text">
-      <string>Luminance flash:</string>
+      <string>Red flash diag:</string>
      </property>
     </widget>
     <widget class="Line" name="line_3">
@@ -973,6 +959,9 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
     </property>
     <property name="focusPolicy">
      <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Open video</string>
     </property>
     <property name="styleSheet">
      <string notr="true">#folderButton
@@ -1017,6 +1006,94 @@ border-image: url(:/images/Res/EjectPressed.png);
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="C_Label" name="label_17">
+    <property name="geometry">
+     <rect>
+      <x>254</x>
+      <y>0</y>
+      <width>16</width>
+      <height>381</height>
+     </rect>
+    </property>
+    <property name="cursor">
+     <cursorShape>SizeHorCursor</cursorShape>
+    </property>
+    <property name="mouseTracking">
+     <bool>true</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border: 0px;</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_14">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>220</y>
+      <width>241</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>13</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
+     </font>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::StrongFocus</enum>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background: black;</string>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::NoFrame</enum>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="scaledContents">
+     <bool>false</bool>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+    <property name="wordWrap">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QVideoWidget" name="videoWidget_2" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>220</y>
+      <width>241</width>
+      <height>151</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Playback output</string>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-color: black;
+border-style: solid;
+border-width: 1px;
+background: transparent;</string>
+    </property>
+   </widget>
    <widget class="QFrame" name="frame_3">
     <property name="geometry">
      <rect>
@@ -1025,6 +1102,9 @@ border-image: url(:/images/Res/EjectPressed.png);
       <width>862</width>
       <height>544</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true"/>
     </property>
     <property name="frameShape">
      <enum>QFrame::Panel</enum>
@@ -1035,11 +1115,34 @@ border-image: url(:/images/Res/EjectPressed.png);
     <property name="lineWidth">
      <number>2</number>
     </property>
+    <widget class="QLabel" name="label_7">
+     <property name="geometry">
+      <rect>
+       <x>690</x>
+       <y>473</y>
+       <width>61</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>10</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Warnings</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </widget>
    <zorder>frame_3</zorder>
    <zorder>customPlot</zorder>
    <zorder>label_10</zorder>
-   <zorder>label_7</zorder>
    <zorder>label_8</zorder>
    <zorder>backWarning</zorder>
    <zorder>label_9</zorder>
@@ -1053,7 +1156,6 @@ border-image: url(:/images/Res/EjectPressed.png);
    <zorder>line_2</zorder>
    <zorder>pauseButton</zorder>
    <zorder>playButton</zorder>
-   <zorder>frame</zorder>
    <zorder>line</zorder>
    <zorder>label_13</zorder>
    <zorder>label_12</zorder>
@@ -1066,6 +1168,9 @@ border-image: url(:/images/Res/EjectPressed.png);
    <zorder>frame_2</zorder>
    <zorder>folderButton</zorder>
    <zorder>label_5</zorder>
+   <zorder>label_17</zorder>
+   <zorder>label_14</zorder>
+   <zorder>videoWidget_2</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -1073,7 +1178,7 @@ border-image: url(:/images/Res/EjectPressed.png);
      <x>0</x>
      <y>0</y>
      <width>863</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1433,6 +1538,15 @@ border-image: url(:/images/Res/EjectPressed.png);
    <extends>QWidget</extends>
    <header>qcustomplot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>C_Label</class>
+   <extends>QLabel</extends>
+   <header>c_label.h</header>
+   <slots>
+    <signal>mousePressed()</signal>
+    <signal>mouseMoved()</signal>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources>

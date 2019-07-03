@@ -30,7 +30,8 @@ SOURCES += \
     waitdialog.cpp \
     qcustomplot.cpp \
     rkbprotool.cpp \
-    mainframe.cpp
+    mainframe.cpp \
+    c_label.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -38,7 +39,8 @@ HEADERS += \
     waitdialog.h \
     qcustomplot.h \
     rkbprotool.h \
-    mainframe.h
+    mainframe.h \
+    c_label.h
 
 FORMS += \
         mainwindow.ui \

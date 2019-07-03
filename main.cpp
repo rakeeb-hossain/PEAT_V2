@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
         QMessageBox::information(0, "Screen Resolution", "Please adjust your screen resolution to at least a height of 650 and width of 1000");
         exit(0);
     }
-
+    //qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
     MainWindow w;
 
     w.show();

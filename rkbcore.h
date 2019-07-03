@@ -25,12 +25,15 @@ public:
     explicit rObject(QObject *parent = Q_NULLPTR);
     ~rObject();
     QString proTool(vector<vector<int> > vidData, QString dir, QString video, int decision, double alpha);
+    bool threadStopped = false;
 
 private:
     void makeFrameGradient(int lowerBound, int upperBound, string gradientFolder, string vidDir);
     Mat lowerContrast(Mat frame, double alpha);
     Mat overlayFilter(Mat frame, double alpha);
     Mat blurFilter(Mat frame, double alpha);
+    Mat swapChannels(Mat frame);
+    Mat reduceGreen(Mat frame, double alpha);
     void writeVideo(QString ndir, QString nreport);
     float relative_luminance(float R, float G, float B);
     float saturation(float R, float G, float B);
@@ -38,6 +41,7 @@ private:
 
 public slots:
     void rkbcore(string filename);
+    void stopLoop();
 
 signals:
     void updateUI(vector<QVector<double > >,vector<QVector<double > >);
@@ -45,6 +49,7 @@ signals:
     void error();
     void finished();
     void fileReceived();
+    void stopped();
 };
 
 

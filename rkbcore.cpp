@@ -36,7 +36,7 @@ const int RTT = 20;
 const double FT = 0.10;
 const double DT = 0.80;
 const double LT = 0.10;
-const double ATH = 0.10; // High sensitivity = 0.05, low = 0.10
+const double ATH = 0.05; // High sensitivity = 0.05, low = 0.10
 const double RTH = 0.10;
 
 rObject::rObject(QObject *parent) : QObject(parent) {
@@ -152,6 +152,34 @@ Mat rObject::lowerContrast(Mat frame, double alpha)
     return updatedFrame;
 }
 
+Mat rObject::reduceGreen(Mat frame, double alpha)
+{
+    Mat updatedFrame = Mat::zeros( frame.size(), frame.type() );
+
+
+    for(int j = 0; j < frame.rows; j++)
+    {
+        const Vec3b* framei = frame.ptr<Vec3b>(j);
+        for(int i = 0; i < frame.cols; i++) {
+            updatedFrame.at<Vec3b>(j,i)[0] = saturate_cast<uchar>((1.0)*(frame.at<Vec3b>(j,i)[0]) + 0);
+            updatedFrame.at<Vec3b>(j,i)[1] = saturate_cast<uchar>((1.0 - alpha)*(frame.at<Vec3b>(j,i)[1]) + 0);
+            updatedFrame.at<Vec3b>(j,i)[2] = saturate_cast<uchar>((1.0 - alpha)*(frame.at<Vec3b>(j,i)[2]) + 0);
+        }
+    }
+    /*
+    parallel_for_(Range(0, frame.rows*frame.cols), [&](const Range& range) {
+        for (int r = range.start; r < range.end; r++) {
+            int x = r % frame.rows;
+            int y = r / frame.rows;
+            updatedFrame.at<Vec3b>(x,y)[0] = saturate_cast<uchar>((1.0 - alpha)*(frame.at<Vec3b>(x,y)[0]) + 0);
+            updatedFrame.at<Vec3b>(x,y)[1] = saturate_cast<uchar>((1.0 - alpha)*(frame.at<Vec3b>(x,y)[1]) + 0);
+            updatedFrame.at<Vec3b>(x,y)[2] = saturate_cast<uchar>((1.0 - alpha)*(frame.at<Vec3b>(x,y)[2]) + 0);
+        }
+    });
+    */
+    return updatedFrame;
+}
+
 Mat rObject::overlayFilter(Mat frame, double alpha)
 {
     qDebug() << "INT";
@@ -174,6 +202,21 @@ Mat rObject::blurFilter(Mat frame, double alpha)
         blur(frame, frame, Size(kernal, kernal));
     }
     return frame;
+}
+
+Mat rObject::swapChannels(Mat frame) {
+    Mat updatedFrame = Mat::zeros( frame.size(), frame.type() );
+
+    for(int j = 0; j < frame.rows; j++)
+    {
+        const Vec3b* framei = frame.ptr<Vec3b>(j);
+        for(int i = 0; i < frame.cols; i++) {
+            updatedFrame.at<Vec3b>(j,i)[0] = saturate_cast<uchar>((1.0)*(frame.at<Vec3b>(j,i)[2]) + 0);
+            updatedFrame.at<Vec3b>(j,i)[1] = saturate_cast<uchar>((1.0)*(frame.at<Vec3b>(j,i)[1]) + 0);
+            updatedFrame.at<Vec3b>(j,i)[2] = saturate_cast<uchar>((1.0)*(frame.at<Vec3b>(j,i)[0]) + 0);
+        }
+    }
+    return updatedFrame;
 }
 
 void rObject::writeVideo(QString ndir, QString nreport)
@@ -243,10 +286,11 @@ float rObject::red_saturation(float R, float G, float B) {
     float red = (R-G-B)*320.f;
     return (red >= 0 ? red : 0);
 }
-
+void rObject::stopLoop() {
+    threadStopped = true;
+}
 
 void rObject::rkbcore(string filename) {
-    mainFrame *main_instance = new mainFrame;
     int count = 1;
     VideoCapture cap(filename);
 
@@ -258,11 +302,6 @@ void rObject::rkbcore(string filename) {
     int frame_count = cap.get(CAP_PROP_FRAME_COUNT);
     double fps = cap.get(CAP_PROP_FPS);
     if (frame.empty()) {emit error(); return;};
-
-    // TO-DO: Stopping
-    connect(main_instance, &mainFrame::thread_stopped, this, [=]{
-        qDebug() << "STOP";
-    });
 
     //Resize first frame
     auto scale = 1.0 / SCALE;
@@ -322,7 +361,7 @@ void rObject::rkbcore(string filename) {
     bool just_red_flashed = false;
 
     //Loop through frames, loading two at a time
-    while(count < frame_count) {
+    while(count < frame_count && !threadStopped) {
         vector<QVector<double > > points_x(4);
         vector<QVector<double > > points_y(4);
         int seizure_count = 0;
@@ -390,7 +429,7 @@ void rObject::rkbcore(string filename) {
                 }
                 else {
                     if (sat_first[r] != 0) {
-                        if (red_first[r] > RTT) {
+                        if (red_first[r] > RTT ) {
                             red_count++;
                         }
                     }
@@ -514,11 +553,14 @@ void rObject::rkbcore(string filename) {
         red_first = red_next;
         count++;
     }
+    if (threadStopped) emit stopped();
     emit finished();
 }
 
 QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString origVidFile, int decision, double alpha)
 {
+    if (ndir == origVidFile) return "You cannot replace the original video used for the analysis. Please select a different output video path.";
+
     if (vidData.size() < 5) {
         return "A valid report was not loaded.";
     }
@@ -542,11 +584,54 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
     VideoWriter video(dir, CV_FOURCC('X','V','I','D'), fps, Size(frame_width,frame_height));
 
     waitDialog *progress = new waitDialog;
-    progress->setProgressBarRange(0, vidData[4][1]);
+    progress->setProgressBarRange(0, 0);
     progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, QImage::Format_RGB888)));
     progress->show();
 
+    int range = vidData[4][1];
+    if (decision == 6) {
+        int speed = (int)alpha;
+        for (int i = 0; i < vidData[2].size(); i++) {
+            if (vidData[2][i] == 1 || vidData[3][i] == 1) {
+                range = range + alpha - 1;
+            }
+            QCoreApplication::processEvents();
+        }
+    } else if (decision == 7) {
+        for (int i = 0; i < vidData[2].size(); i++) {
+            if (vidData[2][i] == 1 || vidData[3][i] == 1) {
+                range -= 1;
+            }
+            QCoreApplication::processEvents();
+        }
+    }
+
+    for (int i = 0; i < vidData[2].size()-1; i++) {
+        QCoreApplication::processEvents();
+        if (vidData[2][i+1] == 1 && vidData[2][i] == 0) {
+            int j = i-1;
+            bool found_two = false;
+            while (!found_two) {
+                vidData[2][j] = 1;
+                if (vidData[0][j] == 1) found_two = true;
+                j--;
+            }
+        }
+        if (vidData[3][i+1] == 1 && vidData[3][i] == 0) {
+            int j = i-1;
+            bool found_two = false;
+            while (!found_two) {
+                vidData[3][j] = 1;
+                if (vidData[1][j] == 1) found_two = true;
+                j--;
+            }
+        }
+    }
+
+    progress->setProgressBarRange(0, range);
+
     if( decision == 1){
+        /*
         int sampleRate = 0;
         int extraFrames = 0;
         for (unsigned int i = 0; i < warn.size(); i += 2)
@@ -568,6 +653,28 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
                 }
             }
         }
+        */
+        for (unsigned int i = 0; i < vidData[2].size(); i++)
+        {
+            if (frame.empty()) {
+                return "A blank video frame was encountered during the video writing process. Video stream could not be decoded.";
+            }
+            if ((int)vidData[2][i] == 1 || (int)vidData[3][i] == 1)
+            {
+                Mat new_frame = reduceGreen(frame, alpha);
+                video.write(new_frame);
+                cvtColor(new_frame, new_frame, CV_BGR2RGB);
+                progress->setImg(QPixmap::fromImage(QImage((unsigned char*) new_frame.data, new_frame.cols, new_frame.rows, new_frame.step, QImage::Format_RGB888)));
+            }
+            else {
+                video.write(frame);
+                cvtColor(frame, frame, CV_BGR2RGB);
+                progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
+            }
+            progress->setProgressBarValue(i+1);
+            QCoreApplication::processEvents();
+            if (i != vidData[2].size()-1) cap >> frame;
+        }
     }
     else if (decision == 2){
         for (unsigned int i = 0; i < vidData[2].size(); i++)
@@ -588,6 +695,7 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
             }
             progress->setProgressBarValue(i+1);
+            QCoreApplication::processEvents();
             if (i != vidData[2].size()-1) cap >> frame;
         }
     }
@@ -612,6 +720,7 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
             }
             progress->setProgressBarValue(i+1);
+            QCoreApplication::processEvents();
             if (i != vidData[2].size()-1) cap >> frame;
         }
         qDebug() << time.elapsed();
@@ -635,6 +744,76 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
             }
             progress->setProgressBarValue(i+1);
+            QCoreApplication::processEvents();
+            if (i != vidData[2].size()-1) cap >> frame;
+        }
+    }
+    else if (decision == 5){
+        for (unsigned int i = 0; i < vidData[2].size(); i++)
+        {
+            if (frame.empty()) {
+                return "A blank video frame was encountered during the video writing process. Video stream could not be decoded.";
+            }
+            if ((int)vidData[3][i] == 1)
+            {
+                Mat new_frame = swapChannels(frame);
+                video.write(new_frame);
+                cvtColor(new_frame, new_frame, CV_BGR2RGB);
+                progress->setImg(QPixmap::fromImage(QImage((unsigned char*) new_frame.data, new_frame.cols, new_frame.rows, new_frame.step, QImage::Format_RGB888)));
+            }
+            else {
+                video.write(frame);
+                cvtColor(frame, frame, CV_BGR2RGB);
+                progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
+            }
+            progress->setProgressBarValue(i+1);
+            QCoreApplication::processEvents();
+            if (i != vidData[2].size()-1) cap >> frame;
+        }
+    }
+    else if (decision == 6){
+        int speed = (int)alpha;
+        int count = 0;
+        for (unsigned int i = 0; i < vidData[2].size(); i++)
+        {
+            if (frame.empty()) {
+                return "A blank video frame was encountered during the video writing process. Video stream could not be decoded.";
+            }
+            if ((int)vidData[2][i] == 1 || (int)vidData[3][i] == 1)
+            {
+                for (int j = 0; j < speed; j++) {
+                    video.write(frame);
+                    cvtColor(frame, frame, CV_BGR2RGB);
+                    progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
+                    QCoreApplication::processEvents();
+                    progress->setProgressBarValue(count+1);
+                    count++;
+                }
+            }
+            else {
+                video.write(frame);
+                cvtColor(frame, frame, CV_BGR2RGB);
+                progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
+                progress->setProgressBarValue(count+1);
+            }
+            QCoreApplication::processEvents();
+            if (i != vidData[2].size()-1) cap >> frame;
+        }
+    }
+    else if (decision == 7){
+        for (unsigned int i = 0; i < vidData[2].size(); i++)
+        {
+            if (frame.empty()) {
+                return "A blank video frame was encountered during the video writing process. Video stream could not be decoded.";
+            }
+            if ((int)vidData[2][i] != 1 && (int)vidData[3][i] != 1)
+            {
+                video.write(frame);
+                cvtColor(frame, frame, CV_BGR2RGB);
+                progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
+                progress->setProgressBarValue(i+1);
+                QCoreApplication::processEvents();
+            }
             if (i != vidData[2].size()-1) cap >> frame;
         }
     }

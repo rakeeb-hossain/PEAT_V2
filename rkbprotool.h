@@ -35,6 +35,12 @@ private slots:
 
     void on_pushButton_clicked();
 
+    void on_radioButton_5_clicked();
+
+    void on_radioButton_6_clicked();
+
+    void on_radioButton_7_clicked();
+
 private:
     Ui::rkbProTool *ui;
     QTimer *timer;

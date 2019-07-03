@@ -58,6 +58,9 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
            ui->radioButton_2->setEnabled(false);
            ui->radioButton_3->setEnabled(false);
            ui->radioButton_4->setEnabled(false);
+           ui->radioButton_5->setEnabled(false);
+           ui->radioButton_6->setEnabled(false);
+           ui->radioButton_7->setEnabled(false);
            ui->label_2->setEnabled(false);
            ui->label_5->setEnabled(false);
            ui->label_7->setEnabled(false);
@@ -67,6 +70,9 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
            ui->radioButton_2->setEnabled(true);
            ui->radioButton_3->setEnabled(true);
            ui->radioButton_4->setEnabled(true);
+           ui->radioButton_5->setEnabled(true);
+           ui->radioButton_6->setEnabled(true);
+           ui->radioButton_7->setEnabled(true);
            ui->label_2->setEnabled(true);
            ui->label_5->setEnabled(true);
            ui->label_7->setEnabled(true);
@@ -79,13 +85,22 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
         ui->label_8->setText("");
     });
     connect(ui->radioButton_2, &QRadioButton::clicked, this, [&]{
-        ui->label_8->setText("Places a grey overlay on failing frames. Strength is the alpha value of the overlay.\n1.0 = fully opaque, 0.0 = fully transparent.");
+        ui->label_8->setText("Sets a grey overlay on failing frames.\n0.0 = fully transparent, 1.0 = fully opaque");
     });
     connect(ui->radioButton_3, &QRadioButton::clicked, this, [&]{
-        ui->label_8->setText("Lowers the contrast ratio of failing frames. Strength corresponds to decrease in contrast ratio (CR).\n1.0 = 1:1 CR, 0.0 = preserves original CR.");
+        ui->label_8->setText("Lowers the contrast ratio (CR) of failing frames.\n0.0 = preserves original CR, 1.0 = 1:1 CR");
     });
     connect(ui->radioButton_4, &QRadioButton::clicked, this, [&]{
-        ui->label_8->setText("Blurs failing frames via a normalized box filter. Strength is the kernal size of blur.\n1.0 = kernal size of 255 (intense blur), 0.0 = kernal size of 0 (no blur).\nATTENTION: Blurring does not block failing frames. It can be used with other filters to enhance viewing.");
+        ui->label_8->setText("Blurs failing frames.\n0.0 = kernal size of 0 (no blur), 1.0 = kernal size of 255 (intense blur).\nATTENTION: Blurring does not block failing frames. It can be used with other filters to enhance viewing.");
+    });
+    connect(ui->radioButton_5, &QRadioButton::clicked, this, [&]{
+        ui->label_8->setText("Swaps red and blue channels in failing frames, lowering effect of saturated red flashes.");
+    });
+    connect(ui->radioButton_6, &QRadioButton::clicked, this, [&]{
+        ui->label_8->setText("Decreases frame rate of video at failing frames, lowering frequency of flashes per second.\n1 = preserve frame rate, 30 = 30x slower frame rate");
+    });
+    connect(ui->radioButton_7, &QRadioButton::clicked, this, [&]{
+        ui->label_8->setText("Removes failing frames from video.");
     });
 }
 
@@ -99,6 +114,11 @@ rkbProTool::~rkbProTool()
 void rkbProTool::on_radioButton_2_clicked()
 {
     ui->slider->setEnabled(true);
+    ui->slider->setRange(0, 100);
+    ui->slider->setSingleStep(1);
+    ui->slider->setPageStep(1);
+    ui->slider->setTickInterval(1);
+    ui->label_3->setText("Set strength");
     ui->label_3->setEnabled(true);
     ui->label_4->setEnabled(true);
     decision  = 2;
@@ -109,6 +129,11 @@ void rkbProTool::on_radioButton_2_clicked()
 void rkbProTool::on_radioButton_3_clicked()
 {
     ui->slider->setEnabled(true);
+    ui->slider->setRange(0, 100);
+    ui->slider->setSingleStep(1);
+    ui->slider->setPageStep(1);
+    ui->slider->setTickInterval(1);
+    ui->label_3->setText("Set strength");
     ui->label_3->setEnabled(true);
     ui->label_4->setEnabled(true);
     decision  = 3;
@@ -119,6 +144,11 @@ void rkbProTool::on_radioButton_3_clicked()
 void rkbProTool::on_radioButton_4_clicked()
 {
     ui->slider->setEnabled(true);
+    ui->slider->setRange(0, 100);
+    ui->slider->setSingleStep(1);
+    ui->slider->setPageStep(1);
+    ui->slider->setTickInterval(1);
+    ui->label_3->setText("Set strength");
     ui->label_3->setEnabled(true);
     ui->label_4->setEnabled(true);
     decision  = 4;
@@ -127,12 +157,50 @@ void rkbProTool::on_radioButton_4_clicked()
 
 void rkbProTool::on_radioButton_clicked()
 {
-    ui->slider->setEnabled(false);
-    ui->label_3->setEnabled(false);
-    ui->label_4->setEnabled(false);
+    ui->slider->setEnabled(true);
+    ui->slider->setRange(0, 100);
+    ui->slider->setSingleStep(1);
+    ui->slider->setPageStep(1);
+    ui->slider->setTickInterval(1);
+    ui->label_3->setText("Set strength");
+    ui->label_3->setEnabled(true);
+    ui->label_4->setEnabled(true);
     decision  = 1;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
 }
+
+void rkbProTool::on_radioButton_5_clicked()
+{
+    ui->slider->setEnabled(false);
+    ui->label_3->setEnabled(false);
+    ui->label_4->setEnabled(false);
+    decision  = 5;
+    ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+}
+
+void rkbProTool::on_radioButton_6_clicked()
+{
+    ui->slider->setEnabled(true);
+    ui->slider->setRange(100, 3000);
+    ui->slider->setSingleStep(100);
+    ui->slider->setPageStep(100);
+    ui->slider->setTickInterval(100);
+    ui->label_3->setText("Set slow factor");
+    ui->label_3->setEnabled(true);
+    ui->label_4->setEnabled(true);
+    decision  = 6;
+    ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+}
+
+void rkbProTool::on_radioButton_7_clicked()
+{
+    ui->slider->setEnabled(false);
+    ui->label_3->setEnabled(false);
+    ui->label_4->setEnabled(false);
+    decision  = 7;
+    ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+}
+
 
 void rkbProTool::on_pushButton_clicked()
 {
@@ -148,8 +216,8 @@ void rkbProTool::on_buttonBox_accepted()
         QFileInfo fi(newFile);
         QString ext = fi.suffix();
         if (ext == "mp4" || ext == "MP4") {
-            rObject r_instance;
-            QString error = r_instance.proTool(vidData, newFile, vidFile, decision, (ui->label_4->text()).toDouble());
+            rObject *r_instance = new rObject;
+            QString error = r_instance->proTool(vidData, newFile, vidFile, decision, (ui->label_4->text()).toDouble());
 
             /*
             rObject *r_instance = new rObject;
@@ -168,7 +236,10 @@ void rkbProTool::on_buttonBox_accepted()
             connect(r_instance, &rObject::error, &loop, &QEventLoop::quit);
             loop.exec();
             */
-            if (error != "Success") QMessageBox::critical(0, "Error", error);
+            if (error != "Success") {
+                QMessageBox::critical(0, "Error", error);
+                delete r_instance;
+            }
         }
         else {
             QMessageBox::critical(0, "Error", "Please select a valid mp4 output.");
