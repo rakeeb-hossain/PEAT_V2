@@ -67,14 +67,18 @@ mainFrame::mainFrame(QWidget *parent) :
     section->bottomRight->setAxes(ui->customPlot->xAxis, ui->customPlot->yAxis);
     section->bottomRight->setAxisRect(ui->customPlot->axisRect());
     section->setClipToAxisRect(true); // is by default true already, but this will change in QCP 2.0.0
-    section->topLeft->setCoords(0, 1.0); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
-    section->bottomRight->setCoords(100000, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
+    //section->topLeft->setCoords(0, 1.0); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
+    //section->bottomRight->setCoords(100000, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
+    section->topLeft->setCoords(0, 2.0); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
+    section->bottomRight->setCoords(100000, -1.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
 
-    section->setBrush(QBrush(QColor(200,200,200,255)));
+    // ADDED: Changed color from 200 -> 194
+    section->setBrush(QBrush(QColor(194,194,194,255)));
     section->setPen(Qt::NoPen);
     QCPItemLine *line = new QCPItemLine(ui->customPlot);
-    line->start->setCoords(0 , 0.25);
-    line->end->setCoords(10000000 , 0.25);
+    // ADDED: Line begins at -10000 instead of 0
+    line->start->setCoords(-10000, 0.25);
+    line->end->setCoords(10000 , 0.25);
     line->setClipToAxisRect(false);
     QCPItemText *textLabel = new QCPItemText(ui->customPlot);
     QCPItemText *textLabel2 = new QCPItemText(ui->customPlot);
@@ -82,16 +86,20 @@ mainFrame::mainFrame(QWidget *parent) :
     textLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignRight);
     textLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
     textLabel->position->setCoords(0.2, 0.7); // place position at center/top of axis rect
-    textLabel->setText("Caution (Fail)");
+    // ADDED: message changed from Caution (Fail/Pass)
+    textLabel->setText("Status: FAIL");
     textLabel->setFont(QFont(font().family(), 12)); // make font a bit larger
-    textLabel->setPen(QPen(Qt::black)); // show black border around text
+    // ADDED: disabled border around text label
+    //textLabel->setPen(QPen(Qt::black)); // show black border around text
+    textLabel->setPen(Qt::noBrush); // show no border around text
 
     textLabel2->setPositionAlignment(Qt::AlignVCenter|Qt::AlignRight);
     textLabel2->position->setType(QCPItemPosition::ptAxisRectRatio);
     textLabel2->position->setCoords(0.2, 0.8); // place position at center/top of axis rect
-    textLabel2->setText("Caution (Pass)");
+    textLabel2->setText("Status: PASS");
     textLabel2->setFont(QFont(font().family(), 12)); // make font a bit larger
-    textLabel2->setPen(QPen(Qt::black)); // show black border around text
+    //textLabel2->setPen(QPen(Qt::black)); // show black border around text
+    textLabel->setPen(Qt::noBrush); // show no border around text
 
     ui->customPlot->xAxis->scaleRange(32.0, ui->customPlot->xAxis->range().center());
 
@@ -277,6 +285,10 @@ mainFrame::mainFrame(QWidget *parent) :
     ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
 
     phaseTracer = new QCPItemTracer(ui->customPlot);
+    // ADDED
+    ui->customPlot->addLayer("tracer", ui->customPlot->layer("overlay"), QCustomPlot::limAbove);
+    phaseTracer->setLayer("tracer");
+    // End
     phaseTracer->setInterpolating(true);
     phaseTracer->setStyle(QCPItemTracer::tsCircle);
     phaseTracer->setPen(QPen(QColor(8,54,117)));
@@ -284,8 +296,7 @@ mainFrame::mainFrame(QWidget *parent) :
     phaseTracer->setSize(7);
     phaseTracer->setVisible(false);
 
-    // Caution layer
-    /*
+    // ADDED: Caution layer
     cautionLayer = new QCPItemRect(ui->customPlot);
     ui->customPlot->addLayer("cautionLayer", ui->customPlot->layer("grid"), QCustomPlot::limBelow);
     cautionLayer->setLayer("cautionLayer");
@@ -298,13 +309,13 @@ mainFrame::mainFrame(QWidget *parent) :
     cautionLayer->bottomRight->setAxes(ui->customPlot->xAxis, ui->customPlot->yAxis);
     cautionLayer->bottomRight->setAxisRect(ui->customPlot->axisRect());
     cautionLayer->setClipToAxisRect(true); // is by default true already, but this will change in QCP 2.0.0
-    cautionLayer->topLeft->setCoords(-1000, 0.35); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
-    cautionLayer->bottomRight->setCoords(100000, 0.20); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
-    cautionLayer->setBrush(QBrush(QColor(150,150,150,150)));
+    cautionLayer->topLeft->setCoords(-1000, 0.65); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
+    cautionLayer->bottomRight->setCoords(100000, 0.85); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
+    cautionLayer->setBrush(QBrush(QColor(164,164,164,255)));
     cautionLayer->setPen(Qt::NoPen);
-    */
 
-    //Specify subticks
+    //Setup x-axis
+    
 }
 
 mainFrame::~mainFrame()
@@ -1521,6 +1532,8 @@ void mainFrame::on_actionLight_Blue_triggered()
         ui->actionLight_Grey->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(190, 212, 221, 255)));
+        section->setBrush(QBrush(QColor(170,192,201,255)));
+        cautionLayer->setBrush(QBrush(QColor(140,162,171,255)));
         ui->customPlot->repaint();
     }
     else {
@@ -1539,6 +1552,8 @@ void mainFrame::on_actionBeige_triggered()
         ui->actionLight_Grey->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(216, 201, 184, 255)));
+        section->setBrush(QBrush(QColor(196,181,164,255)));
+        cautionLayer->setBrush(QBrush(QColor(166,151,134,255)))
         ui->customPlot->repaint();
     }
     else {
@@ -1558,6 +1573,8 @@ void mainFrame::on_actionPale_triggered()
         ui->actionLight_Grey->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(247, 243, 239, 255)));
+        section->setBrush(QBrush(QColor(227,223,219,255)));
+        cautionLayer->setBrush(QBrush(QColor(197,132,141,255)));
         ui->customPlot->repaint();
     }
     else {
@@ -1577,6 +1594,8 @@ void mainFrame::on_actionTurquoise_triggered()
         ui->actionLight_Grey->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(192, 219, 217, 255)));
+        section->setBrush(QBrush(QColor(172,199,197,255)));
+        cautionLayer->setBrush(QBrush(QColor(142,169,167,255)));
         ui->customPlot->repaint();
     }
     else {
@@ -1596,6 +1615,8 @@ void mainFrame::on_actionCharcoal_Grey_triggered()
         ui->actionLight_Grey->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(140, 144, 145, 255)));
+        section->setBrush(QBrush(QColor(120,124,125,255)));
+        cautionLayer->setBrush(QBrush(QColor(90,94,95,255)));
         ui->customPlot->repaint();
     }
     else {
@@ -1615,6 +1636,8 @@ void mainFrame::on_actionLight_Grey_triggered()
         ui->actionLight_Blue->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(214,214,214,255)));
+        section->setBrush(QBrush(QColor(194,194,194,255)));
+        cautionLayer->setBrush(QBrush(QColor(164,164,164,255)));
         ui->customPlot->repaint();
     }
     else {
