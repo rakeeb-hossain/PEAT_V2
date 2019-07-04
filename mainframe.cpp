@@ -859,6 +859,14 @@ void mainFrame::on_reportButton_clicked() {
     ui->actionPlay_Pause->setEnabled(true);
     ui->actionOpen_Report->setEnabled(true);
     ui->actionOpen_Video->setEnabled(true);
+    // ADDED
+    ui->action_ShowAllGraphs->setEnabled(true);
+    ui->action_HideAllGraphs->setEnabled(true);
+    ui->action_HideSelectedGraphs->setEnabled(true);
+    ui->action_LumDiagGraph->setEnabled(true);
+    ui->action_RedDiagGraph->setEnabled(true);
+    ui->action_LumFlashGraph->setEnabled(true);
+    ui->action_RedFlashGraph->setEnabled(true);
     this->repaint();
     qApp->processEvents();
 }
@@ -1297,6 +1305,14 @@ void mainFrame::openReport()
                 ui->actionPrint_Report->setEnabled(true);
                 ui->actionRun_Prophylactic_Tool->setEnabled(true);
                 index = 0;
+                // ADDED
+                ui->action_ShowAllGraphs->setEnabled(true);
+                ui->action_HideAllGraphs->setEnabled(true);
+                ui->action_HideSelectedGraphs->setEnabled(true);
+                ui->action_LumDiagGraph->setEnabled(true);
+                ui->action_RedDiagGraph->setEnabled(true);
+                ui->action_LumFlashGraph->setEnabled(true);
+                ui->action_RedFlashGraph->setEnabled(true);
 
                 vidLabel->setText("Done");
                 file.close();
@@ -1798,6 +1814,14 @@ void mainFrame::no_report_loaded() {
     ui->actionPrint_Report->setEnabled(false);
     ui->actionSave_Report->setEnabled(false);
     ui->actionRun_Prophylactic_Tool->setEnabled(false);
+    // ADDED
+    ui->action_ShowAllGraphs->setEnabled(false);
+    ui->action_HideAllGraphs->setEnabled(false);
+    ui->action_HideSelectedGraphs->setEnabled(false);
+    ui->action_LumDiagGraph->setEnabled(false);
+    ui->action_RedDiagGraph->setEnabled(false);
+    ui->action_LumFlashGraph->setEnabled(false);
+    ui->action_RedFlashGraph->setEnabled(false);
 
     ui->label_13->setText("");
 
@@ -1952,27 +1976,81 @@ void mainFrame::contextMenuRequest(QPoint pos)
   {
       if (ui->customPlot->selectedGraphs().size() > 0)
           menu->addAction("Hide selected plot", this, SLOT(hideSelectedGraph()));
+          menu->addSeparator();
       if (ui->customPlot->graphCount() > 0) {
-          menu->addAction("Hide diagnostic plot", this, SLOT(hideDiagGraphs()));
-          menu->addAction("Hide flash plot", this, SLOT(hideFlashGraphs()));
+          menu->addAction("Hide all plots", this, SLOT(hideAllGraphs()));
+          menu->addAction("Show all plots", this, SLOT(showAllGraphs()));
       }
   }
-   
   menu->popup(ui->customPlot->mapToGlobal(pos));
 }
 
 void mainFrame::hideSelectedGraph() {
-
+    foreach(QCPGraph *gr, ui->customPlot->selectedGraphs()) {
+        gr->setVisible(false);
+    }
 }
 
-void mainFrame::hideDiagGraphs() {
-
+void mainFrame::hideAllGraphs() {
+    for (int i = 0; i > ui->customPlot->graphCount(); i++) {
+        ui->customPlot->graph(i)->setVisible(false);
+    }
 }
 
-void mainFrame::hideFlashGraphs() {
-
+void mainFrame::showAllGraphs() {
+    for (int i = 0; i > ui->customPlot->graphCount(); i++) {
+        ui->customPlot->graph(i)->setVisible(true);
+    }
 }
+
+// ADDED: Graph actions
+/*
+void mainFrame::on_showAllGraphs_triggered() {
+    showAllGraphs();
+}
+
+void mainFrame::on_hideAllGraphs_triggered() {
+    hideAllGraphs();
+}
+
+void mainFrame::on_hideSelectedGraphs_triggered() {
+    hideSelectedGraph();
+}
+
+void mainFrame::on_LumDiagGraph_triggered() {
+    if (ui->action_LumDiagGraph->isChecked() == true) {
+        ui->customPlot->graph(0)->setVisible(false);
+    } else {
+        ui->customPlot->graph(0)->setVisible(true);
+    }
+}
+
+void mainFrame::on_RedDiagGraph_triggered() {
+    if (ui->action_RedDiagGraph->isChecked() == true) {
+        ui->customPlot->graph(1)->setVisible(false);
+    } else {
+        ui->customPlot->graph(1)->setVisible(true);
+    }
+}
+
+void mainFrame::on_LumFlashGraph_triggered() {
+    if (ui->action_LumDiagGraph->isChecked() == true) {
+        ui->customPlot->graph(2)->setVisible(false);
+    } else {
+        ui->customPlot->graph(2)->setVisible(true);
+    }
+}
+
+void mainFrame::on_RedFlashGraph_triggered() {
+    if (ui->action_RedFlashDiag->isChecked() == true) {
+        ui->customPlot->graph(3)->setVisible(false);
+    } else {
+        ui->customPlot->graph(3)->setVisible(true);
+    }
+}
+*/
+
 
 // ADD Menubar actions to hide graphs (just simple functions), make graphs visible again, complete context menu functions, 
-// make plot labels nice, finish printing, reimplement QCPAxisTicker to get time labels from frames and edit subticks, fix reloading
-// of plots, resizing, final testing!
+// make plot labels nice, *finish printing*, *reimplement QCPAxisTicker to get time labels from frames and edit subticks*, 
+// *fix reloading of plots*, *sensitivity*, *UI plans*, *resizing*, *previews*, final testing!

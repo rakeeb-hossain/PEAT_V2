@@ -151,10 +151,10 @@ private slots:
 
     void hideSelectedGraph();
 
-    void hideDiagGraphs();
+    void showAllGraphs();
 
-    void hideFlashGraphs();
-
+    void hideAllGraphs();
+    
 private:
     Ui::mainFrame *ui;
 
