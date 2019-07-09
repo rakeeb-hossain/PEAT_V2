@@ -323,8 +323,8 @@ void rObject::rkbcore(string filename) {
     //Declare arrays of data points
     vector<int> lum_diag = {0};
     vector<int> red_diag = {0};
-    vector<int> seizure_frames = {0};
-    vector<int> red_seizure_frames = {0};
+    int seizure_frames = 0;
+    int red_seizure_frames = 0;
 
     parallel_for_(Range(0, length*width), [&](const Range& range) {
         for (int r = range.start; r < range.end; r++) {
@@ -439,7 +439,7 @@ void rObject::rkbcore(string filename) {
         });
 
         //Check # of increases (flashes) in diag frames in past 1 second and set flash counts to that
-        if (count >= fps) {
+        if (count > fps) {
             for (int i = count-fps; i < count-1; i++) {
                 if (lum_diag[i] < lum_diag[i+1]) flash_count++;
                 if (red_diag[i] < red_diag[i+1]) red_flash_count++;
@@ -509,34 +509,34 @@ void rObject::rkbcore(string filename) {
 
         int is_seizure = (flash_count >= 3);
         int is_red_sat = (red_flash_count >= 3);
-        if (is_seizure == seizure_frames[count-1]) {
+        if (is_seizure == seizure_frames) {
             //Call plot function that only plots next point
             points_x[2].push_back((double)count);
             points_y[2].push_back((double)is_seizure);
-            seizure_frames.push_back(is_seizure);
+            seizure_frames = is_seizure;
         }
         else {
             points_x[2].push_back((double)count);
-            points_y[2].push_back((double)seizure_frames[count-1]);
+            points_y[2].push_back((double)seizure_frames);
             points_x[2].push_back((double)count);
             points_y[2].push_back((double)is_seizure);
             //Call different plot function that plots past point at new x-value and new point (to stop sloping)
-            seizure_frames.push_back(is_seizure);
+            seizure_frames = is_seizure;
         }
 
-        if (is_red_sat == red_seizure_frames[count-1]) {
+        if (is_red_sat == red_seizure_frames) {
             //Call plot function that only plots next point
             points_x[3].push_back((double)count);
             points_y[3].push_back((double)is_red_sat);
-            red_seizure_frames.push_back(is_red_sat);
+            red_seizure_frames = is_red_sat;
         }
         else {
             //Call different plot function that plots past point at new x-value and new point (to stop sloping)
             points_x[3].push_back((double)count);
-            points_y[3].push_back((double)red_seizure_frames[count-1]);
+            points_y[3].push_back((double)red_seizure_frames);
             points_x[3].push_back((double)count);
             points_y[3].push_back((double)is_red_sat);
-            red_seizure_frames.push_back(is_red_sat);
+            red_seizure_frames = is_red_sat;
         }
         //cout << "Count: " << count << endl;
         //Plot points and update signals
@@ -554,6 +554,7 @@ void rObject::rkbcore(string filename) {
         count++;
     }
     if (threadStopped) emit stopped();
+
     emit finished();
 }
 

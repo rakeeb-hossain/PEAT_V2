@@ -44,6 +44,7 @@ private slots:
 private:
     Ui::rkbProTool *ui;
     QTimer *timer;
+    QMovie *mv;
 };
 
 #endif // RKBPROTOOL_H

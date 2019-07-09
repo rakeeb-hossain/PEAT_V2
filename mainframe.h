@@ -155,6 +155,24 @@ private slots:
 
     void hideAllGraphs();
     
+    void on_actionShow_all_graphs_triggered();
+
+    void on_actionHide_All_Graphs_triggered();
+
+    void on_actionHide_Selected_Graph_triggered();
+
+    void on_actionLuminance_diag_graph_triggered();
+
+    void on_actionRed_Flash_Diag_Graph_triggered();
+
+    void on_actionLuminance_Flash_Graph_triggered();
+
+    void on_actionRed_Flash_Graph_triggered();
+
+    void moveLegend();
+
+    void on_actionPlot_Tooltips_triggered();
+
 private:
     Ui::mainFrame *ui;
 
@@ -177,6 +195,9 @@ private:
     QString secondHalfStylesheet = "stop:1.0#6d6b6b); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 200); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }";
     bool media_first_load = true;
     QCPItemTracer *phaseTracer;
+    QCPItemText *textLabel;
+    QCPItemText *textLabel2;
+    QLabel *placeholderLabel;
 };
 
 

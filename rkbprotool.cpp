@@ -37,6 +37,8 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( false );
     this->setFixedSize(640, 445);
 
+    mv = new QMovie(":/images/Res/pkmngif.gif");
+    mv->setScaledSize(ui->label_6->size());
 
     vidData = vid_info;
     vidFile = vid_file;
@@ -77,7 +79,13 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
            ui->label_5->setEnabled(true);
            ui->label_7->setEnabled(true);
            ui->label_8->setEnabled(true);
-           if (decision != 0) ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+           if (decision != 0) {
+               ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+           } else {
+               mv->start();
+               ui->label_6->setAttribute(Qt::WA_NoSystemBackground);
+               ui->label_6->setMovie(mv);
+           }
         }
     });
 
@@ -102,6 +110,7 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
     connect(ui->radioButton_7, &QRadioButton::clicked, this, [&]{
         ui->label_8->setText("Removes failing frames from video.");
     });
+
 }
 
 rkbProTool::~rkbProTool()

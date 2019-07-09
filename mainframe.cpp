@@ -31,7 +31,6 @@ mainFrame::mainFrame(QWidget *parent) :
     this->resize(QSize(863,585));
     this->setFixedSize(QSize(863,585));
 
-
     //Connect toolbar actions
     connect(ui->actionOpen_Video, &QAction::triggered, this, &mainFrame::on_folderButton_clicked);
     connect(ui->actionOpen_Report, &QAction::triggered, this, &mainFrame::openReport);
@@ -50,9 +49,11 @@ mainFrame::mainFrame(QWidget *parent) :
     connect(ui->actionTrace_Center_Homepage, &QAction::triggered, this, &mainFrame::traceHome);
 
     //Setup plot
-    ui->customPlot->yAxis->setRange(0,1);
+    ui->customPlot->yAxis->setRange(0.0, 1.05);
     ui->customPlot->yAxis->setVisible(false);
     ui->customPlot->xAxis->setLabel("Frame Number");
+    ui->customPlot->axisRect()->setAutoMargins(QCP::msNone);
+    ui->customPlot->axisRect()->setMargins(QMargins(0,0,0,38));
     ui->customPlot->setBackground(QBrush(QColor(214,214,214,255)));
     //9/15/18
     section = new QCPItemRect(ui->customPlot);
@@ -77,29 +78,31 @@ mainFrame::mainFrame(QWidget *parent) :
     section->setPen(Qt::NoPen);
     QCPItemLine *line = new QCPItemLine(ui->customPlot);
     // ADDED: Line begins at -10000 instead of 0
-    line->start->setCoords(-10000, 0.25);
-    line->end->setCoords(10000 , 0.25);
+    line->start->setCoords(-100000, 0.26);
+    line->end->setCoords(1000000, 0.26);
     line->setClipToAxisRect(false);
-    QCPItemText *textLabel = new QCPItemText(ui->customPlot);
-    QCPItemText *textLabel2 = new QCPItemText(ui->customPlot);
+    textLabel = new QCPItemText(ui->customPlot);
+    textLabel2 = new QCPItemText(ui->customPlot);
 
     textLabel->setPositionAlignment(Qt::AlignVCenter|Qt::AlignRight);
     textLabel->position->setType(QCPItemPosition::ptAxisRectRatio);
-    textLabel->position->setCoords(0.2, 0.7); // place position at center/top of axis rect
+    textLabel->position->setCoords(0.2, 0.71); // place position at center/top of axis rect
     // ADDED: message changed from Caution (Fail/Pass)
     textLabel->setText("Status: FAIL");
-    textLabel->setFont(QFont(font().family(), 12)); // make font a bit larger
+    textLabel->setFont(QFont(font().family(), 10.5, QFont::Medium)); // make font a bit larger
     // ADDED: disabled border around text label
     //textLabel->setPen(QPen(Qt::black)); // show black border around text
-    textLabel->setPen(Qt::noBrush); // show no border around text
+    textLabel->setPen(Qt::NoPen); // show no border around text
+    textLabel->setColor(QColor(214,214,214,255));
 
     textLabel2->setPositionAlignment(Qt::AlignVCenter|Qt::AlignRight);
     textLabel2->position->setType(QCPItemPosition::ptAxisRectRatio);
-    textLabel2->position->setCoords(0.2, 0.8); // place position at center/top of axis rect
+    textLabel2->position->setCoords(0.209, 0.78); // place position at center/top of axis rect
     textLabel2->setText("Status: PASS");
-    textLabel2->setFont(QFont(font().family(), 12)); // make font a bit larger
+    textLabel2->setFont(QFont(font().family(), 10.5, QFont::Medium)); // make font a bit larger
     //textLabel2->setPen(QPen(Qt::black)); // show black border around text
-    textLabel->setPen(Qt::noBrush); // show no border around text
+    textLabel2->setPen(Qt::NoPen); // show no border around text
+    textLabel2->setColor(QColor(214,214,214,255));
 
     ui->customPlot->xAxis->scaleRange(32.0, ui->customPlot->xAxis->range().center());
 
@@ -223,8 +226,12 @@ mainFrame::mainFrame(QWidget *parent) :
     descriptionLabel = new QLabel;
     descriptionLabel->setText("");
     descriptionLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    ui->statusbar->addPermanentWidget(vidLabel, 1);
+    placeholderLabel = new QLabel;
+    placeholderLabel->setText("");
+    placeholderLabel->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+    ui->statusbar->addPermanentWidget(vidLabel, 2);
     ui->statusbar->addPermanentWidget(descriptionLabel, 6);
+    ui->statusbar->addPermanentWidget(placeholderLabel, 2);
 
     //Create shortcuts
     ui->actionOpen_Video->setShortcut(Qt::Key_V | Qt::CTRL);
@@ -263,7 +270,7 @@ mainFrame::mainFrame(QWidget *parent) :
     ui->label_14->installEventFilter(this);
     ui->label_15->installEventFilter(this);
     ui->label_16->installEventFilter(this);
-    ui->label_17->installEventFilter(this);
+    ui->label_16->installEventFilter(this);
     ui->backWarning->installEventFilter(this);
     ui->forwardWarning->installEventFilter(this);
     ui->customPlot->installEventFilter(this);
@@ -271,6 +278,7 @@ mainFrame::mainFrame(QWidget *parent) :
     ui->slider->installEventFilter(this);
     ui->horizontalScrollBar->installEventFilter(this);
     ui->horizontalSlider->installEventFilter(this);
+    ui->timeLabel->installEventFilter(this);
 
     //Plot tooltip
     connect(ui->customPlot, &QCustomPlot::mouseMove, this, &mainFrame::plotTooltip);
@@ -294,6 +302,7 @@ mainFrame::mainFrame(QWidget *parent) :
     phaseTracer->setPen(QPen(QColor(8,54,117)));
     phaseTracer->setBrush(QColor(8,54,117));
     phaseTracer->setSize(7);
+    phaseTracer->setSelectable(false);
     phaseTracer->setVisible(false);
 
     // ADDED: Caution layer
@@ -309,16 +318,16 @@ mainFrame::mainFrame(QWidget *parent) :
     cautionLayer->bottomRight->setAxes(ui->customPlot->xAxis, ui->customPlot->yAxis);
     cautionLayer->bottomRight->setAxisRect(ui->customPlot->axisRect());
     cautionLayer->setClipToAxisRect(true); // is by default true already, but this will change in QCP 2.0.0
-    cautionLayer->topLeft->setCoords(-1000, 0.65); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
-    cautionLayer->bottomRight->setCoords(100000, 0.85); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
-    cautionLayer->setBrush(QBrush(QColor(164,164,164,255)));
+    cautionLayer->topLeft->setCoords(-100000, 0.68); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
+    cautionLayer->bottomRight->setCoords(1000000, 0.82); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
+    cautionLayer->setBrush(QBrush(QColor(184,184,184,255)));
     cautionLayer->setPen(Qt::NoPen);
 
     //Setup x-axis
 
     //Graph interactions
     ui->customPlot->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenuRequest(QPoint)));
+    connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenuRequest(QPoint)));
 }
 
 mainFrame::~mainFrame()
@@ -642,9 +651,7 @@ void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<do
 
 void mainFrame::on_reportButton_clicked() {
     try {
-        for (int i = 0; i < ui->customPlot->graphCount(); i++) {
-            ui->customPlot->graph(i)->data()->clear();
-        }
+        ui->customPlot->clearPlottables();
         player->pause();
         ui->label_6->setText("0");
         reset_slider();
@@ -699,7 +706,7 @@ void mainFrame::on_reportButton_clicked() {
         ui->customPlot->graph(2)->setName("Luminance flash");
         ui->customPlot->graph(3)->setName("Red flash");
 
-        ui->customPlot->yAxis->setRange(0.0, 1.0);
+        ui->customPlot->yAxis->setRange(0.0, 1.05);
         ui->customPlot->xAxis->setLabel("Frame Number");
         ui->customPlot->yAxis->setVisible(false);
         section->bottomRight->setCoords(frameNum, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
@@ -745,6 +752,7 @@ void mainFrame::on_reportButton_clicked() {
         ui->customPlot->graph(3)->addData(0.0, 0.0);
         ui->customPlot->replot();
         //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+        ui->customPlot->legend->setVisible(true);
 
         //Connect slots (slider and QCP)
         vidLabel->setText("Analysing...");
@@ -785,12 +793,10 @@ void mainFrame::on_reportButton_clicked() {
             threadStopped = true;
         });
         /*connect(this, &mainFrame::thread_stopped, [=]{
-            qDebug() << "ZEE";
             workerThread->terminate();
             r_instance->~rObject();
         });*/
         //connect(this, &mainFrame::thread_stopped, &loop, &QEventLoop::quit);
-
         loop.exec();
         if (!threadStopped) {
             ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + "stop:1.0#25c660); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 200); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }");
@@ -860,13 +866,14 @@ void mainFrame::on_reportButton_clicked() {
     ui->actionOpen_Report->setEnabled(true);
     ui->actionOpen_Video->setEnabled(true);
     // ADDED
-    ui->action_ShowAllGraphs->setEnabled(true);
-    ui->action_HideAllGraphs->setEnabled(true);
-    ui->action_HideSelectedGraphs->setEnabled(true);
-    ui->action_LumDiagGraph->setEnabled(true);
-    ui->action_RedDiagGraph->setEnabled(true);
-    ui->action_LumFlashGraph->setEnabled(true);
-    ui->action_RedFlashGraph->setEnabled(true);
+    ui->actionShow_all_graphs->setEnabled(true);
+    ui->actionHide_All_Graphs->setEnabled(true);
+    ui->actionHide_Selected_Graph->setEnabled(true);
+    ui->actionLuminance_diag_graph->setEnabled(true);
+    ui->actionRed_Flash_Diag_Graph->setEnabled(true);
+    ui->actionLuminance_Flash_Graph->setEnabled(true);
+    ui->actionRed_Flash_Graph->setEnabled(true);
+    ui->actionPlot_Tooltips->setEnabled(true);
     this->repaint();
     qApp->processEvents();
 }
@@ -1202,6 +1209,8 @@ void mainFrame::openReport()
                 });
 
                 //Initialize graphs
+                ui->customPlot->clearPlottables();
+                ui->customPlot->legend->setVisible(true);
                 ui->customPlot->addGraph();
                 ui->customPlot->addGraph();
                 ui->customPlot->addGraph();
@@ -1211,7 +1220,7 @@ void mainFrame::openReport()
                 ui->customPlot->graph(2)->setName("Luminance flash");
                 ui->customPlot->graph(3)->setName("Red flash");
 
-                ui->customPlot->yAxis->setRange(0.0, 1.0);
+                ui->customPlot->yAxis->setRange(0.0, 1.05);
                 ui->customPlot->xAxis->setLabel("Frame Number");
                 ui->customPlot->yAxis->setVisible(false);
                 section->bottomRight->setCoords(frame_count, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
@@ -1306,13 +1315,14 @@ void mainFrame::openReport()
                 ui->actionRun_Prophylactic_Tool->setEnabled(true);
                 index = 0;
                 // ADDED
-                ui->action_ShowAllGraphs->setEnabled(true);
-                ui->action_HideAllGraphs->setEnabled(true);
-                ui->action_HideSelectedGraphs->setEnabled(true);
-                ui->action_LumDiagGraph->setEnabled(true);
-                ui->action_RedDiagGraph->setEnabled(true);
-                ui->action_LumFlashGraph->setEnabled(true);
-                ui->action_RedFlashGraph->setEnabled(true);
+                ui->actionShow_all_graphs->setEnabled(true);
+                ui->actionHide_All_Graphs->setEnabled(true);
+                ui->actionHide_Selected_Graph->setEnabled(true);
+                ui->actionLuminance_diag_graph->setEnabled(true);
+                ui->actionRed_Flash_Diag_Graph->setEnabled(true);
+                ui->actionLuminance_Flash_Graph->setEnabled(true);
+                ui->actionRed_Flash_Graph->setEnabled(true);
+                ui->actionPlot_Tooltips->setEnabled(true);
 
                 vidLabel->setText("Done");
                 file.close();
@@ -1406,6 +1416,7 @@ void mainFrame::on_backWarning_clicked()
 
 void mainFrame::openProTool()
 {
+    player->pause();
     if (vid_data.size() < 5) {
         QMessageBox::critical(this, "Error", "A valid report was not loaded.");
         return;
@@ -1551,9 +1562,11 @@ void mainFrame::on_actionLight_Blue_triggered()
         ui->actionLight_Grey->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(190, 212, 221, 255)));
+        textLabel->setColor(QColor(190, 212, 221, 255));
+        textLabel2->setColor(QColor(190, 212, 221, 255));
         section->setBrush(QBrush(QColor(170,192,201,255)));
-        cautionLayer->setBrush(QBrush(QColor(140,162,171,255)));
-        ui->customPlot->repaint();
+        cautionLayer->setBrush(QBrush(QColor(160,182,191,255)));
+        ui->customPlot->replot();
     }
     else {
         ui->actionLight_Blue->setChecked(true);
@@ -1571,9 +1584,11 @@ void mainFrame::on_actionBeige_triggered()
         ui->actionLight_Grey->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(216, 201, 184, 255)));
+        textLabel->setColor(QColor(216, 201, 184, 255));
+        textLabel2->setColor(QColor(216, 201, 184, 255));
         section->setBrush(QBrush(QColor(196,181,164,255)));
-        cautionLayer->setBrush(QBrush(QColor(166,151,134,255)))
-        ui->customPlot->repaint();
+        cautionLayer->setBrush(QBrush(QColor(186,171,154,255)));
+        ui->customPlot->replot();
     }
     else {
         ui->actionBeige->setChecked(true);
@@ -1592,9 +1607,11 @@ void mainFrame::on_actionPale_triggered()
         ui->actionLight_Grey->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(247, 243, 239, 255)));
+        textLabel->setColor(QColor(247, 243, 239, 255));
+        textLabel2->setColor(QColor(247, 243, 239, 255));
         section->setBrush(QBrush(QColor(227,223,219,255)));
-        cautionLayer->setBrush(QBrush(QColor(197,132,141,255)));
-        ui->customPlot->repaint();
+        cautionLayer->setBrush(QBrush(QColor(217,213,209,255)));
+        ui->customPlot->replot();
     }
     else {
         ui->actionPale->setChecked(true);
@@ -1613,9 +1630,11 @@ void mainFrame::on_actionTurquoise_triggered()
         ui->actionLight_Grey->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(192, 219, 217, 255)));
+        textLabel->setColor(QColor(192, 219, 217, 255));
+        textLabel2->setColor(QColor(192, 219, 217, 255));
         section->setBrush(QBrush(QColor(172,199,197,255)));
-        cautionLayer->setBrush(QBrush(QColor(142,169,167,255)));
-        ui->customPlot->repaint();
+        cautionLayer->setBrush(QBrush(QColor(162,189,187,255)));
+        ui->customPlot->replot();
     }
     else {
         ui->actionTurquoise->setChecked(true);
@@ -1634,9 +1653,11 @@ void mainFrame::on_actionCharcoal_Grey_triggered()
         ui->actionLight_Grey->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(140, 144, 145, 255)));
+        textLabel->setColor(QColor(140, 144, 145, 255));
+        textLabel2->setColor(QColor(140, 144, 145, 255));
         section->setBrush(QBrush(QColor(120,124,125,255)));
-        cautionLayer->setBrush(QBrush(QColor(90,94,95,255)));
-        ui->customPlot->repaint();
+        cautionLayer->setBrush(QBrush(QColor(110,114,115,255)));
+        ui->customPlot->replot();
     }
     else {
         ui->actionCharcoal_Grey->setChecked(true);
@@ -1655,9 +1676,11 @@ void mainFrame::on_actionLight_Grey_triggered()
         ui->actionLight_Blue->setChecked(false);
         ui->actionWhite->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(214,214,214,255)));
+        textLabel->setColor(QColor(214,214,214,255));
+        textLabel2->setColor(QColor(214,214,214,255));
         section->setBrush(QBrush(QColor(194,194,194,255)));
-        cautionLayer->setBrush(QBrush(QColor(164,164,164,255)));
-        ui->customPlot->repaint();
+        cautionLayer->setBrush(QBrush(QColor(184,184,184,255)));
+        ui->customPlot->replot();
     }
     else {
         ui->actionLight_Grey->setChecked(true);
@@ -1676,6 +1699,11 @@ void mainFrame::on_actionWhite_triggered()
         ui->actionLight_Blue->setChecked(false);
         ui->actionLight_Grey->setChecked(false);
         ui->customPlot->setBackground(QBrush(QColor(252,252,252,255)));
+        textLabel->setColor(QColor(252,252,252,255));
+        textLabel2->setColor(QColor(252,252,252,255));
+        section->setBrush(QBrush(QColor(232,232,232,255)));
+        cautionLayer->setBrush(QBrush(QColor(222,222,222,255)));
+        ui->customPlot->replot();
         ui->customPlot->repaint();
     }
     else {
@@ -1718,12 +1746,12 @@ void mainFrame::on_actionPrint_Report_triggered()
     dialog->setWindowTitle("Print Document");
 
     if (dialog->exec() != QDialog::Accepted)
-        return -1;
+        return;
 
     QPainter painter;
     painter.begin(&printer);
 
-    painter.drawText(100, 100, 500, 500, Qt::AlignLCenter|Qt::AlignTop, text);
+    painter.drawText(100, 100, 500, 500, Qt::AlignHCenter|Qt::AlignTop, text);
 
     painter.end();
 }
@@ -1802,9 +1830,8 @@ bool mainFrame::on_actionSave_Report_triggered()
 void mainFrame::no_report_loaded() {
     vid_data.clear();
     saved = true;
-    for (int i = 0; i < ui->customPlot->graphCount(); i++) {
-        ui->customPlot->graph(i)->data()->clear();
-    }
+    ui->customPlot->clearPlottables();
+    ui->customPlot->legend->setVisible(false);
     ui->customPlot->replot();
     warnings.clear();
     reset_slider();
@@ -1815,13 +1842,14 @@ void mainFrame::no_report_loaded() {
     ui->actionSave_Report->setEnabled(false);
     ui->actionRun_Prophylactic_Tool->setEnabled(false);
     // ADDED
-    ui->action_ShowAllGraphs->setEnabled(false);
-    ui->action_HideAllGraphs->setEnabled(false);
-    ui->action_HideSelectedGraphs->setEnabled(false);
-    ui->action_LumDiagGraph->setEnabled(false);
-    ui->action_RedDiagGraph->setEnabled(false);
-    ui->action_LumFlashGraph->setEnabled(false);
-    ui->action_RedFlashGraph->setEnabled(false);
+    ui->actionShow_all_graphs->setEnabled(false);
+    ui->actionHide_All_Graphs->setEnabled(false);
+    ui->actionHide_Selected_Graph->setEnabled(false);
+    ui->actionLuminance_diag_graph->setEnabled(false);
+    ui->actionRed_Flash_Diag_Graph->setEnabled(false);
+    ui->actionLuminance_Flash_Graph->setEnabled(false);
+    ui->actionRed_Flash_Graph->setEnabled(false);
+    ui->actionPlot_Tooltips->setEnabled(false);
 
     ui->label_13->setText("");
 
@@ -1876,6 +1904,7 @@ bool mainFrame::eventFilter(QObject *obj, QEvent *event) {
         QWidget *w = qobject_cast<QWidget*>(obj);
         QString b = w->isEnabled() ? "" : " (disabled)";
         descriptionLabel->setText(w->toolTip() + b);
+        if (obj != ui->customPlot) QApplication::setOverrideCursor(Qt::ArrowCursor);
     }
     else if (event->type() == QEvent::Leave) {
         descriptionLabel->setText("");
@@ -1883,15 +1912,23 @@ bool mainFrame::eventFilter(QObject *obj, QEvent *event) {
     else if (event->type() == QEvent::ToolTip) {
         return true;
     }
+
     return QMainWindow::eventFilter(obj, event);
 }
 
 void mainFrame::plotTooltip(QMouseEvent *event) {
-    if (ui->customPlot->graphCount() == 4) {
+    vector<int> visibleGraphs;
+    for (int i = 0; i < ui->customPlot->graphCount(); i++) {
+        if (ui->customPlot->graph(i)->visible()) {
+            visibleGraphs.push_back(i);
+        }
+    }
+    if (visibleGraphs.size() > 0) {
         int x = ui->customPlot->xAxis->pixelToCoord(event->pos().x());
         //descriptionLabel->setText(QString::number(x) + ", " + QString::number(y));
         if (x <= nFrame && x >= 0) {
             double y = ui->customPlot->yAxis->pixelToCoord(event->pos().y());
+            if (y > 0) placeholderLabel->setText("Cursor: " + QString::number(x) + ", " + QString::number((int)(100*y)/100.0));
             /*
             QSharedPointer<QCPGraphDataContainer> dataMap1 = ui->customPlot->graph(0)->data();
             QSharedPointer<QCPGraphDataContainer> dataMap2 = ui->customPlot->graph(1)->data();
@@ -1902,39 +1939,79 @@ void mainFrame::plotTooltip(QMouseEvent *event) {
             double min = 2.0;
             int min_index = -1;
             double min_val = -1.0;
-            for (int i = 0; i < 4; i++) {
-                QCPGraphDataContainer::const_iterator ptr = ui->customPlot->graph(i)->data().data()->findBegin(x);
+            for (auto itr = visibleGraphs.begin(); itr != visibleGraphs.end(); itr++) {
+                QCPGraphDataContainer::const_iterator ptr = ui->customPlot->graph(*itr)->data().data()->findBegin(x);
                 double val = ptr->value-(double)y;
                 val = val > 0 ? val : -1.0*val;
                 if (val < min) {
                     min = val;
-                    min_index = i;
+                    min_index = *itr;
                     min_val = ptr->value;
                 }
             }
             if (min < 0.10) {
-                descriptionLabel->setText(QString::number(min_index) + ": " + QString::number(x) + ", " + QString::number(ui->customPlot->graph(min_index)->data().data()->findBegin(x)->value));
+                descriptionLabel->setText("Graph: " + QString::number(x) + ", " + QString::number(ui->customPlot->graph(min_index)->data().data()->findBegin(x)->value));
                 phaseTracer->setGraph(ui->customPlot->graph(min_index));
                 phaseTracer->setGraphKey(x);
                 phaseTracer->setVisible(true);
                 ui->customPlot->replot();
-                //QApplication::setOverrideCursor(Qt::ArrowCursor);
+                QApplication::setOverrideCursor(Qt::ArrowCursor);
                 QString status;
                 if (min_index == 2 || min_index == 3) {
                     status = (int)min_val == 1 ? "FAIL" : "PASS";
                 }
+                int dur = player->duration()*(double)x/(double)nFrame;
+                QString hours, minutes, seconds, milliseconds;
+                auto hrs = qFloor(dur / 3600000.0);
+                if (hrs < 10)
+                {
+                    hours = "0" + QString::number(hrs);
+                }
+                else {
+                    hours = QString::number(hrs);
+                }
+                auto mins = qFloor((dur - hrs*3600000.0) / 60000.0);
+                if (mins < 10)
+                {
+                    minutes = "0" + QString::number(mins);
+                }
+                else {
+                    minutes = QString::number(mins);
+                }
+                auto secs = qFloor((dur - hrs*3600000.0 - mins*60000.0) / 1000.0);
+                if (secs < 10)
+                {
+                    seconds = "0" + QString::number(secs);
+                }
+                else {
+                    seconds = QString::number(secs);
+                }
+                auto ms = (dur - hrs*3600000 - mins*60000 - secs*1000);
+                if (ms < 10)
+                {
+                    milliseconds = "0" + QString::number(ms);
+                }
+                else if (100 < ms && ms >= 10)
+                {
+                    milliseconds = "" + QString::number(ms);
+                }
+                else {
+                    milliseconds = QString::number(ms);
+                }
+                QString time = hours + ":" + minutes +":" + seconds + ":" + milliseconds;
+
                 switch(min_index) {
                     case 0:
-                        QToolTip::showText(event->globalPos(), "Luminance flash diag.\nFrame: " + QString::number(x) + "\nFlash #: " + QString::number(min_val*10));
+                        QToolTip::showText(event->globalPos(), "Luminance flash diag.\nFrame: " + QString::number(x) + "\nTime: " + time + "\nFlash #: " + QString::number(min_val*10));
                     break;
                     case 1:
-                        QToolTip::showText(event->globalPos(), "Red flash diag.\nFrame: " + QString::number(x) + "\nFlash #: " + QString::number(min_val*10));
+                        QToolTip::showText(event->globalPos(), "Red flash diag.\nFrame: " + QString::number(x) + "\nTime: " + time + "\nFlash #: " + QString::number(min_val*10));
                     break;
                     case 2:
-                        QToolTip::showText(event->globalPos(), "Luminance flash\nFrame: " + QString::number(x) + "\nStatus: " + status);
+                        QToolTip::showText(event->globalPos(), "Luminance flash\nFrame: " + QString::number(x) + "\nTime: " + time + "\nStatus: " + status);
                     break;
                     case 3:
-                        QToolTip::showText(event->globalPos(), "Red flash.\nFrame: " + QString::number(x) + "\nStatus: " + status);
+                        QToolTip::showText(event->globalPos(), "Red flash.\nFrame: " + QString::number(x) + "\nTime: " + time + "\nStatus: " + status);
                     break;
                 }
             }
@@ -1942,19 +2019,19 @@ void mainFrame::plotTooltip(QMouseEvent *event) {
                 descriptionLabel->setText("");
                 phaseTracer->setVisible(false);
                 QToolTip::hideText();
-                //QApplication::setOverrideCursor(Qt::ArrowCursor);
+                QApplication::setOverrideCursor(Qt::ArrowCursor);
             }
-            /*
+
             if (min < 0.05) {
                 QApplication::setOverrideCursor(Qt::PointingHandCursor);
             }
-            */
+
         }
         else {
             descriptionLabel->setText("");
             phaseTracer->setVisible(false);
             QToolTip::hideText();
-            //QApplication::setOverrideCursor(Qt::ArrowCursor);
+            QApplication::setOverrideCursor(Qt::ArrowCursor);
         }
     }
 }
@@ -1962,95 +2039,131 @@ void mainFrame::plotTooltip(QMouseEvent *event) {
 // ADDED
 void mainFrame::contextMenuRequest(QPoint pos)
 {
-  QMenu *menu = new QMenu(this);
-  menu->setAttribute(Qt::WA_DeleteOnClose);
-   
-  if (ui->customPlot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
-  {
-    menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignLeft));
-    menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignHCenter));
-    menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignRight));
-    menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignRight));
-    menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignLeft));
-  } else  // general context menu on graphs requested
-  {
-      if (ui->customPlot->selectedGraphs().size() > 0)
-          menu->addAction("Hide selected plot", this, SLOT(hideSelectedGraph()));
+  QMenu *menu = new QMenu(this);
+  menu->setAttribute(Qt::WA_DeleteOnClose);
+   
+  if (ui->customPlot->legend->selectTest(pos, false) >= 0) // context menu on legend requested
+  {
+    menu->addAction("Move to top left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignLeft));
+    menu->addAction("Move to top center", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignHCenter));
+    menu->addAction("Move to top right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignTop|Qt::AlignRight));
+    menu->addAction("Move to bottom right", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignRight));
+    menu->addAction("Move to bottom left", this, SLOT(moveLegend()))->setData((int)(Qt::AlignBottom|Qt::AlignLeft));
+  } else  // general context menu on graphs requested
+  {
+      if (ui->customPlot->selectedGraphs().size() > 0)
+          menu->addAction("Hide selected plot", this, SLOT(hideSelectedGraph()));
           menu->addSeparator();
-      if (ui->customPlot->graphCount() > 0) {
+      if (ui->customPlot->graphCount() > 0) {
           menu->addAction("Hide all plots", this, SLOT(hideAllGraphs()));
           menu->addAction("Show all plots", this, SLOT(showAllGraphs()));
       }
-  }
-  menu->popup(ui->customPlot->mapToGlobal(pos));
+  }
+  menu->popup(ui->customPlot->mapToGlobal(pos));
+}
+
+void mainFrame::moveLegend()
+{
+  if (QAction* contextAction = qobject_cast<QAction*>(sender())) // make sure this slot is really called by a context menu action, so it carries the data we need
+  {
+    bool ok;
+    int dataInt = contextAction->data().toInt(&ok);
+    if (ok)
+    {
+      ui->customPlot->axisRect()->insetLayout()->setInsetAlignment(0, (Qt::Alignment)dataInt);
+      ui->customPlot->replot();
+    }
+  }
 }
 
 void mainFrame::hideSelectedGraph() {
     foreach(QCPGraph *gr, ui->customPlot->selectedGraphs()) {
         gr->setVisible(false);
     }
+    phaseTracer->setVisible(false);
+    ui->customPlot->replot();
 }
 
 void mainFrame::hideAllGraphs() {
-    for (int i = 0; i > ui->customPlot->graphCount(); i++) {
+    for (int i = 0; i < ui->customPlot->graphCount(); i++) {
         ui->customPlot->graph(i)->setVisible(false);
+        qDebug() << ui->customPlot->graph(i)->visible();
     }
+    phaseTracer->setVisible(false);
+    ui->customPlot->replot();
 }
 
 void mainFrame::showAllGraphs() {
-    for (int i = 0; i > ui->customPlot->graphCount(); i++) {
+    for (int i = 0; i < ui->customPlot->graphCount(); i++) {
         ui->customPlot->graph(i)->setVisible(true);
     }
+    ui->customPlot->replot();
 }
 
 // ADDED: Graph actions
-/*
-void mainFrame::on_showAllGraphs_triggered() {
+void mainFrame::on_actionShow_all_graphs_triggered()
+{
     showAllGraphs();
 }
 
-void mainFrame::on_hideAllGraphs_triggered() {
+void mainFrame::on_actionHide_All_Graphs_triggered() {
     hideAllGraphs();
 }
 
-void mainFrame::on_hideSelectedGraphs_triggered() {
+void mainFrame::on_actionHide_Selected_Graph_triggered() {
     hideSelectedGraph();
 }
 
-void mainFrame::on_LumDiagGraph_triggered() {
-    if (ui->action_LumDiagGraph->isChecked() == true) {
-        ui->customPlot->graph(0)->setVisible(false);
-    } else {
+void mainFrame::on_actionLuminance_diag_graph_triggered() {
+    if (ui->actionLuminance_diag_graph->isChecked() == true) {
         ui->customPlot->graph(0)->setVisible(true);
+    } else {
+        ui->customPlot->graph(0)->setVisible(false);
     }
+    ui->customPlot->replot();
 }
 
-void mainFrame::on_RedDiagGraph_triggered() {
-    if (ui->action_RedDiagGraph->isChecked() == true) {
-        ui->customPlot->graph(1)->setVisible(false);
-    } else {
+void mainFrame::on_actionRed_Flash_Diag_Graph_triggered() {
+    if (ui->actionRed_Flash_Diag_Graph->isChecked() == true) {
         ui->customPlot->graph(1)->setVisible(true);
+    } else {
+        ui->customPlot->graph(1)->setVisible(false);
     }
+    ui->customPlot->replot();
 }
 
-void mainFrame::on_LumFlashGraph_triggered() {
-    if (ui->action_LumDiagGraph->isChecked() == true) {
-        ui->customPlot->graph(2)->setVisible(false);
-    } else {
+void mainFrame::on_actionLuminance_Flash_Graph_triggered() {
+    if (ui->actionLuminance_Flash_Graph->isChecked() == true) {
         ui->customPlot->graph(2)->setVisible(true);
-    }
-}
-
-void mainFrame::on_RedFlashGraph_triggered() {
-    if (ui->action_RedFlashDiag->isChecked() == true) {
-        ui->customPlot->graph(3)->setVisible(false);
     } else {
-        ui->customPlot->graph(3)->setVisible(true);
+        ui->customPlot->graph(2)->setVisible(false);
     }
+    ui->customPlot->replot();
 }
-*/
+
+void mainFrame::on_actionRed_Flash_Graph_triggered() {
+    if (ui->actionRed_Flash_Graph->isChecked() == true) {
+        ui->customPlot->graph(3)->setVisible(true);
+    } else {
+        ui->customPlot->graph(3)->setVisible(false);
+    }
+    ui->customPlot->replot();
+}
 
 
-// ADD Menubar actions to hide graphs (just simple functions), make graphs visible again, complete context menu functions, 
-// make plot labels nice, *finish printing*, *reimplement QCPAxisTicker to get time labels from frames and edit subticks*, 
-// *fix reloading of plots*, *sensitivity*, *UI plans*, *resizing*, *previews*, final testing!
+// *printing*,
+// *UI plans*, *resizing*, *previews*, *screen capture*
+// *fix reloading of plots*, *sensitivity*, final testing!
+
+void mainFrame::on_actionPlot_Tooltips_triggered()
+{
+    if (ui->actionPlot_Tooltips->isChecked() == true) {
+        connect(ui->customPlot, &QCustomPlot::mouseMove, this, &mainFrame::plotTooltip);
+        phaseTracer->setVisible(true);
+    } else {
+        disconnect(ui->customPlot, &QCustomPlot::mouseMove, this, &mainFrame::plotTooltip);
+        phaseTracer->setVisible(false);
+    }
+    ui->customPlot->replot();
+
+}

@@ -24,68 +24,12 @@
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QCustomPlot" name="customPlot" native="true">
-    <property name="geometry">
-     <rect>
-      <x>269</x>
-      <y>20</y>
-      <width>581</width>
-      <height>341</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Analysis plot</string>
-    </property>
-    <property name="toolTipDuration">
-     <number>0</number>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-color:black;
-border-style: solid;
-border-width: 1px;
-
-QTooltip {
-	background-color:blue;
-}</string>
-    </property>
-    <widget class="Line" name="line_5">
-     <property name="geometry">
-      <rect>
-       <x>288</x>
-       <y>0</y>
-       <width>3</width>
-       <height>302</height>
-      </rect>
-     </property>
-     <property name="autoFillBackground">
-      <bool>false</bool>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">background-color:black;</string>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
-     </property>
-     <property name="lineWidth">
-      <number>3</number>
-     </property>
-     <property name="midLineWidth">
-      <number>3</number>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-    </widget>
-   </widget>
    <widget class="QLabel" name="label_10">
     <property name="geometry">
      <rect>
-      <x>500</x>
+      <x>505</x>
       <y>483</y>
-      <width>111</width>
+      <width>115</width>
       <height>20</height>
      </rect>
     </property>
@@ -157,42 +101,12 @@ QTooltip {
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QPushButton" name="backWarning">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>630</x>
-      <y>440</y>
-      <width>37</width>
-      <height>37</height>
-     </rect>
-    </property>
-    <property name="focusPolicy">
-     <enum>Qt::NoFocus</enum>
-    </property>
-    <property name="toolTip">
-     <string>Previous warning</string>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">#backWarning
-{
-background-image: url(:/images/Res/PrevWarningDisabled.png);
-border-image: url(:/images/Res/PrevWarningDisabled.png);
-}
-</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_9">
     <property name="geometry">
      <rect>
       <x>410</x>
       <y>483</y>
-      <width>91</width>
+      <width>95</width>
       <height>20</height>
      </rect>
     </property>
@@ -225,7 +139,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
     <property name="geometry">
      <rect>
       <x>60</x>
-      <y>446</y>
+      <y>445</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -271,18 +185,18 @@ border-radius: 5px;</string>
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>440</y>
-      <width>321</width>
-      <height>25</height>
+      <y>441</y>
+      <width>331</width>
+      <height>30</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
-      <pointsize>10</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
+      <pointsize>11</pointsize>
      </font>
+    </property>
+    <property name="cursor">
+     <cursorShape>ArrowCursor</cursorShape>
     </property>
     <property name="toolTip">
      <string>Loaded file name</string>
@@ -295,7 +209,7 @@ border-width:2px;
 -webkit-border-radius: 5px;
 -moz-border-radius: 5px;
 border-radius: 7px;
-font-size: 10pt;</string>
+font-size: 10.5pt;</string>
     </property>
     <property name="text">
      <string>(No file open)</string>
@@ -320,7 +234,7 @@ font-size: 10pt;</string>
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>402</y>
+      <y>403</y>
       <width>37</width>
       <height>37</height>
      </rect>
@@ -402,54 +316,6 @@ border-image: url(:/images/Res/AnalyzeDisabled.png);</string>
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QSlider" name="horizontalSlider">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>280</x>
-      <y>390</y>
-      <width>571</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="focusPolicy">
-     <enum>Qt::NoFocus</enum>
-    </property>
-    <property name="toolTip">
-     <string>Zoom control</string>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QSlider::groove:horizontal {
-    border: 1px solid #999999;
-    height: 5px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
-   background: rgba(140,140,140,200);
-    margin: 2px 0;
-}
-
-QSlider::handle:horizontal {
-    background:rgba(143,143,143,210);
-    border: 1px solid rgb(143,143,143);
-    width: 8px;
-    margin: -6px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
-    border-radius: 3px;
-}
-</string>
-    </property>
-    <property name="minimum">
-     <number>-50</number>
-    </property>
-    <property name="maximum">
-     <number>50</number>
-    </property>
-    <property name="value">
-     <number>0</number>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
@@ -486,7 +352,7 @@ QSlider::handle:horizontal {
       <x>259</x>
       <y>0</y>
       <width>7</width>
-      <height>383</height>
+      <height>396</height>
      </rect>
     </property>
     <property name="cursor">
@@ -551,28 +417,12 @@ border-image: url(:/images/Res/PlayDisabled.png);</string>
      <string/>
     </property>
    </widget>
-   <widget class="Line" name="line">
-    <property name="geometry">
-     <rect>
-      <x>0</x>
-      <y>374</y>
-      <width>901</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="lineWidth">
-     <number>2</number>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
    <widget class="QLabel" name="label_13">
     <property name="geometry">
      <rect>
-      <x>500</x>
+      <x>505</x>
       <y>503</y>
-      <width>111</width>
+      <width>114</width>
       <height>20</height>
      </rect>
     </property>
@@ -606,7 +456,7 @@ border-image: url(:/images/Res/PlayDisabled.png);</string>
      <rect>
       <x>410</x>
       <y>503</y>
-      <width>91</width>
+      <width>95</width>
       <height>20</height>
      </rect>
     </property>
@@ -691,44 +541,6 @@ border-image: url(:/images/Res/FFwdDisabled.png);</string>
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="label_6">
-    <property name="geometry">
-     <rect>
-      <x>670</x>
-      <y>440</y>
-      <width>101</width>
-      <height>33</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Segoe UI</family>
-      <pointsize>11</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string># of warnings</string>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-color: #C01A00;
-border-width: 2px;
-border-style: solid;
-background-color: #FFECE9;
-border-radius: 5px;
-color: #C01A00;</string>
-    </property>
-    <property name="text">
-     <string>0</string>
-    </property>
-    <property name="scaledContents">
-     <bool>false</bool>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-   </widget>
    <widget class="QSlider" name="slider">
     <property name="enabled">
      <bool>false</bool>
@@ -770,10 +582,10 @@ QSlider::handle:horizontal {
      <number>99</number>
     </property>
     <property name="singleStep">
-     <number>1</number>
+     <number>1000</number>
     </property>
     <property name="pageStep">
-     <number>1</number>
+     <number>1000</number>
     </property>
     <property name="sliderPosition">
      <number>0</number>
@@ -784,56 +596,8 @@ QSlider::handle:horizontal {
     <property name="tickPosition">
      <enum>QSlider::NoTicks</enum>
     </property>
-   </widget>
-   <widget class="QScrollBar" name="horizontalScrollBar">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>364</y>
-      <width>581</width>
-      <height>14</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Plot scrollbar</string>
-    </property>
-    <property name="pageStep">
-     <number>1</number>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="forwardWarning">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>770</x>
-      <y>440</y>
-      <width>37</width>
-      <height>37</height>
-     </rect>
-    </property>
-    <property name="focusPolicy">
-     <enum>Qt::NoFocus</enum>
-    </property>
-    <property name="toolTip">
-     <string>Next warning</string>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">#forwardWarning
-{
-background-image: url(:/images/Res/NextWarningDisabled.png);
-border-image: url(:/images/Res/NextWarningDisabled.png);
-}</string>
-    </property>
-    <property name="text">
-     <string/>
+    <property name="tickInterval">
+     <number>0</number>
     </property>
    </widget>
    <widget class="QFrame" name="frame_2">
@@ -960,7 +724,7 @@ border-image: url(:/images/Res/NextWarningDisabled.png);
     <property name="geometry">
      <rect>
       <x>240</x>
-      <y>440</y>
+      <y>435</y>
       <width>37</width>
       <height>37</height>
      </rect>
@@ -990,44 +754,23 @@ border-image: url(:/images/Res/EjectPressed.png);
      <string/>
     </property>
    </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>800</x>
-      <y>510</y>
-      <width>61</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Segoe UI</family>
-     </font>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="pixmap">
-     <pixmap resource="resources.qrc">:/images/Res/NiddrLogo.bmp</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="C_Label" name="label_17">
     <property name="geometry">
      <rect>
       <x>254</x>
       <y>0</y>
       <width>16</width>
-      <height>381</height>
+      <height>401</height>
      </rect>
     </property>
     <property name="cursor">
      <cursorShape>SizeHorCursor</cursorShape>
     </property>
     <property name="mouseTracking">
-     <bool>true</bool>
+     <bool>false</bool>
+    </property>
+    <property name="contextMenuPolicy">
+     <enum>Qt::NoContextMenu</enum>
     </property>
     <property name="styleSheet">
      <string notr="true">border: 0px;</string>
@@ -1045,7 +788,7 @@ border-image: url(:/images/Res/EjectPressed.png);
       <x>10</x>
       <y>220</y>
       <width>241</width>
-      <height>151</height>
+      <height>171</height>
      </rect>
     </property>
     <property name="font">
@@ -1083,14 +826,14 @@ border-image: url(:/images/Res/EjectPressed.png);
       <x>10</x>
       <y>220</y>
       <width>241</width>
-      <height>151</height>
+      <height>171</height>
      </rect>
     </property>
     <property name="focusPolicy">
      <enum>Qt::NoFocus</enum>
     </property>
     <property name="toolTip">
-     <string>Playback output</string>
+     <string>Video playback</string>
     </property>
     <property name="autoFillBackground">
      <bool>false</bool>
@@ -1126,8 +869,8 @@ background: transparent;</string>
     <widget class="QLabel" name="label_7">
      <property name="geometry">
       <rect>
-       <x>690</x>
-       <y>473</y>
+       <x>712</x>
+       <y>475</y>
        <width>61</width>
        <height>21</height>
       </rect>
@@ -1147,38 +890,293 @@ background: transparent;</string>
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
+    <widget class="QLabel" name="label_5">
+     <property name="geometry">
+      <rect>
+       <x>790</x>
+       <y>510</y>
+       <width>61</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+      </font>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="resources.qrc">:/images/Res/NiddrLogo.bmp</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCustomPlot" name="customPlot" native="true">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>10</y>
+       <width>581</width>
+       <height>341</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Analysis plot</string>
+     </property>
+     <property name="toolTipDuration">
+      <number>0</number>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-color:black;
+border-style: solid;
+border-width: 1px;
+
+QTooltip {
+	background-color:blue;
+}</string>
+     </property>
+     <widget class="Line" name="line_5">
+      <property name="geometry">
+       <rect>
+        <x>288</x>
+        <y>0</y>
+        <width>3</width>
+        <height>302</height>
+       </rect>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background-color:black;</string>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="lineWidth">
+       <number>3</number>
+      </property>
+      <property name="midLineWidth">
+       <number>3</number>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QScrollBar" name="horizontalScrollBar">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>351</y>
+       <width>581</width>
+       <height>14</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>Plot scrollbar</string>
+     </property>
+     <property name="pageStep">
+      <number>1</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="Line" name="line">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>390</y>
+       <width>901</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="lineWidth">
+      <number>2</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QSlider" name="horizontalSlider">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>370</y>
+       <width>581</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="toolTip">
+      <string>Zoom control</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QSlider::groove:horizontal {
+    border: 1px solid #999999;
+    height: 5px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+   background: rgba(140,140,140,200);
+    margin: 2px 0;
+}
+
+QSlider::handle:horizontal {
+    background:rgba(143,143,143,210);
+    border: 1px solid rgb(143,143,143);
+    width: 8px;
+    margin: -6px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 3px;
+}
+</string>
+     </property>
+     <property name="minimum">
+      <number>-50</number>
+     </property>
+     <property name="maximum">
+      <number>50</number>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="forwardWarning">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>800</x>
+       <y>442</y>
+       <width>37</width>
+       <height>37</height>
+      </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="toolTip">
+      <string>Next warning</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#forwardWarning
+{
+background-image: url(:/images/Res/NextWarningDisabled.png);
+border-image: url(:/images/Res/NextWarningDisabled.png);
+}</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label_6">
+     <property name="geometry">
+      <rect>
+       <x>682</x>
+       <y>444</y>
+       <width>118</width>
+       <height>31</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+       <pointsize>11</pointsize>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string># of warnings</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">border-color: #C01A00;
+border-width: 2px;
+border-style: solid;
+background-color: #FFECE9;
+border-radius: 5px;
+color: #C01A00;</string>
+     </property>
+     <property name="text">
+      <string>0</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="backWarning">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>645</x>
+       <y>442</y>
+       <width>37</width>
+       <height>37</height>
+      </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="toolTip">
+      <string>Previous warning</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">#backWarning
+{
+background-image: url(:/images/Res/PrevWarningDisabled.png);
+border-image: url(:/images/Res/PrevWarningDisabled.png);
+}
+</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+    </widget>
    </widget>
    <zorder>frame_3</zorder>
-   <zorder>customPlot</zorder>
    <zorder>label_10</zorder>
    <zorder>label_8</zorder>
-   <zorder>backWarning</zorder>
    <zorder>label_9</zorder>
    <zorder>timeLabel</zorder>
    <zorder>label</zorder>
    <zorder>restartButton</zorder>
    <zorder>reportButton</zorder>
    <zorder>label_11</zorder>
-   <zorder>horizontalSlider</zorder>
    <zorder>label_2</zorder>
-   <zorder>line_2</zorder>
    <zorder>pauseButton</zorder>
    <zorder>playButton</zorder>
-   <zorder>line</zorder>
    <zorder>label_13</zorder>
    <zorder>label_12</zorder>
    <zorder>rewindButton</zorder>
    <zorder>forwardButton</zorder>
-   <zorder>label_6</zorder>
    <zorder>slider</zorder>
-   <zorder>horizontalScrollBar</zorder>
-   <zorder>forwardWarning</zorder>
    <zorder>frame_2</zorder>
    <zorder>folderButton</zorder>
-   <zorder>label_5</zorder>
-   <zorder>label_17</zorder>
    <zorder>label_14</zorder>
    <zorder>videoWidget_2</zorder>
+   <zorder>line_2</zorder>
+   <zorder>label_17</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -1243,9 +1241,25 @@ background: transparent;</string>
     <addaction name="actionAbout_PEAT"/>
     <addaction name="actionTrace_Center_Homepage"/>
    </widget>
+   <widget class="QMenu" name="menuGraph">
+    <property name="title">
+     <string>Graph</string>
+    </property>
+    <addaction name="actionHide_Selected_Graph"/>
+    <addaction name="actionShow_all_graphs"/>
+    <addaction name="actionHide_All_Graphs"/>
+    <addaction name="separator"/>
+    <addaction name="actionLuminance_diag_graph"/>
+    <addaction name="actionRed_Flash_Diag_Graph"/>
+    <addaction name="actionLuminance_Flash_Graph"/>
+    <addaction name="actionRed_Flash_Graph"/>
+    <addaction name="separator"/>
+    <addaction name="actionPlot_Tooltips"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuAnalysis"/>
    <addaction name="menuControls"/>
+   <addaction name="menuGraph"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -1531,6 +1545,100 @@ background: transparent;</string>
     <font>
      <family>Segoe UI</family>
     </font>
+   </property>
+  </action>
+  <action name="actionShow_all_graphs">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Show All Graphs</string>
+   </property>
+  </action>
+  <action name="actionHide_All_Graphs">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Hide All Graphs</string>
+   </property>
+  </action>
+  <action name="actionLuminance_diag_graph">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Luminance Diag. Graph </string>
+   </property>
+  </action>
+  <action name="actionRed_Flash_Diag_Graph">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Red Flash Diag. Graph</string>
+   </property>
+  </action>
+  <action name="actionLuminance_Flash_Graph">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Luminance Flash Graph</string>
+   </property>
+  </action>
+  <action name="actionRed_Flash_Graph">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Red Flash Graph</string>
+   </property>
+  </action>
+  <action name="actionHide_Selected_Graph">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Hide Selected Graph</string>
+   </property>
+  </action>
+  <action name="actionPlot_Tooltips">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Plot Tooltips</string>
    </property>
   </action>
  </widget>
