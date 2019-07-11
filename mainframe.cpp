@@ -256,8 +256,6 @@ mainFrame::mainFrame(QWidget *parent) :
     ui->restartButton->installEventFilter(this);
     ui->label->installEventFilter(this);
     ui->label_2->installEventFilter(this);
-    ui->label_3->installEventFilter(this);
-    ui->label_4->installEventFilter(this);
     ui->label_5->installEventFilter(this);
     ui->label_6->installEventFilter(this);
     ui->label_7->installEventFilter(this);
@@ -268,9 +266,7 @@ mainFrame::mainFrame(QWidget *parent) :
     ui->label_12->installEventFilter(this);
     ui->label_13->installEventFilter(this);
     ui->label_14->installEventFilter(this);
-    ui->label_15->installEventFilter(this);
-    ui->label_16->installEventFilter(this);
-    ui->label_16->installEventFilter(this);
+    ui->frame_2->installEventFilter(this);
     ui->backWarning->installEventFilter(this);
     ui->forwardWarning->installEventFilter(this);
     ui->customPlot->installEventFilter(this);
@@ -1879,8 +1875,8 @@ void mainFrame::on_label_17_mouseMoved()
     int diff = ui->label_17->x_new_pos - ui->label_17->x_old_pos;
     //ui->line_2->setGeometry(259+diff, 0, 7, 383);
     int origPos = ui->label_17->orig_x_pos;
-    ui->label_17->setGeometry(origPos+diff, 0, 16, 381);
-    ui->line_2->setGeometry(origPos+5+diff, 0, 7, 383);
+    ui->label_17->setGeometry(origPos+diff, 0, 16, 394);
+    ui->line_2->setGeometry(origPos+5+diff, 0, 7, 396);
 
     ui->customPlot->setGeometry(origPos+16+diff, 20, origPos+327-diff, 341);
     //ui->line_5->setGeometry(288+diff, 0, 3, 302);
@@ -1891,8 +1887,8 @@ void mainFrame::on_label_17_mouseMoved()
     ui->customPlot->setMask(mask);
 
 
-    ui->videoWidget_2->setGeometry(10, origPos-34-diff, origPos-13+diff, origPos-103+diff);
-    ui->label_14->setGeometry(10, origPos-34-diff, origPos-13+diff, origPos-103+diff);
+    ui->videoWidget_2->setGeometry(10, origPos-34-diff, origPos-13+diff, origPos-83+diff);
+    ui->label_14->setGeometry(10, origPos-34-diff, origPos-13+diff, origPos-83+diff);
     this->update();
 
     //ui->label_2
@@ -2165,5 +2161,4 @@ void mainFrame::on_actionPlot_Tooltips_triggered()
         phaseTracer->setVisible(false);
     }
     ui->customPlot->replot();
-
 }
