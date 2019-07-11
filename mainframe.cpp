@@ -799,7 +799,7 @@ void mainFrame::on_reportButton_clicked() {
         //connect(this, &mainFrame::thread_stopped, &loop, &QEventLoop::quit);
         loop.exec();
         if (!threadStopped) {
-            ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + "stop:1.0#25c660); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 200); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }");
+            ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + "stop:1.0#25c660); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 255); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }");
 
             //Check to see vid_data has valid arrays of data points
             if (vid_data.size() < 4) {

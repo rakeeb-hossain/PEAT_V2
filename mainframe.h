@@ -192,7 +192,7 @@ private:
     QCPItemRect *section;
     QCPItemRect *cautionLayer;
     string firstHalfStylesheet = "QSlider::groove:horizontal { height: 8px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0,stop:0.000000#6d6b6b,";
-    QString secondHalfStylesheet = "stop:1.0#6d6b6b); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 200); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }";
+    QString secondHalfStylesheet = "stop:1.0#6d6b6b); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 255); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }";
     bool media_first_load = true;
     QCPItemTracer *phaseTracer;
     QCPItemText *textLabel;

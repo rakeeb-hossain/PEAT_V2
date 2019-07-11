@@ -192,7 +192,10 @@ border-radius: 5px;</string>
     </property>
     <property name="font">
      <font>
+      <family>Segoe UI</family>
       <pointsize>11</pointsize>
+      <weight>75</weight>
+      <bold>true</bold>
      </font>
     </property>
     <property name="cursor">
