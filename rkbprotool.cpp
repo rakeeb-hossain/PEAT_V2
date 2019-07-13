@@ -35,7 +35,7 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
     ui->setupUi(this);
     this->setWindowTitle("Prophylactic Tool");
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( false );
-    this->setFixedSize(640, 445);
+    this->setFixedSize(QSize(640, 445));
 
     mv = new QMovie(":/images/Res/pkmngif.gif");
     mv->setScaledSize(ui->label_6->size());
@@ -135,6 +135,10 @@ void rkbProTool::on_radioButton_2_clicked()
     decision  = 2;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
 
+    mv->start();
+    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
+    preview->setScaledSize(ui->label_10->size());
+    preview->start();
 }
 
 void rkbProTool::on_radioButton_3_clicked()
@@ -150,6 +154,10 @@ void rkbProTool::on_radioButton_3_clicked()
     decision  = 3;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
 
+    mv->start();
+    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
+    preview->setScaledSize(ui->label_10->size());
+    preview->start();
 }
 
 void rkbProTool::on_radioButton_4_clicked()
@@ -164,6 +172,11 @@ void rkbProTool::on_radioButton_4_clicked()
     ui->label_4->setEnabled(true);
     decision  = 4;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+
+    mv->start();
+    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
+    preview->setScaledSize(ui->label_10->size());
+    preview->start();
 }
 
 void rkbProTool::on_radioButton_clicked()
@@ -178,6 +191,11 @@ void rkbProTool::on_radioButton_clicked()
     ui->label_4->setEnabled(true);
     decision  = 1;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+
+    mv->start();
+    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
+    preview->setScaledSize(ui->label_10->size());
+    preview->start();
 }
 
 void rkbProTool::on_radioButton_5_clicked()
@@ -187,6 +205,11 @@ void rkbProTool::on_radioButton_5_clicked()
     ui->label_4->setEnabled(false);
     decision  = 5;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+
+    mv->start();
+    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
+    preview->setScaledSize(ui->label_10->size());
+    preview->start();
 }
 
 /*
@@ -212,6 +235,11 @@ void rkbProTool::on_radioButton_7_clicked()
     ui->label_4->setEnabled(false);
     decision  = 7;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
+
+    mv->start();
+    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
+    preview->setScaledSize(ui->label_10->size());
+    preview->start();
 }
 
 

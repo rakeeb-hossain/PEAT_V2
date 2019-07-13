@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>863</width>
+    <width>882</width>
     <height>585</height>
    </rect>
   </property>
@@ -181,52 +181,6 @@ border-radius: 5px;</string>
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>290</x>
-      <y>441</y>
-      <width>331</width>
-      <height>30</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>11</pointsize>
-     </font>
-    </property>
-    <property name="cursor">
-     <cursorShape>ArrowCursor</cursorShape>
-    </property>
-    <property name="toolTip">
-     <string>Loaded file name</string>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">background-color:rgb(200, 200, 210);
-border-style:solid;
-border-color: #4B4B4B;
-border-width:2px;
--webkit-border-radius: 5px;
--moz-border-radius: 5px;
-border-radius: 7px;
-font-size: 10.5pt;</string>
-    </property>
-    <property name="text">
-     <string>(No file open)</string>
-    </property>
-    <property name="textFormat">
-     <enum>Qt::AutoText</enum>
-    </property>
-    <property name="scaledContents">
-     <bool>false</bool>
-    </property>
-    <property name="alignment">
-     <set>Qt::AlignCenter</set>
-    </property>
-    <property name="wordWrap">
-     <bool>false</bool>
-    </property>
-   </widget>
    <widget class="QPushButton" name="restartButton">
     <property name="enabled">
      <bool>false</bool>
@@ -316,47 +270,17 @@ border-image: url(:/images/Res/AnalyzeDisabled.png);</string>
      <set>Qt::AlignCenter</set>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>241</width>
-      <height>101</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Segoe UI</family>
-     </font>
-    </property>
-    <property name="toolTip">
-     <string>Trace R&amp;D Center</string>
-    </property>
-    <property name="autoFillBackground">
-     <bool>true</bool>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-    <property name="pixmap">
-     <pixmap resource="resources.qrc">:/images/Res/TraceLogoSmall.bmp</pixmap>
-    </property>
-    <property name="scaledContents">
-     <bool>true</bool>
-    </property>
-   </widget>
    <widget class="Line" name="line_2">
     <property name="geometry">
      <rect>
-      <x>259</x>
+      <x>358</x>
       <y>0</y>
       <width>7</width>
       <height>396</height>
      </rect>
     </property>
     <property name="cursor">
-     <cursorShape>SizeHorCursor</cursorShape>
+     <cursorShape>ArrowCursor</cursorShape>
     </property>
     <property name="lineWidth">
      <number>2</number>
@@ -541,65 +465,6 @@ border-image: url(:/images/Res/FFwdDisabled.png);</string>
      <string/>
     </property>
    </widget>
-   <widget class="QSlider" name="slider">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>70</x>
-      <y>410</y>
-      <width>771</width>
-      <height>22</height>
-     </rect>
-    </property>
-    <property name="focusPolicy">
-     <enum>Qt::NoFocus</enum>
-    </property>
-    <property name="toolTip">
-     <string>Video position</string>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QSlider::groove:horizontal {
-    height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
-   background-color: rgba(109, 107, 107, 140);
-    margin: 2px 0;
-}
-
-QSlider::handle:horizontal {
-    background-color: rgba(143,143,143, 200);
-    border: 1px solid rgb(143,143,143);
-    width: 8px;
-    margin: -6px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
-    border-radius: 5px;
-}
-</string>
-    </property>
-    <property name="maximum">
-     <number>99</number>
-    </property>
-    <property name="singleStep">
-     <number>1000</number>
-    </property>
-    <property name="pageStep">
-     <number>1000</number>
-    </property>
-    <property name="sliderPosition">
-     <number>0</number>
-    </property>
-    <property name="orientation">
-     <enum>Qt::Horizontal</enum>
-    </property>
-    <property name="tickPosition">
-     <enum>QSlider::NoTicks</enum>
-    </property>
-    <property name="tickInterval">
-     <number>0</number>
-    </property>
-   </widget>
    <widget class="QPushButton" name="folderButton">
     <property name="geometry">
      <rect>
@@ -637,14 +502,14 @@ border-image: url(:/images/Res/EjectPressed.png);
    <widget class="C_Label" name="label_17">
     <property name="geometry">
      <rect>
-      <x>254</x>
+      <x>355</x>
       <y>0</y>
       <width>16</width>
       <height>401</height>
      </rect>
     </property>
     <property name="cursor">
-     <cursorShape>SizeHorCursor</cursorShape>
+     <cursorShape>ArrowCursor</cursorShape>
     </property>
     <property name="mouseTracking">
      <bool>false</bool>
@@ -666,9 +531,9 @@ border-image: url(:/images/Res/EjectPressed.png);
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>220</y>
-      <width>241</width>
-      <height>171</height>
+      <y>113</y>
+      <width>341</width>
+      <height>271</height>
      </rect>
     </property>
     <property name="font">
@@ -700,37 +565,12 @@ border-image: url(:/images/Res/EjectPressed.png);
      <bool>false</bool>
     </property>
    </widget>
-   <widget class="QVideoWidget" name="videoWidget_2" native="true">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>220</y>
-      <width>241</width>
-      <height>171</height>
-     </rect>
-    </property>
-    <property name="focusPolicy">
-     <enum>Qt::NoFocus</enum>
-    </property>
-    <property name="toolTip">
-     <string>Video playback</string>
-    </property>
-    <property name="autoFillBackground">
-     <bool>false</bool>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">border-color: black;
-border-style: solid;
-border-width: 1px;
-background: transparent;</string>
-    </property>
-   </widget>
    <widget class="QFrame" name="frame_3">
     <property name="geometry">
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>862</width>
+      <width>881</width>
       <height>544</height>
      </rect>
     </property>
@@ -773,9 +613,9 @@ background: transparent;</string>
     <widget class="QLabel" name="label_5">
      <property name="geometry">
       <rect>
-       <x>790</x>
+       <x>806</x>
        <y>510</y>
-       <width>61</width>
+       <width>62</width>
        <height>31</height>
       </rect>
      </property>
@@ -797,9 +637,9 @@ background: transparent;</string>
     <widget class="QCustomPlot" name="customPlot" native="true">
      <property name="geometry">
       <rect>
-       <x>270</x>
+       <x>370</x>
        <y>10</y>
-       <width>581</width>
+       <width>501</width>
        <height>341</height>
       </rect>
      </property>
@@ -824,7 +664,7 @@ QTooltip {
      <widget class="Line" name="line_5">
       <property name="geometry">
        <rect>
-        <x>288</x>
+        <x>251</x>
         <y>0</y>
         <width>3</width>
         <height>302</height>
@@ -856,10 +696,10 @@ QTooltip {
      </property>
      <property name="geometry">
       <rect>
-       <x>270</x>
+       <x>370</x>
        <y>351</y>
-       <width>581</width>
-       <height>14</height>
+       <width>501</width>
+       <height>20</height>
       </rect>
      </property>
      <property name="toolTip">
@@ -894,9 +734,9 @@ QTooltip {
      </property>
      <property name="geometry">
       <rect>
-       <x>270</x>
+       <x>370</x>
        <y>370</y>
-       <width>581</width>
+       <width>501</width>
        <height>22</height>
       </rect>
      </property>
@@ -1039,17 +879,18 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      </property>
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>120</y>
-       <width>241</width>
-       <height>91</height>
+       <x>180</x>
+       <y>20</y>
+       <width>171</width>
+       <height>81</height>
       </rect>
      </property>
      <property name="toolTip">
       <string>Report summary</string>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: #D0D0D0;</string>
+      <string notr="true">background-color: rgba(214,214,214,255);
+</string>
      </property>
      <property name="frameShape">
       <enum>QFrame::Panel</enum>
@@ -1057,11 +898,14 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <property name="frameShadow">
       <enum>QFrame::Sunken</enum>
      </property>
+     <property name="lineWidth">
+      <number>3</number>
+     </property>
      <widget class="QLabel" name="label_3">
       <property name="geometry">
        <rect>
-        <x>53</x>
-        <y>24</y>
+        <x>23</x>
+        <y>23</y>
         <width>91</width>
         <height>16</height>
        </rect>
@@ -1082,8 +926,8 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
-        <x>53</x>
-        <y>44</y>
+        <x>22</x>
+        <y>42</y>
         <width>91</width>
         <height>16</height>
        </rect>
@@ -1104,9 +948,9 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <widget class="Line" name="line_3">
       <property name="geometry">
        <rect>
-        <x>0</x>
+        <x>2</x>
         <y>20</y>
-        <width>251</width>
+        <width>167</width>
         <height>3</height>
        </rect>
       </property>
@@ -1120,10 +964,10 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="geometry">
        <rect>
-        <x>70</x>
-        <y>3</y>
+        <x>46</x>
+        <y>4</y>
         <width>41</width>
-        <height>16</height>
+        <height>14</height>
        </rect>
       </property>
       <property name="font">
@@ -1140,8 +984,8 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <widget class="QLabel" name="label_15">
       <property name="geometry">
        <rect>
-        <x>53</x>
-        <y>64</y>
+        <x>22</x>
+        <y>61</y>
         <width>101</width>
         <height>16</height>
        </rect>
@@ -1156,7 +1000,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
        <string>Saturated red flashes &gt; 3 Hz</string>
       </property>
       <property name="text">
-       <string>Total failing frames:</string>
+       <string>Total failed frames:</string>
       </property>
      </widget>
      <widget class="QLabel" name="label_19">
@@ -1165,10 +1009,10 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="geometry">
        <rect>
-        <x>116</x>
-        <y>3</y>
+        <x>92</x>
+        <y>4</y>
         <width>41</width>
-        <height>16</height>
+        <height>14</height>
        </rect>
       </property>
       <property name="font">
@@ -1185,13 +1029,13 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
        <string>NONE</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_16">
+     <widget class="QLabel" name="label_20">
       <property name="geometry">
        <rect>
-        <x>160</x>
-        <y>26</y>
-        <width>47</width>
-        <height>13</height>
+        <x>129</x>
+        <y>43</y>
+        <width>39</width>
+        <height>16</height>
        </rect>
       </property>
       <property name="font">
@@ -1205,13 +1049,13 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
        <string>0</string>
       </property>
      </widget>
-     <widget class="QLabel" name="label_20">
+     <widget class="QLabel" name="label_16">
       <property name="geometry">
        <rect>
-        <x>160</x>
-        <y>46</y>
-        <width>47</width>
-        <height>13</height>
+        <x>129</x>
+        <y>23</y>
+        <width>39</width>
+        <height>16</height>
        </rect>
       </property>
       <property name="font">
@@ -1228,10 +1072,10 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <widget class="QLabel" name="label_22">
       <property name="geometry">
        <rect>
-        <x>160</x>
-        <y>66</y>
-        <width>47</width>
-        <height>13</height>
+        <x>129</x>
+        <y>62</y>
+        <width>39</width>
+        <height>16</height>
        </rect>
       </property>
       <property name="font">
@@ -1251,40 +1095,197 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <zorder>label_4</zorder>
      <zorder>label_15</zorder>
      <zorder>label_19</zorder>
-     <zorder>label_16</zorder>
      <zorder>label_20</zorder>
+     <zorder>label_16</zorder>
      <zorder>label_22</zorder>
     </widget>
+    <widget class="QLabel" name="label_2">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>23</y>
+       <width>161</width>
+       <height>71</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <family>Segoe UI</family>
+      </font>
+     </property>
+     <property name="toolTip">
+      <string>Trace R&amp;D Center</string>
+     </property>
+     <property name="autoFillBackground">
+      <bool>true</bool>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="resources.qrc">:/images/Res/TraceLogoSmall.bmp</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>290</x>
+       <y>441</y>
+       <width>331</width>
+       <height>30</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>11</pointsize>
+      </font>
+     </property>
+     <property name="cursor">
+      <cursorShape>ArrowCursor</cursorShape>
+     </property>
+     <property name="toolTip">
+      <string>Loaded file name</string>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color:rgb(200, 200, 210);
+border-style:solid;
+border-color: #4B4B4B;
+border-width:2px;
+-webkit-border-radius: 5px;
+-moz-border-radius: 5px;
+border-radius: 7px;
+font-size: 10.5pt;</string>
+     </property>
+     <property name="text">
+      <string>(No file open)</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::AutoText</enum>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="wordWrap">
+      <bool>false</bool>
+     </property>
+    </widget>
+    <widget class="QSlider" name="slider">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>410</y>
+       <width>791</width>
+       <height>22</height>
+      </rect>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="toolTip">
+      <string>Video position</string>
+     </property>
+     <property name="autoFillBackground">
+      <bool>false</bool>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">QSlider::groove:horizontal {
+    height: 8px; /* the groove expands to the size of the slider by default. by giving it a height, it has a fixed size */
+   background-color: rgba(109, 107, 107, 140);
+    margin: 2px 0;
+}
+
+QSlider::handle:horizontal {
+    background-color: rgba(143,143,143, 200);
+    border: 1px solid rgb(143,143,143);
+    width: 8px;
+    margin: -6px 0; /* handle is placed by default on the contents rect of the groove. Expand outside the groove */
+    border-radius: 5px;
+}
+</string>
+     </property>
+     <property name="maximum">
+      <number>99</number>
+     </property>
+     <property name="singleStep">
+      <number>1000</number>
+     </property>
+     <property name="pageStep">
+      <number>1000</number>
+     </property>
+     <property name="sliderPosition">
+      <number>0</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="tickPosition">
+      <enum>QSlider::NoTicks</enum>
+     </property>
+     <property name="tickInterval">
+      <number>0</number>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QVideoWidget" name="videoWidget_2" native="true">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>112</y>
+      <width>341</width>
+      <height>271</height>
+     </rect>
+    </property>
+    <property name="focusPolicy">
+     <enum>Qt::NoFocus</enum>
+    </property>
+    <property name="toolTip">
+     <string>Video playback</string>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">border-color: black;
+border-style: solid;
+border-width: 1px;
+background: transparent;</string>
+    </property>
    </widget>
    <zorder>frame_3</zorder>
    <zorder>label_10</zorder>
    <zorder>label_8</zorder>
    <zorder>label_9</zorder>
    <zorder>timeLabel</zorder>
-   <zorder>label</zorder>
    <zorder>restartButton</zorder>
    <zorder>reportButton</zorder>
    <zorder>label_11</zorder>
-   <zorder>label_2</zorder>
    <zorder>pauseButton</zorder>
    <zorder>playButton</zorder>
    <zorder>label_13</zorder>
    <zorder>label_12</zorder>
    <zorder>rewindButton</zorder>
    <zorder>forwardButton</zorder>
-   <zorder>slider</zorder>
    <zorder>folderButton</zorder>
    <zorder>label_14</zorder>
-   <zorder>videoWidget_2</zorder>
    <zorder>line_2</zorder>
    <zorder>label_17</zorder>
+   <zorder>videoWidget_2</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>863</width>
+     <width>882</width>
      <height>21</height>
     </rect>
    </property>

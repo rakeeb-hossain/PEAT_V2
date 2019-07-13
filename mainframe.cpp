@@ -28,8 +28,8 @@ mainFrame::mainFrame(QWidget *parent) :
     ui->setupUi(this);
     this->setWindowTitle("UW Trace Center Photosensitive Epilepsy Analysis Tool (PEAT)");
     setWindowFlags(Qt::Widget | Qt::WindowCloseButtonHint | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
-    this->resize(QSize(863,585));
-    this->setFixedSize(QSize(863,585));
+    this->resize(QSize(882,585));
+    this->setFixedSize(QSize(882,585));
 
     //Connect toolbar actions
     connect(ui->actionOpen_Video, &QAction::triggered, this, &mainFrame::on_folderButton_clicked);
@@ -713,6 +713,9 @@ void mainFrame::on_reportButton_clicked() {
         ui->actionPlay_Pause->setEnabled(false);
         ui->actionOpen_Report->setEnabled(false);
         ui->actionOpen_Video->setEnabled(false);
+
+        ui->forwardWarning->setStyleSheet("background-image: url(:/images/Res/NextWarningDisabled.png); border-image: url(:/images/Res/NextWarningDisabled.png);");
+        ui->backWarning->setStyleSheet("background-image: url(:/images/Res/PrevWarningDisabled.png); border-image: url(:/images/Res/PrevWarningDisabled.png);");
 
         //Initialize graphs
         ui->customPlot->addGraph();
@@ -1621,6 +1624,7 @@ void mainFrame::on_actionLight_Blue_triggered()
         textLabel2->setColor(QColor(190, 212, 221, 255));
         section->setBrush(QBrush(QColor(170,192,201,255)));
         cautionLayer->setBrush(QBrush(QColor(160,182,191,255)));
+        ui->frame_2->setStyleSheet("background-color: rgba(190, 212, 221, 255)");
         ui->customPlot->replot();
     }
     else {
@@ -1643,6 +1647,7 @@ void mainFrame::on_actionBeige_triggered()
         textLabel2->setColor(QColor(216, 201, 184, 255));
         section->setBrush(QBrush(QColor(196,181,164,255)));
         cautionLayer->setBrush(QBrush(QColor(186,171,154,255)));
+        ui->frame_2->setStyleSheet("background-color: rgba(216, 201, 184, 255)");
         ui->customPlot->replot();
     }
     else {
@@ -1666,6 +1671,7 @@ void mainFrame::on_actionPale_triggered()
         textLabel2->setColor(QColor(247, 243, 239, 255));
         section->setBrush(QBrush(QColor(227,223,219,255)));
         cautionLayer->setBrush(QBrush(QColor(217,213,209,255)));
+        ui->frame_2->setStyleSheet("background-color: rgba(247, 243, 239, 255)");
         ui->customPlot->replot();
     }
     else {
@@ -1689,6 +1695,7 @@ void mainFrame::on_actionTurquoise_triggered()
         textLabel2->setColor(QColor(192, 219, 217, 255));
         section->setBrush(QBrush(QColor(172,199,197,255)));
         cautionLayer->setBrush(QBrush(QColor(162,189,187,255)));
+        ui->frame_2->setStyleSheet("background-color: rgba(192, 219, 217, 255)");
         ui->customPlot->replot();
     }
     else {
@@ -1712,6 +1719,7 @@ void mainFrame::on_actionCharcoal_Grey_triggered()
         textLabel2->setColor(QColor(140, 144, 145, 255));
         section->setBrush(QBrush(QColor(120,124,125,255)));
         cautionLayer->setBrush(QBrush(QColor(110,114,115,255)));
+        ui->frame_2->setStyleSheet("background-color: rgba(140, 144, 145, 255)");
         ui->customPlot->replot();
     }
     else {
@@ -1735,6 +1743,7 @@ void mainFrame::on_actionLight_Grey_triggered()
         textLabel2->setColor(QColor(214,214,214,255));
         section->setBrush(QBrush(QColor(194,194,194,255)));
         cautionLayer->setBrush(QBrush(QColor(184,184,184,255)));
+        ui->frame_2->setStyleSheet("background-color: rgba(214, 214, 214, 255)");
         ui->customPlot->replot();
     }
     else {
@@ -1758,6 +1767,7 @@ void mainFrame::on_actionWhite_triggered()
         textLabel2->setColor(QColor(252,252,252,255));
         section->setBrush(QBrush(QColor(232,232,232,255)));
         cautionLayer->setBrush(QBrush(QColor(222,222,222,255)));
+        ui->frame_2->setStyleSheet("background-color: rgba(252,252,252, 255)");
         ui->customPlot->replot();
         ui->customPlot->repaint();
     }
@@ -1925,6 +1935,10 @@ void mainFrame::no_report_loaded() {
     ui->slider->setStyleSheet("QSlider::groove:horizontal { height: 8px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0,stop:0.000000#6d6b6b,stop:1.0#6d6b6b); margin: 2px 0; } QSlider::handle:horizontal { background-color: #8f8f8f; border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 5px; }");
     ui->horizontalSlider->setEnabled(true);
     ui->horizontalSlider->setStyleSheet("QSlider::groove:horizontal { border: 1px solid #999999; height: 5px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #B1B1B1, stop: 1.0 #c4c4c4); margin: 2px 0; } QSlider::handle:horizontal { background: #8f8f8f; border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 3px; }");
+
+    ui->forwardWarning->setStyleSheet("background-image: url(:/images/Res/NextWarningDisabled.png); border-image: url(:/images/Res/NextWarningDisabled.png);");
+    ui->backWarning->setStyleSheet("background-image: url(:/images/Res/PrevWarningDisabled.png); border-image: url(:/images/Res/PrevWarningDisabled.png);");
+
     index = 0;
 }
 

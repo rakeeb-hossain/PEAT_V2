@@ -269,7 +269,7 @@
     <rect>
      <x>310</x>
      <y>190</y>
-     <width>251</width>
+     <width>131</width>
      <height>131</height>
     </rect>
    </property>
@@ -415,6 +415,23 @@
    </property>
    <property name="text">
     <string>Remove frames</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_10">
+   <property name="geometry">
+    <rect>
+     <x>440</x>
+     <y>190</y>
+     <width>131</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color:black;
+color:white;</string>
+   </property>
+   <property name="text">
+    <string/>
    </property>
   </widget>
  </widget>
