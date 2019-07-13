@@ -14,7 +14,7 @@ C_Label::~C_Label()
 void C_Label::mouseMoveEvent ( QMouseEvent * event )
 {
     x_new_pos = event->globalPos().x();
-    if (leftClicked == true && orig_x_pos+x_new_pos-x_old_pos >= 254)
+    if (leftClicked == true && orig_x_pos+x_new_pos-x_old_pos >= 254 && orig_x_pos+x_new_pos-x_old_pos <= 425)
         emit mouseMoved();
 }
 

@@ -61,7 +61,7 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
            ui->radioButton_3->setEnabled(false);
            ui->radioButton_4->setEnabled(false);
            ui->radioButton_5->setEnabled(false);
-           ui->radioButton_6->setEnabled(false);
+           //ui->radioButton_6->setEnabled(false);
            ui->radioButton_7->setEnabled(false);
            ui->label_2->setEnabled(false);
            ui->label_5->setEnabled(false);
@@ -73,7 +73,7 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
            ui->radioButton_3->setEnabled(true);
            ui->radioButton_4->setEnabled(true);
            ui->radioButton_5->setEnabled(true);
-           ui->radioButton_6->setEnabled(true);
+           //ui->radioButton_6->setEnabled(true);
            ui->radioButton_7->setEnabled(true);
            ui->label_2->setEnabled(true);
            ui->label_5->setEnabled(true);
@@ -104,9 +104,11 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
     connect(ui->radioButton_5, &QRadioButton::clicked, this, [&]{
         ui->label_8->setText("Swaps red and blue channels in failing frames, lowering effect of saturated red flashes.");
     });
+    /*
     connect(ui->radioButton_6, &QRadioButton::clicked, this, [&]{
         ui->label_8->setText("Decreases frame rate of video at failing frames, lowering frequency of flashes per second.\n1 = preserve frame rate, 30 = 30x slower frame rate");
     });
+    */
     connect(ui->radioButton_7, &QRadioButton::clicked, this, [&]{
         ui->label_8->setText("Removes failing frames from video.");
     });
@@ -187,6 +189,7 @@ void rkbProTool::on_radioButton_5_clicked()
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
 }
 
+/*
 void rkbProTool::on_radioButton_6_clicked()
 {
     ui->slider->setEnabled(true);
@@ -200,6 +203,7 @@ void rkbProTool::on_radioButton_6_clicked()
     decision  = 6;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
 }
+*/
 
 void rkbProTool::on_radioButton_7_clicked()
 {
@@ -251,7 +255,7 @@ void rkbProTool::on_buttonBox_accepted()
             }
         }
         else {
-            QMessageBox::critical(0, "Error", "Please select a valid mp4 output.");
+            QMessageBox::critical(0, "Error", "Please select a valid mp4 output path.");
         }
     }
     else {

@@ -185,7 +185,7 @@ Mat rObject::overlayFilter(Mat frame, double alpha)
     qDebug() << "INT";
     Mat overlay;
     frame.copyTo(overlay);
-    cv::rectangle(overlay, cv::Rect(0, 0, frame.cols, frame.rows), cv::Scalar(20, 20, 20), -1);
+    cv::rectangle(overlay, cv::Rect(0, 0, frame.cols, frame.rows), cv::Scalar(50, 50, 50), -1);
     cv::addWeighted(overlay, alpha, frame, 1.0 - alpha, 0.0, frame);
     return frame;
 }

@@ -141,8 +141,6 @@ private slots:
 
     void reset_slider();
 
-    void on_label_17_mouseMoved();
-
     bool eventFilter(QObject *obj, QEvent *event);
 
     void plotTooltip(QMouseEvent *event);
@@ -173,6 +171,12 @@ private slots:
 
     void on_actionPlot_Tooltips_triggered();
 
+    /*
+    void on_label_17_mousePressed();
+
+    void on_label_17_mouseMoved();
+    */
+
 private:
     Ui::mainFrame *ui;
 
@@ -198,6 +202,16 @@ private:
     QCPItemText *textLabel;
     QCPItemText *textLabel2;
     QLabel *placeholderLabel;
+    QRect videoWidgetRect;
+    QRect plotRect;
+    QRect horizontalScrollRect;
+    QRect label_14Rect;
+    QRect label_2Rect;
+    QRect horizontalSliderRect;
+    QRect frameRect;
+    QRect label_17Rect;
+    QRect lineRect;
+
 };
 
 

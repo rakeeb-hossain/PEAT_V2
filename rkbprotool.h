@@ -37,7 +37,7 @@ private slots:
 
     void on_radioButton_5_clicked();
 
-    void on_radioButton_6_clicked();
+    //void on_radioButton_6_clicked();
 
     void on_radioButton_7_clicked();
 

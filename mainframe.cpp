@@ -1934,33 +1934,48 @@ void mainFrame::reset_slider() {
     ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + secondHalfStylesheet);
 }
 
-// TODO: resizing upper half
+/*
+void mainFrame::on_label_17_mousePressed()
+{
+    videoWidgetRect = ui->videoWidget_2->geometry();
+    plotRect = ui->customPlot->geometry();
+    horizontalScrollRect = ui->horizontalScrollBar->geometry();
+    label_14Rect = ui->label_14->geometry();
+    label_2Rect = ui->label_2->geometry();
+    horizontalSliderRect = ui->horizontalSlider->geometry();
+    frameRect = ui->frame_2->geometry();
+}
+
+// DISABLED
 void mainFrame::on_label_17_mouseMoved()
 {
-    qDebug() << ui->customPlot->axisRect()->center();
+    //qDebug() << ui->customPlot->axisRect()->center();
     int diff = ui->label_17->x_new_pos - ui->label_17->x_old_pos;
-    //ui->line_2->setGeometry(259+diff, 0, 7, 383);
     int origPos = ui->label_17->orig_x_pos;
+
+    //ui->line_2->setGeometry(259+diff, 0, 7, 383);
     ui->label_17->setGeometry(origPos+diff, 0, 16, 394);
     ui->line_2->setGeometry(origPos+5+diff, 0, 7, 396);
 
-    ui->customPlot->setGeometry(origPos+16+diff, 20, origPos+327-diff, 341);
-    //ui->line_5->setGeometry(288+diff, 0, 3, 302);
-    ui->horizontalScrollBar->setGeometry(origPos+16+diff, 364, origPos+327-diff, 14);
+    ui->customPlot->setGeometry(QRect(plotRect.x()+diff, plotRect.y(), plotRect.width()-diff, plotRect.height()));
+    ui->line_5->setGeometry((plotRect.width()-diff)/2, 0, 3, 302);
+    ui->horizontalScrollBar->setGeometry(QRect(horizontalScrollRect.x()+diff, horizontalScrollRect.y(), horizontalScrollRect.width()-diff, horizontalScrollRect.height()));
+    ui->horizontalSlider->setGeometry(QRect(horizontalSliderRect.x()+diff, horizontalSliderRect.y(), horizontalSliderRect.width()-diff, horizontalSliderRect.height()));
     QPainterPath path;
     path.addRoundedRect(ui->customPlot->rect(), 10, 10);
     QRegion mask = QRegion(path.toFillPolygon().toPolygon());
     ui->customPlot->setMask(mask);
 
-
-    ui->videoWidget_2->setGeometry(10, origPos-34-diff, origPos-13+diff, origPos-83+diff);
-    ui->label_14->setGeometry(10, origPos-34-diff, origPos-13+diff, origPos-83+diff);
+    ui->videoWidget_2->setGeometry(QRect(videoWidgetRect.x(), videoWidgetRect.y()-0.75*diff, videoWidgetRect.width()+0.75*diff, videoWidgetRect.height()+0.75*diff));
+    ui->label_14->setGeometry(QRect(label_14Rect.x(), label_14Rect.y()-0.75*diff, label_14Rect.width()+0.75*diff, label_14Rect.height()+0.75*diff));
+    ui->label_2->setGeometry(QRect(label_2Rect.x(), label_2Rect.y(), label_2Rect.width()-0.5*diff, label_2Rect.height()-0.5*diff));
+    ui->frame_2->setGeometry(QRect(frameRect.x(), frameRect.y()-diff, frameRect.width()-0.5*diff, frameRect.height()-0.5*diff));
     this->update();
 
     //ui->label_2
     //ui->label_4
 }
-
+*/
 bool mainFrame::eventFilter(QObject *obj, QEvent *event) {
     if (event->type() == QEvent::Enter) {
         QWidget *w = qobject_cast<QWidget*>(obj);
@@ -2228,3 +2243,4 @@ void mainFrame::on_actionPlot_Tooltips_triggered()
     }
     ui->customPlot->replot();
 }
+
