@@ -192,10 +192,7 @@ border-radius: 5px;</string>
     </property>
     <property name="font">
      <font>
-      <family>Segoe UI</family>
       <pointsize>11</pointsize>
-      <weight>75</weight>
-      <bold>true</bold>
      </font>
     </property>
     <property name="cursor">
@@ -1048,6 +1045,9 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
        <height>91</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>Report summary</string>
+     </property>
      <property name="styleSheet">
       <string notr="true">background-color: #D0D0D0;</string>
      </property>
@@ -1060,7 +1060,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <widget class="QLabel" name="label_3">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>53</x>
         <y>24</y>
         <width>91</width>
         <height>16</height>
@@ -1082,8 +1082,8 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <widget class="QLabel" name="label_4">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>42</y>
+        <x>53</x>
+        <y>44</y>
         <width>91</width>
         <height>16</height>
        </rect>
@@ -1140,8 +1140,8 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <widget class="QLabel" name="label_15">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>60</y>
+        <x>53</x>
+        <y>64</y>
         <width>101</width>
         <height>16</height>
        </rect>
@@ -1188,7 +1188,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <widget class="QLabel" name="label_16">
       <property name="geometry">
        <rect>
-        <x>117</x>
+        <x>160</x>
         <y>26</y>
         <width>47</width>
         <height>13</height>
@@ -1208,8 +1208,8 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <widget class="QLabel" name="label_20">
       <property name="geometry">
        <rect>
-        <x>117</x>
-        <y>44</y>
+        <x>160</x>
+        <y>46</y>
         <width>47</width>
         <height>13</height>
        </rect>
@@ -1228,8 +1228,8 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <widget class="QLabel" name="label_22">
       <property name="geometry">
        <rect>
-        <x>117</x>
-        <y>62</y>
+        <x>160</x>
+        <y>66</y>
         <width>47</width>
         <height>13</height>
        </rect>

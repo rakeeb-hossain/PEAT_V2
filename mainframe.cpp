@@ -324,6 +324,10 @@ mainFrame::mainFrame(QWidget *parent) :
     //Graph interactions
     ui->customPlot->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenuRequest(QPoint)));
+
+    // Bug fix: force update label font
+    QFont font("Segoe UI", 11, QFont::Bold);
+    ui->label->setFont(font);
 }
 
 mainFrame::~mainFrame()
@@ -620,8 +624,10 @@ void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<do
     if ((int)points_x[0][0] % 3 == 0) ui->customPlot->replot();
 
     //Update slider and warnings
+    int currentRed = vid_data[3][vid_data[3].size()-1];
+    int currentLum = vid_data[2][vid_data[2].size()-1];
     int previous = vid_data[2][vid_data[2].size()-2] | vid_data[3][vid_data[3].size()-2];
-    int current = vid_data[2][vid_data[2].size()-1] | vid_data[3][vid_data[3].size()-1];
+    int current = currentRed | currentLum;
     double ind = points_x[0][0];
     firstHalfStylesheet = firstHalfStylesheet.substr(0, firstHalfStylesheet.length()-21);
     if (previous == 0 && current == 1) {
@@ -640,6 +646,15 @@ void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<do
     }
     ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + secondHalfStylesheet);
 
+    if (currentLum) {
+        ui->label_16->setText(QString::number(ui->label_16->text().toInt() + 1));
+    }
+    if (currentRed) {
+        ui->label_20->setText(QString::number(ui->label_20->text().toInt() + 1));
+    }
+    if (currentRed | currentLum) {
+        ui->label_22->setText(QString::number(ui->label_22->text().toInt() + 1));
+    }
     emit received();
 
     //if ((int)points_x[0][points_x[0].size()-1] % 10 == 0) ui->slider->setValue(points_x[0][0]);
@@ -648,6 +663,13 @@ void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<do
 void mainFrame::on_reportButton_clicked() {
     try {
         ui->customPlot->clearPlottables();
+        ui->frame_2->setEnabled(true);
+        ui->label_18->setEnabled(true);
+        ui->label_19->setText("NONE");
+        ui->label_19->setStyleSheet("color: rgb(193, 147, 28);");
+        ui->label_16->setText("0");
+        ui->label_20->setText("0");
+        ui->label_22->setText("0");
         player->pause();
         ui->label_6->setText("0");
         reset_slider();
@@ -828,6 +850,14 @@ void mainFrame::on_reportButton_clicked() {
             //Set report data to unsaved
             saved = false;
             vidLabel->setText("Done");
+
+            if (ui->label_16->text() != "0" || ui->label_20->text() != "0" || ui->label_22->text() != "0") {
+                ui->label_19->setText("FAIL");
+                ui->label_19->setStyleSheet("color: #c10707;");
+            } else {
+                ui->label_19->setText("PASS");
+                ui->label_19->setStyleSheet("color: #25c660;");
+            }
         }
         else {
             vidLabel->setText("Analysis stopped");
@@ -1068,12 +1098,22 @@ void mainFrame::openReport()
                 connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
                 connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
 
-                //Update slider (NOT WORKING)
+                //Update slider
                 firstHalfStylesheet = "QSlider::groove:horizontal { height: 8px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0,stop:0.000000#25c660,";
+                ui->frame_2->setEnabled(true);
+                ui->label_18->setEnabled(true);
+                ui->label_19->setText("NONE");
+                ui->label_19->setStyleSheet("color: rgb(193, 147, 28);");
+                ui->label_16->setText("0");
+                ui->label_20->setText("0");
+                ui->label_22->setText("0");
                 bool isGreen = true;
                 bool isRed = false;
                 for (int i = 0; i < frame_count; i++) {
                     int current = vid_data[2][i] | vid_data[3][i];
+                    int currentLum = vid_data[2][i];
+                    int currentRed = vid_data[3][i];
+
                     if (current && isGreen) {
                         isGreen = false;
                         isRed = true;
@@ -1092,6 +1132,16 @@ void mainFrame::openReport()
                         else if (isRed) {
                             firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string((i+1)/(double)frame_count) + "#c10707";
                         }
+                    }
+
+                    if (currentLum) {
+                        ui->label_16->setText(QString::number(ui->label_16->text().toInt() + 1));
+                    }
+                    if (currentRed) {
+                        ui->label_20->setText(QString::number(ui->label_20->text().toInt() + 1));
+                    }
+                    if (currentRed | currentLum) {
+                        ui->label_22->setText(QString::number(ui->label_22->text().toInt() + 1));
                     }
 
                     /*
@@ -1276,7 +1326,16 @@ void mainFrame::openReport()
                 ui->customPlot->graph(2)->addData(frame_count, 0);
                 ui->customPlot->graph(3)->addData(frame_count, 0);
 
-                ui->customPlot->replot();                
+                ui->customPlot->replot();
+
+                if (ui->label_16->text() != "0" || ui->label_20->text() != "0" || ui->label_22->text() != "0") {
+                    ui->label_19->setText("FAIL");
+                    ui->label_19->setStyleSheet("color: #c10707;");
+                } else {
+                    ui->label_19->setText("PASS");
+                    ui->label_19->setStyleSheet("color: #25c660;");
+                }
+
                 nFrame = frame_count;
                 ui->label_8->setText(QString::number(frame_count));
                 ui->label_9->setText(QString::number(fps));
@@ -1848,6 +1907,13 @@ void mainFrame::no_report_loaded() {
     ui->actionPlot_Tooltips->setEnabled(false);
 
     ui->label_13->setText("");
+    ui->frame_2->setEnabled(false);
+    ui->label_18->setEnabled(false);
+    ui->label_19->setText("NONE");
+    ui->label_19->setStyleSheet("color: rgb(193, 147, 28);");
+    ui->label_16->setText("0");
+    ui->label_20->setText("0");
+    ui->label_22->setText("0");
 
     ui->horizontalScrollBar->setEnabled(false);
     ui->horizontalScrollBar->setRange(0, 100);
