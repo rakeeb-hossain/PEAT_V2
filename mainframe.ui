@@ -880,7 +880,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <property name="geometry">
       <rect>
        <x>180</x>
-       <y>20</y>
+       <y>10</y>
        <width>171</width>
        <height>81</height>
       </rect>
@@ -997,7 +997,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
        </font>
       </property>
       <property name="toolTip">
-       <string>Saturated red flashes &gt; 3 Hz</string>
+       <string/>
       </property>
       <property name="text">
        <string>Total failed frames:</string>
@@ -1103,7 +1103,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>22</y>
+       <y>10</y>
        <width>161</width>
        <height>73</height>
       </rect>
@@ -1234,6 +1234,22 @@ QSlider::handle:horizontal {
       <number>0</number>
      </property>
     </widget>
+    <widget class="Line" name="line_4">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>93</y>
+       <width>361</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="lineWidth">
+      <number>2</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
    </widget>
    <widget class="QVideoWidget" name="videoWidget_2" native="true">
     <property name="geometry">
@@ -1332,8 +1348,6 @@ background: transparent;</string>
     <addaction name="actionBack_30_Frames"/>
     <addaction name="separator"/>
     <addaction name="menuChange_Paper_Colour"/>
-    <addaction name="separator"/>
-    <addaction name="actionInvert_UI_Colour"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">

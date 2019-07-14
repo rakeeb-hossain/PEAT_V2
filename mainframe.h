@@ -129,8 +129,6 @@ private slots:
 
     void on_actionWhite_triggered();
 
-    void on_actionInvert_UI_Colour_triggered();
-
     void on_actionPrint_Report_triggered();
 
     bool on_actionSave_Report_triggered();

@@ -1778,21 +1778,6 @@ void mainFrame::on_actionWhite_triggered()
 
 }
 
-void mainFrame::on_actionInvert_UI_Colour_triggered()
-{
-    if (ui->actionInvert_UI_Colour->isChecked() == true) {
-        this->setStyleSheet("background-color: rgb(66, 65, 64);");
-        ui->customPlot->repaint();
-        ui->label_14->setStyleSheet("QLabel { color : white; }");
-        ui->label_7->setStyleSheet("QLabel { color : white; }");
-    }
-    else {
-        this->setStyleSheet("");
-        ui->label_14->setStyleSheet("QLabel { color : black; }");
-        ui->label_7->setStyleSheet("QLabel { color : black; }");
-    }
-}
-
 void mainFrame::on_actionPrint_Report_triggered()
 {
 
@@ -2242,10 +2227,6 @@ void mainFrame::on_actionRed_Flash_Graph_triggered() {
 }
 
 
-// *printing*,
-// *UI plans*, *resizing*, *previews*, *screen capture*
-// *fix reloading of plots*, *sensitivity*, final testing!
-
 void mainFrame::on_actionPlot_Tooltips_triggered()
 {
     if (ui->actionPlot_Tooltips->isChecked() == true) {
@@ -2257,4 +2238,9 @@ void mainFrame::on_actionPlot_Tooltips_triggered()
     }
     ui->customPlot->replot();
 }
+
+// *printing*,
+// *UI plans*, *resizing*, *previews*, *screen capture*
+// *fix reloading of plots*, *sensitivity*, final testing!
+
 
