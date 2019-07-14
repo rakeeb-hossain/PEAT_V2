@@ -28,7 +28,7 @@
     <property name="geometry">
      <rect>
       <x>505</x>
-      <y>483</y>
+      <y>486</y>
       <width>115</width>
       <height>20</height>
      </rect>
@@ -71,7 +71,7 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>483</y>
+      <y>486</y>
       <width>121</width>
       <height>20</height>
      </rect>
@@ -105,7 +105,7 @@
     <property name="geometry">
      <rect>
       <x>410</x>
-      <y>483</y>
+      <y>486</y>
       <width>95</width>
       <height>20</height>
      </rect>
@@ -138,8 +138,8 @@
    <widget class="QLabel" name="timeLabel">
     <property name="geometry">
      <rect>
-      <x>60</x>
-      <y>445</y>
+      <x>58</x>
+      <y>446</y>
       <width>111</width>
       <height>31</height>
      </rect>
@@ -240,7 +240,7 @@ border-image: url(:/images/Res/AnalyzeDisabled.png);</string>
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>503</y>
+      <y>506</y>
       <width>121</width>
       <height>20</height>
      </rect>
@@ -345,7 +345,7 @@ border-image: url(:/images/Res/PlayDisabled.png);</string>
     <property name="geometry">
      <rect>
       <x>505</x>
-      <y>503</y>
+      <y>506</y>
       <width>114</width>
       <height>20</height>
      </rect>
@@ -379,7 +379,7 @@ border-image: url(:/images/Res/PlayDisabled.png);</string>
     <property name="geometry">
      <rect>
       <x>410</x>
-      <y>503</y>
+      <y>506</y>
       <width>95</width>
       <height>20</height>
      </rect>
@@ -469,7 +469,7 @@ border-image: url(:/images/Res/FFwdDisabled.png);</string>
     <property name="geometry">
      <rect>
       <x>240</x>
-      <y>435</y>
+      <y>442</y>
       <width>37</width>
       <height>37</height>
      </rect>
@@ -640,7 +640,7 @@ border-image: url(:/images/Res/EjectPressed.png);
        <x>370</x>
        <y>10</y>
        <width>501</width>
-       <height>341</height>
+       <height>344</height>
       </rect>
      </property>
      <property name="toolTip">
@@ -667,7 +667,7 @@ QTooltip {
         <x>251</x>
         <y>0</y>
         <width>3</width>
-        <height>302</height>
+        <height>306</height>
        </rect>
       </property>
       <property name="autoFillBackground">
@@ -1103,9 +1103,9 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>23</y>
+       <y>22</y>
        <width>161</width>
-       <height>71</height>
+       <height>73</height>
       </rect>
      </property>
      <property name="font">
@@ -1133,7 +1133,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      <property name="geometry">
       <rect>
        <x>290</x>
-       <y>441</y>
+       <y>444</y>
        <width>331</width>
        <height>30</height>
       </rect>
@@ -1183,7 +1183,7 @@ font-size: 10.5pt;</string>
       <rect>
        <x>70</x>
        <y>410</y>
-       <width>791</width>
+       <width>797</width>
        <height>22</height>
       </rect>
      </property>

@@ -13,7 +13,7 @@ TEMPLATE = app
 
 QT += opengl
 DEFINES += QT_DEPRECATED_WARNINGS
-
+CONFIG += resources_big
 
 SOURCES += \
         main.cpp \

@@ -45,6 +45,7 @@ private:
     Ui::rkbProTool *ui;
     QTimer *timer;
     QMovie *mv;
+    QMovie *preview;
 };
 
 #endif // RKBPROTOOL_H

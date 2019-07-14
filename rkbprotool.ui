@@ -287,10 +287,17 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>320</y>
+     <y>315</y>
      <width>61</width>
      <height>16</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
    </property>
    <property name="text">
     <string>Description</string>
@@ -303,10 +310,15 @@
    <property name="geometry">
     <rect>
      <x>50</x>
-     <y>350</y>
+     <y>340</y>
      <width>251</width>
      <height>81</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
    <property name="text">
     <string>Please select a prophylactic method above.</string>
@@ -339,6 +351,11 @@
      <width>521</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+    </font>
    </property>
    <property name="placeholderText">
     <string> output_video.mp4</string>
@@ -426,12 +443,23 @@
      <height>131</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>16</pointsize>
+     <weight>75</weight>
+     <bold>true</bold>
+    </font>
+   </property>
    <property name="styleSheet">
     <string notr="true">background-color:black;
 color:white;</string>
    </property>
    <property name="text">
     <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignCenter</set>
    </property>
   </widget>
  </widget>

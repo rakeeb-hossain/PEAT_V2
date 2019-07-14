@@ -154,5 +154,10 @@
         <file>Res/cage.png</file>
         <file>Res/logoLARGE.bmp</file>
         <file>Res/pkmngif.gif</file>
+        <file>Res/blur.gif</file>
+        <file>Res/colorShift.gif</file>
+        <file>Res/contrast.gif</file>
+        <file>Res/overlay.gif</file>
+        <file>Res/swap.gif</file>
     </qresource>
 </RCC>

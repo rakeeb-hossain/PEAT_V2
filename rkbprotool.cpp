@@ -90,16 +90,16 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
     });
 
     connect(ui->radioButton, &QRadioButton::clicked, this, [&]{
-        ui->label_8->setText("");
+        ui->label_8->setText("Decreases intensity of green and red channels in failing frames, lowering intensity of flashes.\n\n0.0 = no decrease, 1.0 = remove red and green channels");
     });
     connect(ui->radioButton_2, &QRadioButton::clicked, this, [&]{
-        ui->label_8->setText("Sets a grey overlay on failing frames.\n0.0 = fully transparent, 1.0 = fully opaque");
+        ui->label_8->setText("Sets a grey overlay on failing frames.\n\n0.0 = fully transparent, 1.0 = fully opaque");
     });
     connect(ui->radioButton_3, &QRadioButton::clicked, this, [&]{
-        ui->label_8->setText("Lowers the contrast ratio (CR) of failing frames.\n0.0 = preserves original CR, 1.0 = 1:1 CR");
+        ui->label_8->setText("Lowers the contrast ratio (CR) of failing frames.\n\n0.0 = preserves original CR, 1.0 = 1:1 CR");
     });
     connect(ui->radioButton_4, &QRadioButton::clicked, this, [&]{
-        ui->label_8->setText("Blurs failing frames.\n0.0 = kernal size of 0 (no blur), 1.0 = kernal size of 255 (intense blur).\nATTENTION: Blurring does not block failing frames. It can be used with other filters to enhance viewing.");
+        ui->label_8->setText("Blurs failing frames.\n\n0.0 = no blur, 1.0 = intense blur.\n\nATTENTION: Blurring does not block failing frames. It can be used with other filters.");
     });
     connect(ui->radioButton_5, &QRadioButton::clicked, this, [&]{
         ui->label_8->setText("Swaps red and blue channels in failing frames, lowering effect of saturated red flashes.");
@@ -113,13 +113,12 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
         ui->label_8->setText("Removes failing frames from video.");
     });
 
+    preview = new QMovie;
 }
 
 rkbProTool::~rkbProTool()
 {
     delete ui;
-
-
 }
 
 void rkbProTool::on_radioButton_2_clicked()
@@ -135,9 +134,13 @@ void rkbProTool::on_radioButton_2_clicked()
     decision  = 2;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
 
+    mv->stop();
     mv->start();
-    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
+    preview->stop();
+    ui->label_10->setText("");
+    preview->setFileName(":/images/Res/overlay.gif");
     preview->setScaledSize(ui->label_10->size());
+    ui->label_10->setMovie(preview);
     preview->start();
 }
 
@@ -154,9 +157,13 @@ void rkbProTool::on_radioButton_3_clicked()
     decision  = 3;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
 
+    mv->stop();
     mv->start();
-    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
+    preview->stop();
+    ui->label_10->setText("");
+    preview->setFileName(":/images/Res/contrast.gif");
     preview->setScaledSize(ui->label_10->size());
+    ui->label_10->setMovie(preview);
     preview->start();
 }
 
@@ -173,9 +180,13 @@ void rkbProTool::on_radioButton_4_clicked()
     decision  = 4;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
 
+    mv->stop();
     mv->start();
-    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
+    preview->stop();
+    ui->label_10->setText("");
+    preview->setFileName(":/images/Res/blur.gif");
     preview->setScaledSize(ui->label_10->size());
+    ui->label_10->setMovie(preview);
     preview->start();
 }
 
@@ -192,9 +203,13 @@ void rkbProTool::on_radioButton_clicked()
     decision  = 1;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
 
+    mv->stop();
     mv->start();
-    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
+    preview->stop();
+    ui->label_10->setText("");
+    preview->setFileName(":/images/Res/colorShift.gif");
     preview->setScaledSize(ui->label_10->size());
+    ui->label_10->setMovie(preview);
     preview->start();
 }
 
@@ -206,9 +221,13 @@ void rkbProTool::on_radioButton_5_clicked()
     decision  = 5;
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
 
+    mv->stop();
     mv->start();
-    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
+    preview->stop();
+    ui->label_10->setText("");
+    preview->setFileName(":/images/Res/swap.gif");
     preview->setScaledSize(ui->label_10->size());
+    ui->label_10->setMovie(preview);
     preview->start();
 }
 
@@ -237,9 +256,8 @@ void rkbProTool::on_radioButton_7_clicked()
     ui->buttonBox->button( QDialogButtonBox::Ok )->setEnabled( true );
 
     mv->start();
-    QMovie *preview = new QMovie(":/images/Res/pkmncropped.gif");
-    preview->setScaledSize(ui->label_10->size());
-    preview->start();
+    preview->stop();
+    ui->label_10->setText("No\nPreview");
 }
 
 
