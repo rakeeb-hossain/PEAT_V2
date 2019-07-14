@@ -617,34 +617,43 @@ void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<do
     vid_data[2].push_back(points_y[2][points_y[2].size()-1]);
     vid_data[3].push_back(points_y[3][points_y[3].size()-1]);
 
-    ui->customPlot->graph(0)->addData(points_x[0], points_y[0]);
-    ui->customPlot->graph(1)->addData(points_x[1], points_y[1]);
-    ui->customPlot->graph(2)->addData(points_x[2], points_y[2]);
-    ui->customPlot->graph(3)->addData(points_x[3], points_y[3]);
-    if ((int)points_x[0][0] % 3 == 0) ui->customPlot->replot();
+    ui->customPlot->graph(2)->addData(points_x[0], points_y[0]);
+    ui->customPlot->graph(3)->addData(points_x[1], points_y[1]);
+    ui->customPlot->graph(0)->addData(points_x[2], points_y[2]);
+    ui->customPlot->graph(1)->addData(points_x[3], points_y[3]);
 
     //Update slider and warnings
     int currentRed = vid_data[3][vid_data[3].size()-1];
     int currentLum = vid_data[2][vid_data[2].size()-1];
     int previous = vid_data[2][vid_data[2].size()-2] | vid_data[3][vid_data[3].size()-2];
+    if (vid_data[2].size()-2 == 0) {
+        previous = 1;
+    }
     int current = currentRed | currentLum;
     double ind = points_x[0][0];
-    firstHalfStylesheet = firstHalfStylesheet.substr(0, firstHalfStylesheet.length()-21);
     if (previous == 0 && current == 1) {
         warnings.push_back(points_x[2][0]);
+        firstHalfStylesheet = firstHalfStylesheet.substr(0, firstHalfStylesheet.length()-21);
         ui->label_6->setText(QString::number(ui->label_6->text().toInt() + 1));
         firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*((ind-1)/vid_data[4][1]+0.001))/1000.0) + "#c10707,stop:" + to_string(ind/vid_data[4][1]) + "#c10707,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
     }
     else if (previous == 1 && current == 0) {
+        firstHalfStylesheet = firstHalfStylesheet.substr(0, firstHalfStylesheet.length()-21);
         firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*((ind-1)/vid_data[4][1]+0.001))/1000.0) + "#25c660,stop:" + to_string(ind/vid_data[4][1]) + "#25c660,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
     }
     else if (previous == 0 && current == 0) {
+        firstHalfStylesheet = firstHalfStylesheet.substr(0, firstHalfStylesheet.length()-42);
         firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*ind/vid_data[4][1])/1000.0) + "#25c660,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
     }
     else {
+        firstHalfStylesheet = firstHalfStylesheet.substr(0, firstHalfStylesheet.length()-42);
         firstHalfStylesheet = firstHalfStylesheet + "stop:" + to_string(round(1000.0*ind/vid_data[4][1])/1000.0) + "#c10707,stop:" + to_string(round(1000.0*(ind/vid_data[4][1]+0.001))/1000.0) + "#6d6b6b,";
     }
-    ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + secondHalfStylesheet);
+
+    if ((int)points_x[0][0] % 4 == 0) {
+        ui->customPlot->replot();
+        ui->slider->setStyleSheet(firstHalfStylesheet.c_str() + secondHalfStylesheet);
+    }
 
     if (currentLum) {
         ui->label_16->setText(QString::number(ui->label_16->text().toInt() + 1));
@@ -722,10 +731,10 @@ void mainFrame::on_reportButton_clicked() {
         ui->customPlot->addGraph();
         ui->customPlot->addGraph();
         ui->customPlot->addGraph();
-        ui->customPlot->graph(0)->setName("Luminance flash diag.");
-        ui->customPlot->graph(1)->setName("Red flash diag.");
-        ui->customPlot->graph(2)->setName("Luminance flash");
-        ui->customPlot->graph(3)->setName("Red flash");
+        ui->customPlot->graph(0)->setName("Luminance flash");
+        ui->customPlot->graph(1)->setName("Red flash");
+        ui->customPlot->graph(2)->setName("Lum flash diag");
+        ui->customPlot->graph(3)->setName("Red flash diag");
 
         ui->customPlot->yAxis->setRange(0.0, 1.05);
         ui->customPlot->xAxis->setLabel("Frame Number");
@@ -734,45 +743,46 @@ void mainFrame::on_reportButton_clicked() {
         ui->customPlot->replot();
 
         //Graph 1 style
-        QPen solid;
-        solid.setStyle(Qt::DotLine);
-        solid.setWidthF(1.5);
-        solid.setColor(Qt::black);
-        ui->customPlot->graph(0)->setPen(solid);
+        QPen dotted;
+        dotted.setStyle(Qt::SolidLine);
+        dotted.setWidthF(3);
+        dotted.setColor(Qt::white);
+        ui->customPlot->graph(0)->setPen(dotted);
         ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
         ui->customPlot->graph(0)->addData(0.0, 0.0);
         //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
         //Graph 2 style
-        QPen solidRed;
-        solidRed.setStyle(Qt::DotLine);
-        solidRed.setWidthF(1.5);
-        solidRed.setColor(Qt::red);
-        ui->customPlot->graph(1)->setPen(solidRed);
+        QPen dottedRed;
+        dottedRed.setStyle(Qt::SolidLine);
+        dottedRed.setWidthF(3);
+        dottedRed.setColor(Qt::red);
+        ui->customPlot->graph(1)->setPen(dottedRed);
         ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
         ui->customPlot->graph(1)->addData(0.0, 0.0);
         //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
         //Graph 3 style
-        QPen dotted;
-        dotted.setStyle(Qt::SolidLine);
-        dotted.setWidthF(3);
-        dotted.setColor(Qt::white);
-        ui->customPlot->graph(2)->setPen(dotted);
+        QPen solid;
+        solid.setStyle(Qt::DotLine);
+        solid.setWidthF(1.5);
+        solid.setColor(Qt::black);
+        ui->customPlot->graph(2)->setPen(solid);
         ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsLine);
         ui->customPlot->graph(2)->addData(0.0, 0.0);
         //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
         //Graph 4 style
-        QPen dottedRed;
-        dottedRed.setStyle(Qt::SolidLine);
-        dottedRed.setWidthF(3);
-        dottedRed.setColor(Qt::red);
-        ui->customPlot->graph(3)->setPen(dottedRed);
+        QPen solidRed;
+        solidRed.setStyle(Qt::DotLine);
+        solidRed.setWidthF(1.5);
+        solidRed.setColor(Qt::red);
+        ui->customPlot->graph(3)->setPen(solidRed);
         ui->customPlot->graph(3)->setLineStyle(QCPGraph::lsLine);
         ui->customPlot->graph(3)->addData(0.0, 0.0);
         ui->customPlot->replot();
         //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+
         ui->customPlot->legend->setVisible(true);
 
         //Connect slots (slider and QCP)
@@ -820,7 +830,6 @@ void mainFrame::on_reportButton_clicked() {
         //connect(this, &mainFrame::thread_stopped, &loop, &QEventLoop::quit);
         loop.exec();
         if (!threadStopped) {
-            ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + "stop:1.0#25c660); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 255); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }");
 
             //Check to see vid_data has valid arrays of data points
             if (vid_data.size() < 4) {
@@ -829,6 +838,7 @@ void mainFrame::on_reportButton_clicked() {
             else if (vid_data[0].size() != frameNum || vid_data[1].size() != frameNum || vid_data[2].size() != frameNum || vid_data[3].size() != frameNum) {
                 throw 230;
             }
+            ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + "stop:1.0#25c660); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 255); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }");
 
             ui->customPlot->graph(0)->addData(frameNum, 0);
             ui->customPlot->graph(1)->addData(frameNum, 0);
@@ -1168,7 +1178,7 @@ void mainFrame::openReport()
                     }
                     */
                 }
-                ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + "); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 200); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }");
+                ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + "); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }");
                 ui->slider->repaint();
 
                 //Load video
@@ -1264,10 +1274,10 @@ void mainFrame::openReport()
                 ui->customPlot->addGraph();
                 ui->customPlot->addGraph();
                 ui->customPlot->addGraph();
-                ui->customPlot->graph(0)->setName("Luminance flash diag.");
-                ui->customPlot->graph(1)->setName("Red flash diag.");
-                ui->customPlot->graph(2)->setName("Luminance flash");
-                ui->customPlot->graph(3)->setName("Red flash");
+                ui->customPlot->graph(0)->setName("Luminance flash");
+                ui->customPlot->graph(1)->setName("Red flash");
+                ui->customPlot->graph(2)->setName("Lum flash diag");
+                ui->customPlot->graph(3)->setName("Red flash diag");
 
                 ui->customPlot->yAxis->setRange(0.0, 1.05);
                 ui->customPlot->xAxis->setLabel("Frame Number");
@@ -1276,38 +1286,38 @@ void mainFrame::openReport()
                 ui->customPlot->replot();
 
                 //Graph 1 style
-                QPen solid;
-                solid.setStyle(Qt::DotLine);
-                solid.setWidthF(1.5);
-                solid.setColor(Qt::black);
-                ui->customPlot->graph(0)->setPen(solid);
-                ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
-                //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-
-                //Graph 2 style
-                QPen solidRed;
-                solidRed.setStyle(Qt::DotLine);
-                solidRed.setWidthF(1.5);
-                solidRed.setColor(Qt::red);
-                ui->customPlot->graph(1)->setPen(solidRed);
-                ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
-                //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-
-                //Graph 3 style
                 QPen dotted;
                 dotted.setStyle(Qt::SolidLine);
                 dotted.setWidthF(3);
                 dotted.setColor(Qt::white);
-                ui->customPlot->graph(2)->setPen(dotted);
-                ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsLine);
+                ui->customPlot->graph(0)->setPen(dotted);
+                ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
                 //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
-                //Graph 4 style
+                //Graph 2 style
                 QPen dottedRed;
                 dottedRed.setStyle(Qt::SolidLine);
                 dottedRed.setWidthF(3);
                 dottedRed.setColor(Qt::red);
-                ui->customPlot->graph(3)->setPen(dottedRed);
+                ui->customPlot->graph(1)->setPen(dottedRed);
+                ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
+                //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+
+                //Graph 3 style
+                QPen solid;
+                solid.setStyle(Qt::DotLine);
+                solid.setWidthF(1.5);
+                solid.setColor(Qt::black);
+                ui->customPlot->graph(2)->setPen(solid);
+                ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsLine);
+                //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
+
+                //Graph 4 style
+                QPen solidRed;
+                solidRed.setStyle(Qt::DotLine);
+                solidRed.setWidthF(1.5);
+                solidRed.setColor(Qt::red);
+                ui->customPlot->graph(3)->setPen(solidRed);
                 ui->customPlot->graph(3)->setLineStyle(QCPGraph::lsLine);
                 ui->customPlot->replot();
                 for (int i = 0; i < ui->customPlot->graphCount(); i++) {
@@ -1319,10 +1329,10 @@ void mainFrame::openReport()
                 for (int i = 0; i < diag_y.size(); i++) {
                     qDebug() << diag_x[i] << ": " << diag_y[i];
                 }
-                ui->customPlot->graph(0)->setData(diag_x, diag_y);
-                ui->customPlot->graph(1)->setData(red_diag_x, red_diag_y);
-                ui->customPlot->graph(2)->setData(flash_x, flash_y);
-                ui->customPlot->graph(3)->setData(red_flash_x, red_flash_y);
+                ui->customPlot->graph(2)->setData(diag_x, diag_y);
+                ui->customPlot->graph(3)->setData(red_diag_x, red_diag_y);
+                ui->customPlot->graph(0)->setData(flash_x, flash_y);
+                ui->customPlot->graph(1)->setData(red_flash_x, red_flash_y);
 
                 ui->customPlot->graph(0)->addData(frame_count, 0);
                 ui->customPlot->graph(1)->addData(frame_count, 0);
@@ -2239,8 +2249,15 @@ void mainFrame::on_actionPlot_Tooltips_triggered()
     ui->customPlot->replot();
 }
 
+int mainFrame::visibleGraphCount() {
+    int count = 0;
+    for (int i = 0; i < ui->customPlot->graphCount(); i++) {
+        if (ui->customPlot->graph(i)->visible()) {
+            count++;
+        }
+    }
+    return count;
+}
 // *printing*,
 // *UI plans*, *resizing*, *previews*, *screen capture*
 // *fix reloading of plots*, *sensitivity*, final testing!
-
-

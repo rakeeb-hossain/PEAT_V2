@@ -27,7 +27,7 @@
 using namespace std;
 using namespace cv;
 
-const int CHUNK = 256;
+const int CHUNK = 32;
 const int SCALE = 4;
 const int N = CHUNK/SCALE;
 const int AREA = N*N;

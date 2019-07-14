@@ -896,10 +896,10 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       <enum>QFrame::Panel</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Sunken</enum>
+      <enum>QFrame::Raised</enum>
      </property>
      <property name="lineWidth">
-      <number>3</number>
+      <number>2</number>
      </property>
      <widget class="QLabel" name="label_3">
       <property name="geometry">
@@ -964,7 +964,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="geometry">
        <rect>
-        <x>46</x>
+        <x>47</x>
         <y>4</y>
         <width>41</width>
         <height>14</height>
@@ -1009,7 +1009,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="geometry">
        <rect>
-        <x>92</x>
+        <x>95</x>
         <y>4</y>
         <width>41</width>
         <height>14</height>
@@ -1105,7 +1105,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
        <x>10</x>
        <y>10</y>
        <width>161</width>
-       <height>73</height>
+       <height>81</height>
       </rect>
      </property>
      <property name="font">
@@ -1118,6 +1118,15 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
      </property>
      <property name="autoFillBackground">
       <bool>true</bool>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <property name="lineWidth">
+      <number>2</number>
      </property>
      <property name="text">
       <string/>
@@ -1238,7 +1247,7 @@ QSlider::handle:horizontal {
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>93</y>
+       <y>94</y>
        <width>361</width>
        <height>16</height>
       </rect>

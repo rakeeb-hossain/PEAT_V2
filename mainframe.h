@@ -169,6 +169,8 @@ private slots:
 
     void on_actionPlot_Tooltips_triggered();
 
+    int visibleGraphCount();
+
     /*
     void on_label_17_mousePressed();
 
