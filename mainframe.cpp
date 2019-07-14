@@ -611,9 +611,15 @@ void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<do
     //Plot
     //qDebug() << "DATA: " << points_y[0][points_y[0].size()-1];
 
-    vid_data[0].push_back(points_y[0][points_y[0].size()-1]*10);
-    vid_data[1].push_back(points_y[1][points_y[1].size()-1]*10);
-    //qDebug() << points_y[0][points_y[0].size()-1]*10 << ", " << vid_data[0][vid_data[0].size()-1];
+    /* vid_data structure:
+     * Index 0: lum diag
+     * Index 1: red diag
+     * Index 2: lum flash
+     * Index 3: red flash
+     * Graphs are arranged (using above indices): {2,3,0,1}; this odd order is from rearrangement of graph orders
+    */
+    vid_data[0].push_back(round(points_y[0][points_y[0].size()-1]*10));
+    vid_data[1].push_back(round(points_y[1][points_y[1].size()-1]*10));
     vid_data[2].push_back(points_y[2][points_y[2].size()-1]);
     vid_data[3].push_back(points_y[3][points_y[3].size()-1]);
 
@@ -2043,7 +2049,7 @@ void mainFrame::plotTooltip(QMouseEvent *event) {
                 ui->customPlot->replot();
                 QApplication::setOverrideCursor(Qt::ArrowCursor);
                 QString status;
-                if (min_index == 2 || min_index == 3) {
+                if (min_index == 0 || min_index == 1) {
                     status = (int)min_val == 1 ? "FAIL" : "PASS";
                 }
                 int dur = player->duration()*(double)x/(double)nFrame;
@@ -2088,16 +2094,16 @@ void mainFrame::plotTooltip(QMouseEvent *event) {
 
                 switch(min_index) {
                     case 0:
-                        QToolTip::showText(event->globalPos(), "Luminance flash diag.\nFrame: " + QString::number(x) + "\nTime: " + time + "\nFlash #: " + QString::number(min_val*10));
-                    break;
-                    case 1:
-                        QToolTip::showText(event->globalPos(), "Red flash diag.\nFrame: " + QString::number(x) + "\nTime: " + time + "\nFlash #: " + QString::number(min_val*10));
-                    break;
-                    case 2:
                         QToolTip::showText(event->globalPos(), "Luminance flash\nFrame: " + QString::number(x) + "\nTime: " + time + "\nStatus: " + status);
                     break;
-                    case 3:
+                    case 1:
                         QToolTip::showText(event->globalPos(), "Red flash.\nFrame: " + QString::number(x) + "\nTime: " + time + "\nStatus: " + status);
+                    break;
+                    case 2:
+                        QToolTip::showText(event->globalPos(), "Luminance flash diag.\nFrame: " + QString::number(x) + "\nTime: " + time + "\nFlash #: " + QString::number(min_val*10));
+                    break;
+                    case 3:
+                        QToolTip::showText(event->globalPos(), "Red flash diag.\nFrame: " + QString::number(x) + "\nTime: " + time + "\nFlash #: " + QString::number(min_val*10));
                     break;
                 }
             }

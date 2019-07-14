@@ -114,6 +114,27 @@ rkbProTool::rkbProTool(vector<vector<int> > vid_info, QString vid_file, QWidget 
     });
 
     preview = new QMovie;
+
+    ui->label->installEventFilter(this);
+    ui->label_2->installEventFilter(this);
+    ui->label_3->installEventFilter(this);
+    ui->label_4->installEventFilter(this);
+    ui->label_5->installEventFilter(this);
+    ui->label_6->installEventFilter(this);
+    ui->label_7->installEventFilter(this);
+    ui->label_8->installEventFilter(this);
+    ui->label_9->installEventFilter(this);
+    ui->label_10->installEventFilter(this);
+    ui->lineEdit->installEventFilter(this);
+    ui->radioButton->installEventFilter(this);
+    ui->radioButton_2->installEventFilter(this);
+    ui->radioButton_3->installEventFilter(this);
+    ui->radioButton_4->installEventFilter(this);
+    ui->radioButton_5->installEventFilter(this);
+    ui->radioButton_7->installEventFilter(this);
+    ui->pushButton->installEventFilter(this);
+    ui->slider->installEventFilter(this);
+    ui->buttonBox->installEventFilter(this);
 }
 
 rkbProTool::~rkbProTool()
@@ -307,4 +328,11 @@ void rkbProTool::on_buttonBox_accepted()
     else {
         QMessageBox::critical(0, "Error", "Please select a prophylactic method.");
     }
+}
+
+bool rkbProTool::eventFilter(QObject *obj, QEvent *event) {
+    if (event->type() == QEvent::Enter) {
+        if (obj != ui->lineEdit) QApplication::setOverrideCursor(Qt::ArrowCursor);
+    }
+    return QDialog::eventFilter(obj, event);
 }

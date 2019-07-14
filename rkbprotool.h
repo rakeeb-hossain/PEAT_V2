@@ -41,6 +41,8 @@ private slots:
 
     void on_radioButton_7_clicked();
 
+    bool eventFilter(QObject *obj, QEvent *event);
+
 private:
     Ui::rkbProTool *ui;
     QTimer *timer;
