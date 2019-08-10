@@ -45,17 +45,25 @@ RESOURCES += \
 
 QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS
 
-INCLUDEPATH += C:\opencv-build\install\include
+win32 {
+    INCLUDEPATH += C:\opencv-4.1.1-build\install\include
+    INCLUDEPATH += $$PWD\Lib
 
-LIBS += -L C:\\opencv-build\\bin \
-    libopencv_core331 \
-    libopencv_highgui331 \
-    libopencv_imgproc331 \
-    libopencv_features2d331 \
-    libopencv_calib3d331 \
-    libopencv_videoio331 \
-    libopencv_imgcodecs331 \
-    libopencv_ffmpeg331 \
+    LIBS += -L C:\\opencv-4.1.1-build\\bin \
+        libopencv_core411 \
+        libopencv_highgui411 \
+        libopencv_imgproc411 \
+        libopencv_features2d411 \
+        libopencv_calib3d411 \
+        libopencv_videoio411 \
+        libopencv_imgcodecs411 \
+        libopencv_videoio_ffmpeg411 \
+}
+
+unix {
+    CONFIG += link_pkgconfig
+    PKGCONFIG += opencv4
+}
 
 DISTFILES += \
     README

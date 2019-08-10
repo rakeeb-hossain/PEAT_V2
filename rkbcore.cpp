@@ -250,7 +250,7 @@ void rObject::writeVideo(QString ndir, QString nreport)
     int frame_width = frame1.cols;
     int frame_height = frame1.rows;
     string videoName = oldDir + "/video.mp4";
-    VideoWriter video(videoName, CV_FOURCC('X','V','I','D'), 30, Size(frame_width,frame_height));
+    VideoWriter video(videoName, VideoWriter::fourcc('X','V','I','D'), 30, Size(frame_width,frame_height));
 
     QCoreApplication::processEvents();
     QProgressDialog progress("Writing video...", "Abort", 0, fileNum);
@@ -359,6 +359,7 @@ void rObject::rkbcore(string filename) {
 
     bool just_flashed = false; //True if flash just occurred (now looking for decrease in luminance)
     bool just_red_flashed = false;
+    int blankCounter = 0;
 
     //Loop through frames, loading two at a time
     while(count < frame_count && !threadStopped) {
@@ -368,75 +369,86 @@ void rObject::rkbcore(string filename) {
         int red_count = 0;
         int flash_count = 0;
         int red_flash_count = 0;
+        bool wasBlank = false;
 
         //Load new frame and resize
         Mat next_frame;
         cap >> next_frame;
-        if (frame.empty() || next_frame.empty()) {emit error(); return;};
-        resize(next_frame, next_frame, Size(), scale, scale);
-
-        //Parallel loop through pixels in NxN chunks to get lum. and red sat. values
-        parallel_for_(Range(0, length*width), [&](const Range& range) {
-            for (int r = range.start; r < range.end; r++) {
-                int c_num = r / AREA;
-                int x = N*(c_num % (length/N)) + r % N;
-                int y = N*(c_num / (length/N)) + (r % AREA) / N;
-
-                //Inverse gamma correction for linear RGB
-                float sB = frame.at<Vec3b>(y,x)[0]/255.f;
-                float sG = frame.at<Vec3b>(y,x)[1]/255.f;
-                float sR = frame.at<Vec3b>(y,x)[2]/255.f;
-                float B = (sB <= 0.03928 ? sB/12.92 : pow((sB+0.055)/1.055, 2.4));
-                float G = (sG <= 0.03928 ? sG/12.92 : pow((sG+0.055)/1.055, 2.4));
-                float R = (sR <= 0.03928 ? sR/12.92 : pow((sR+0.055)/1.055, 2.4));
-
-                float lum = relative_luminance(R,G,B);
-                float sat = saturation(R,G,B);
-                float red_val = red_saturation(R,G,B);
-
-                lum_next[c_num] += lum;
-                sat_next[c_num] += sat;
-                red_next[c_num] += red_val;
+        if (frame.empty() || next_frame.empty()) {
+            blankCounter++;
+            wasBlank = true;
+            qDebug() << blankCounter;
+            if (blankCounter >= fps) {
+                emit error();
+                return;
             }
-        });
-        //Parallel loop to calculate and compare chunk averages between the frames
-        parallel_for_(Range(0, num_chunks), [&](const Range& range) {
-            for (int r = range.start; r < range.end; r++) {
-                lum_next[r] = lum_next[r] / (float) AREA;
-                sat_next[r] = ((sat_next[r] / (float) AREA) >= ST ? sat_next[r] / (float) AREA : 0);
-                red_next[r] = (sat_next[r] != 0 ? red_next[r] / (float) AREA : 0);
+        }
+        if (!wasBlank) {
+            resize(next_frame, next_frame, Size(), scale, scale);
 
-                if (just_flashed == false) {
-                    if (lum_next[r] - lum_first[r] > FT && lum_first[r] < DT) {
-                        seizure_count++;
-                    }
-                }
-                else {
-                    if (lum_first[r] - lum_next[r] > FT && lum_next[r] < DT) {
-                        seizure_count++;
-                    }
-                }
+            //Parallel loop through pixels in NxN chunks to get lum. and red sat. values
+            parallel_for_(Range(0, length*width), [&](const Range& range) {
+                for (int r = range.start; r < range.end; r++) {
+                    int c_num = r / AREA;
+                    int x = N*(c_num % (length/N)) + r % N;
+                    int y = N*(c_num / (length/N)) + (r % AREA) / N;
 
-                //CONSIDER: checking only if abs. diff. of red values is > 20
-                if (just_red_flashed == false) {
-                    //INVESTIGATE: WCAG 2.0 Guidelines say that both states should be saturated
-                    //if (sat_first[r] != 0 && sat_next[r] != 0)
-                    if (sat_next[r] != 0) {
-                        if (red_next[r] > RTT) {
-                            red_count++;
+                    //Inverse gamma correction for linear RGB
+                    float sB = frame.at<Vec3b>(y,x)[0]/255.f;
+                    float sG = frame.at<Vec3b>(y,x)[1]/255.f;
+                    float sR = frame.at<Vec3b>(y,x)[2]/255.f;
+                    float B = (sB <= 0.03928 ? sB/12.92 : pow((sB+0.055)/1.055, 2.4));
+                    float G = (sG <= 0.03928 ? sG/12.92 : pow((sG+0.055)/1.055, 2.4));
+                    float R = (sR <= 0.03928 ? sR/12.92 : pow((sR+0.055)/1.055, 2.4));
+
+                    float lum = relative_luminance(R,G,B);
+                    float sat = saturation(R,G,B);
+                    float red_val = red_saturation(R,G,B);
+
+                    lum_next[c_num] += lum;
+                    sat_next[c_num] += sat;
+                    red_next[c_num] += red_val;
+                }
+            });
+            //Parallel loop to calculate and compare chunk averages between the frames
+            parallel_for_(Range(0, num_chunks), [&](const Range& range) {
+                for (int r = range.start; r < range.end; r++) {
+                    lum_next[r] = lum_next[r] / (float) AREA;
+                    sat_next[r] = ((sat_next[r] / (float) AREA) >= ST ? sat_next[r] / (float) AREA : 0);
+                    red_next[r] = (sat_next[r] != 0 ? red_next[r] / (float) AREA : 0);
+
+                    if (just_flashed == false) {
+                        if (lum_next[r] - lum_first[r] > FT && lum_first[r] < DT) {
+                            seizure_count++;
                         }
                     }
-                }
-                else {
-                    if (sat_first[r] != 0) {
-                        if (red_first[r] > RTT ) {
-                            red_count++;
+                    else {
+                        if (lum_first[r] - lum_next[r] > FT && lum_next[r] < DT) {
+                            seizure_count++;
                         }
                     }
-                }
 
-            }
-        });
+                    //CONSIDER: checking only if abs. diff. of red values is > 20
+                    if (just_red_flashed == false) {
+                        //INVESTIGATE: WCAG 2.0 Guidelines say that both states should be saturated
+                        //if (sat_first[r] != 0 && sat_next[r] != 0)
+                        if (sat_next[r] != 0) {
+                            if (red_next[r] > RTT) {
+                                red_count++;
+                            }
+                        }
+                    }
+                    else {
+                        if (sat_first[r] != 0) {
+                            if (red_first[r] > RTT ) {
+                                red_count++;
+                            }
+                        }
+                    }
+
+                }
+            });
+        }
 
         //Check # of increases (flashes) in diag frames in past 1 second and set flash counts to that
         if (count > fps) {
@@ -452,26 +464,28 @@ void rObject::rkbcore(string filename) {
             }
         }
 
-        //Increment flash counts if a valid flash occurs in the transition to the next frame
-        if (seizure_count*AREA >= ATH*frame.cols*frame.rows) {
-            if (just_flashed == false) {
-                flash_count++;
-                just_flashed = true;
+        if (!wasBlank) {
+            //Increment flash counts if a valid flash occurs in the transition to the next frame
+            if (seizure_count*AREA >= ATH*frame.cols*frame.rows) {
+                if (just_flashed == false) {
+                    flash_count++;
+                    just_flashed = true;
+                }
+                else {
+                    //flash_count++;
+                    just_flashed = false;
+                }
             }
-            else {
-                //flash_count++;
-                just_flashed = false;
-            }
-        }
 
-        if (red_count*AREA >= RTH*frame.cols*frame.rows) {
-            if (just_red_flashed == false) {
-                red_flash_count++;
-                just_red_flashed = true;
-            }
-            else {
-                //red_flash_count++;
-                just_red_flashed = false;
+            if (red_count*AREA >= RTH*frame.cols*frame.rows) {
+                if (just_red_flashed == false) {
+                    red_flash_count++;
+                    just_red_flashed = true;
+                }
+                else {
+                    //red_flash_count++;
+                    just_red_flashed = false;
+                }
             }
         }
 
@@ -582,7 +596,7 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
     int frame_width = frame.cols;
     int frame_height = frame.rows;
     int fps = round(vidData[4][0]);
-    VideoWriter video(dir, CV_FOURCC('X','V','I','D'), fps, Size(frame_width,frame_height));
+    VideoWriter video(dir, VideoWriter::fourcc('X','V','I','D'), fps, Size(frame_width,frame_height));
 
     waitDialog *progress = new waitDialog;
     progress->setProgressBarRange(0, 0);
@@ -664,12 +678,12 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
             {
                 Mat new_frame = reduceGreen(frame, alpha);
                 video.write(new_frame);
-                cvtColor(new_frame, new_frame, CV_BGR2RGB);
+                cvtColor(new_frame, new_frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) new_frame.data, new_frame.cols, new_frame.rows, new_frame.step, QImage::Format_RGB888)));
             }
             else {
                 video.write(frame);
-                cvtColor(frame, frame, CV_BGR2RGB);
+                cvtColor(frame, frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
             }
             progress->setProgressBarValue(i+1);
@@ -687,12 +701,12 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
             {
                 Mat new_frame = overlayFilter(frame, alpha);
                 video.write(new_frame);
-                cvtColor(new_frame, new_frame, CV_BGR2RGB);
+                cvtColor(new_frame, new_frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) new_frame.data, new_frame.cols, new_frame.rows, new_frame.step, QImage::Format_RGB888)));
             }
             else {
                 video.write(frame);
-                cvtColor(frame, frame, CV_BGR2RGB);
+                cvtColor(frame, frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
             }
             progress->setProgressBarValue(i+1);
@@ -712,12 +726,12 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
             {
                 Mat new_frame = lowerContrast(frame, alpha);
                 video.write(new_frame);
-                cvtColor(new_frame, new_frame, CV_BGR2RGB);
+                cvtColor(new_frame, new_frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) new_frame.data, new_frame.cols, new_frame.rows, new_frame.step, QImage::Format_RGB888)));
             }
             else {
                 video.write(frame);
-                cvtColor(frame, frame, CV_BGR2RGB);
+                cvtColor(frame, frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
             }
             progress->setProgressBarValue(i+1);
@@ -736,12 +750,12 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
             {
                 Mat new_frame = blurFilter(frame, alpha);
                 video.write(new_frame);
-                cvtColor(new_frame, new_frame, CV_BGR2RGB);
+                cvtColor(new_frame, new_frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) new_frame.data, new_frame.cols, new_frame.rows, new_frame.step, QImage::Format_RGB888)));
             }
             else {
                 video.write(frame);
-                cvtColor(frame, frame, CV_BGR2RGB);
+                cvtColor(frame, frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
             }
             progress->setProgressBarValue(i+1);
@@ -759,12 +773,12 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
             {
                 Mat new_frame = swapChannels(frame);
                 video.write(new_frame);
-                cvtColor(new_frame, new_frame, CV_BGR2RGB);
+                cvtColor(new_frame, new_frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) new_frame.data, new_frame.cols, new_frame.rows, new_frame.step, QImage::Format_RGB888)));
             }
             else {
                 video.write(frame);
-                cvtColor(frame, frame, CV_BGR2RGB);
+                cvtColor(frame, frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
             }
             progress->setProgressBarValue(i+1);
@@ -784,7 +798,7 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
             {
                 for (int j = 0; j < speed; j++) {
                     video.write(frame);
-                    cvtColor(frame, frame, CV_BGR2RGB);
+                    cvtColor(frame, frame, COLOR_BGR2RGB);
                     progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
                     QCoreApplication::processEvents();
                     progress->setProgressBarValue(count+1);
@@ -793,7 +807,7 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
             }
             else {
                 video.write(frame);
-                cvtColor(frame, frame, CV_BGR2RGB);
+                cvtColor(frame, frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
                 progress->setProgressBarValue(count+1);
             }
@@ -810,7 +824,7 @@ QString rObject::proTool(vector<vector<int > > vidData, QString ndir, QString or
             if ((int)vidData[2][i] != 1 && (int)vidData[3][i] != 1)
             {
                 video.write(frame);
-                cvtColor(frame, frame, CV_BGR2RGB);
+                cvtColor(frame, frame, COLOR_BGR2RGB);
                 progress->setImg(QPixmap::fromImage(QImage((unsigned char*) frame.data, frame.cols, frame.rows, frame.step, QImage::Format_RGB888)));
                 progress->setProgressBarValue(i+1);
                 QCoreApplication::processEvents();

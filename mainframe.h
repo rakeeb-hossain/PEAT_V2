@@ -111,7 +111,7 @@ private slots:
 
     void traceHome();
 
-    string execute(const char * cmd);
+    // string execute(const char * cmd);
 
     string replaceChar(string str, char ch1, char ch2);
 

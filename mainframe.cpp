@@ -1,6 +1,5 @@
 #include "mainframe.h"
 #include "ui_mainframe.h"
-#include <windows.h>
 #include <stdio.h>
 #include <QProgressDialog>
 #include "rkbcore.h"
@@ -362,7 +361,7 @@ void mainFrame::closeEvent(QCloseEvent *event) {
 void mainFrame::on_folderButton_clicked()
 {
 
-    QString filename = QFileDialog::getOpenFileName(this, "Open a Video File", "", "Video File (*.mp4; *.avi; *.flv; *.mpeg)");
+    QString filename = QFileDialog::getOpenFileName(this, "Open a Video File", "", "Video File (*.mp4 *.avi *.flv *.mpeg)");
     QFileInfo fi(filename);
     QString ext = fi.suffix();
     bool didSelect = false;
@@ -400,7 +399,7 @@ void mainFrame::on_folderButton_clicked()
             messageBox.information(this, "Error", "Sorry, this encoding format is not supported by PEAT.");
             messageBox.setFixedSize(600,400);
         }
-        else if (fileString.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_./\!@#$%^&*()-+=~`?<>,") == std::string::npos)
+        else if (fileString.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_./!@#$%^&*()-+=~`?<>,\\") != std::string::npos)
         {
             QMessageBox messageBox;
             messageBox.information(this, "Error", "Please remove the spaces in the file name.");
@@ -794,8 +793,8 @@ void mainFrame::on_reportButton_clicked() {
         //Connect slots (slider and QCP)
         vidLabel->setText("Analysing...");
         rObject* r_instance = new rObject;
-        connect(r_instance, &rObject::updateUI, this, updatePlot, Qt::QueuedConnection);
-        connect(r_instance, &rObject::progressCount, this, updateSlider, Qt::QueuedConnection);
+        connect(r_instance, &rObject::updateUI, this, &mainFrame::updatePlot, Qt::QueuedConnection);
+        connect(r_instance, &rObject::progressCount, this, &mainFrame::updateSlider, Qt::QueuedConnection);
 
         vid_data.clear();
         vid_data.resize(5);
@@ -885,7 +884,11 @@ void mainFrame::on_reportButton_clicked() {
     catch(int e) {
         vidLabel->setText(tr("Error"));
         QMessageBox mb;
-        mb.critical(this, "Error: " + QString::number(e), "There was an error in decoding the video stream. Please try and install the appropriate codecs and try again.");
+        if (e == 230) {
+            mb.critical(this, "Error: " + QString::number(e), "A blank frame was encountered during the analysis. This video may include frames unreadable by PEAT. Please try and convert your video to another compression and/or colour format and try again.");
+        } else {
+            mb.critical(this, "Error: " + QString::number(e), "There was an error in decoding the video stream. Please try and install the appropriate codecs and try again.");
+        }
         mb.setFixedSize(600,400);
     }
     ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
@@ -1597,7 +1600,7 @@ void mainFrame::traceHome()
     QString link = "http://trace.umd.edu/";
     QDesktopServices::openUrl(QUrl(link));
 }
-
+/*
 string mainFrame::execute(const char * cmd) {
 
     std::array<char, 128> buffer;
@@ -1615,6 +1618,7 @@ string mainFrame::execute(const char * cmd) {
     }
     return result;
 }
+*/
 
 string mainFrame::replaceChar(string str, char ch1, char ch2) {
   for (int i = 0; i < str.length(); ++i) {
