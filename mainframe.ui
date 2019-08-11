@@ -146,8 +146,8 @@
     </property>
     <property name="font">
      <font>
-      <family>DejaVu Sans</family>
-      <pointsize>9</pointsize>
+      <family>Segoe UI</family>
+      <pointsize>11</pointsize>
       <weight>75</weight>
       <bold>true</bold>
      </font>
@@ -597,8 +597,8 @@ border-image: url(:/images/Res/EjectPressed.png);
      </property>
      <property name="font">
       <font>
-       <family>DejaVu Sans</family>
-       <pointsize>8</pointsize>
+       <family>Segoe UI</family>
+       <pointsize>10</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
@@ -912,8 +912,8 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="font">
        <font>
-        <family>DejaVu Sans</family>
-        <pointsize>7</pointsize>
+        <family>Segoe UI</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -934,8 +934,8 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="font">
        <font>
-        <family>DejaVu Sans</family>
-        <pointsize>7</pointsize>
+        <family>Segoe UI</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -964,16 +964,15 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="geometry">
        <rect>
-        <x>33</x>
+        <x>47</x>
         <y>4</y>
-        <width>62</width>
+        <width>41</width>
         <height>14</height>
        </rect>
       </property>
       <property name="font">
        <font>
-        <family>DejaVu Sans</family>
-        <pointsize>8</pointsize>
+        <family>Segoe UI</family>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -993,8 +992,8 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="font">
        <font>
-        <family>DejaVu Sans</family>
-        <pointsize>7</pointsize>
+        <family>Segoe UI</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -1018,8 +1017,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="font">
        <font>
-        <family>DejaVu Sans</family>
-        <pointsize>8</pointsize>
+        <family>Segoe UI</family>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -1042,8 +1040,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="font">
        <font>
-        <family>DejaVu Sans</family>
-        <pointsize>9</pointsize>
+        <family>Segoe UI</family>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -1063,8 +1060,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="font">
        <font>
-        <family>DejaVu Sans</family>
-        <pointsize>9</pointsize>
+        <family>Segoe UI</family>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -1084,8 +1080,7 @@ border-image: url(:/images/Res/PrevWarningDisabled.png);
       </property>
       <property name="font">
        <font>
-        <family>DejaVu Sans</family>
-        <pointsize>9</pointsize>
+        <family>Segoe UI</family>
         <weight>75</weight>
         <bold>true</bold>
        </font>
@@ -1316,7 +1311,7 @@ background: transparent;</string>
      <x>0</x>
      <y>0</y>
      <width>882</width>
-     <height>22</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
