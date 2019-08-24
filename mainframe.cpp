@@ -361,7 +361,7 @@ void mainFrame::closeEvent(QCloseEvent *event) {
 void mainFrame::on_folderButton_clicked()
 {
 
-    QString filename = QFileDialog::getOpenFileName(this, "Open a Video File", "", "Video File (*.mp4 *.avi *.flv *.mpeg)");
+    QString filename = QFileDialog::getOpenFileName(this, "Open a Video File", "", "Video File (*.mp4 *.avi *.flv)");
     QFileInfo fi(filename);
     QString ext = fi.suffix();
     bool didSelect = false;
@@ -373,7 +373,7 @@ void mainFrame::on_folderButton_clicked()
     VideoCapture cap;
 
     bool vid_is_valid = true;
-
+    /*
     if (ext == "avi" || ext == "AVI")
     {
         QMessageBox messageBox;
@@ -381,6 +381,7 @@ void mainFrame::on_folderButton_clicked()
         messageBox.setFixedSize(600,400);
 
     }
+    */
     if (ext == "mp4" || ext == "avi" || ext == "mpeg" || ext == "flv" || ext == "mov" || ext == "wmv" || ext == "MP4" || ext == "AVI" || ext == "MPEG" || ext == "FLV" || ext == "MOV" || ext == "WMV"){
         isVideo = true;
         didSelect = true;
@@ -885,7 +886,7 @@ void mainFrame::on_reportButton_clicked() {
         vidLabel->setText(tr("Error"));
         QMessageBox mb;
         if (e == 230) {
-            mb.critical(this, "Error: " + QString::number(e), "A blank frame was encountered during the analysis. This video may include frames unreadable by PEAT. Please try and convert your video to another compression and/or colour format and try again.");
+            mb.critical(this, "Error: " + QString::number(e), "A blank frame was encountered during the analysis. The video is corrupted. Please try and repair the video (using VLC) or convert your video to another compression format and try again.");
         } else {
             mb.critical(this, "Error: " + QString::number(e), "There was an error in decoding the video stream. Please try and install the appropriate codecs and try again.");
         }

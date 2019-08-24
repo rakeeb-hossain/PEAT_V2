@@ -378,7 +378,7 @@ void rObject::rkbcore(string filename) {
             blankCounter++;
             wasBlank = true;
             qDebug() << blankCounter;
-            if (blankCounter >= fps) {
+            if (blankCounter >= 1) {
                 emit error();
                 return;
             }

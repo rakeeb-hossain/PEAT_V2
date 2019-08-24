@@ -5,7 +5,6 @@
         <file>Res/FFwdUp.bmp</file>
         <file>Res/PauseUp.bmp</file>
         <file>Res/PlayUp.bmp</file>
-        <file>Res/AnalyzeDisabled.bmp</file>
         <file>Res/AnalyzeDown.bmp</file>
         <file>Res/AnalyzeDownHilite.bmp</file>
         <file>Res/AnalyzeFocusMask.bmp</file>
@@ -90,8 +89,6 @@
         <file>Res/StopDownHilite.bmp</file>
         <file>Res/StopFocusMask.bmp</file>
         <file>Res/StopPressed.bmp</file>
-        <file>Res/StopUp.bmp</file>
-        <file>Res/StopUpHilite.bmp</file>
         <file>Res/TestButton.bmp</file>
         <file>Res/Thumbs.db</file>
         <file>Res/Toolbar.bmp</file>

@@ -23,7 +23,8 @@ SOURCES += \
     qcustomplot.cpp \
     rkbprotool.cpp \
     mainframe.cpp \
-    c_label.cpp
+    c_label.cpp \
+    colordialog.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -32,13 +33,16 @@ HEADERS += \
     qcustomplot.h \
     rkbprotool.h \
     mainframe.h \
-    c_label.h
+    c_label.h \
+    colordialog.h
 
 FORMS += \
         mainwindow.ui \
     waitdialog.ui \
     rkbprotool.ui \
-    mainframe.ui
+    mainframe.ui \
+    colordialog.ui \
+    colordialog.ui
 
 RESOURCES += \
     resources.qrc
