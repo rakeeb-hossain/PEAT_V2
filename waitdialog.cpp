@@ -1,3 +1,10 @@
+//
+//  waitdialog.cpp
+//  PEAT_V2
+//
+//  Created by Hossain, Rakeeb on 2018-01-02.
+//  Copyright © 2018 Hossain, Rakeeb. All rights reserved.
+//
 #include "waitdialog.h"
 #include "ui_waitdialog.h"
 #include "mainframe.h"

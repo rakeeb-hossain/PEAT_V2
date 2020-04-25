@@ -1,6 +1,6 @@
 //
-//  main.cpp
-//  GradientTest
+//  rkbcore.cpp
+//  PEAT_V2
 //
 //  Created by Hossain, Rakeeb on 2018-01-02.
 //  Copyright © 2018 Hossain, Rakeeb. All rights reserved.
@@ -290,7 +290,7 @@ void rObject::stopLoop() {
     threadStopped = true;
 }
 
-void rObject::rkbcore(string filename) {
+void rObject::rkbcore(string filename, int colorEnum) {
     int count = 1;
     VideoCapture cap(filename);
 
@@ -306,7 +306,9 @@ void rObject::rkbcore(string filename) {
     //Resize first frame
     auto scale = 1.0 / SCALE;
     resize(frame, frame, Size(), scale, scale);
-
+    if (colorEnum != 0) {
+        cvtColor(frame, frame, colorConv[colorEnum]);
+    }
     //Round dimensions for analysis based on chunk size (N)
     int length = frame.cols - (frame.cols % N);
     int width = frame.rows - (frame.rows % N);
@@ -385,6 +387,9 @@ void rObject::rkbcore(string filename) {
         }
         if (!wasBlank) {
             resize(next_frame, next_frame, Size(), scale, scale);
+            if (colorEnum != 0) {
+                cvtColor(frame, frame, colorConv[colorEnum]);
+            }
 
             //Parallel loop through pixels in NxN chunks to get lum. and red sat. values
             parallel_for_(Range(0, length*width), [&](const Range& range) {

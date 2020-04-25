@@ -28,6 +28,7 @@
 #include <QPrintDialog>
 #include <QPrinter>
 #include <QThread>
+#include "colordialog.h"
 
 using namespace std;
 
@@ -43,8 +44,8 @@ class mainFrame : public QMainWindow
 public:
     explicit mainFrame(QWidget *parent = nullptr);
     ~mainFrame();
-    double x = 1.0;
-    qreal rate = x;
+    double playback_speed = 1.0;
+    qreal rate = playback_speed;
     vector<int> warnings;
     QAction *generateReport;
     QAction *skipLeft;
@@ -180,6 +181,13 @@ private slots:
 private:
     Ui::mainFrame *ui;
 
+    void setupPlot();
+    void setPlayerHandling();
+    void setToolbar();
+    void setStatusBar();
+    void setShortcuts();
+    void setEventFilters();
+
     void keyPressEvent(QKeyEvent * event);
     QLabel *vidLabel;
     QLabel *descriptionLabel;
@@ -211,6 +219,7 @@ private:
     QRect frameRect;
     QRect label_17Rect;
     QRect lineRect;
+    ColorDialog *colorDialog;
 
 };
 

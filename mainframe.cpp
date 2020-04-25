@@ -1,3 +1,10 @@
+//
+//  mainframe.cpp
+//  PEAT_V2
+//
+//  Created by Hossain, Rakeeb on 2018-01-02.
+//  Copyright © 2018 Hossain, Rakeeb. All rights reserved.
+//
 #include "mainframe.h"
 #include "ui_mainframe.h"
 #include <stdio.h>
@@ -30,6 +37,20 @@ mainFrame::mainFrame(QWidget *parent) :
     this->resize(QSize(882,585));
     this->setFixedSize(QSize(882,585));
 
+    setToolbar();
+    setStatusBar();
+    setupPlot();
+    setPlayerHandling();
+    setEventFilters();
+    setShortcuts();
+}
+
+mainFrame::~mainFrame()
+{
+    delete ui;
+}
+
+void mainFrame::setToolbar() {
     //Connect toolbar actions
     connect(ui->actionOpen_Video, &QAction::triggered, this, &mainFrame::on_folderButton_clicked);
     connect(ui->actionOpen_Report, &QAction::triggered, this, &mainFrame::openReport);
@@ -46,7 +67,9 @@ mainFrame::mainFrame(QWidget *parent) :
     connect(ui->actionPEAT_Help, &QAction::triggered, this, &mainFrame::peatHelp);
     connect(ui->actionAbout_PEAT, &QAction::triggered, this, &mainFrame::aboutPEAT);
     connect(ui->actionTrace_Center_Homepage, &QAction::triggered, this, &mainFrame::traceHome);
+}
 
+void mainFrame::setupPlot() {
     //Setup plot
     ui->customPlot->yAxis->setRange(0.0, 1.05);
     ui->customPlot->yAxis->setVisible(false);
@@ -104,7 +127,6 @@ mainFrame::mainFrame(QWidget *parent) :
     textLabel2->setColor(QColor(214,214,214,255));
 
     ui->customPlot->xAxis->scaleRange(32.0, ui->customPlot->xAxis->range().center());
-
     ui->customPlot->replot();
 
     //Set frame for QCP
@@ -113,6 +135,59 @@ mainFrame::mainFrame(QWidget *parent) :
     QRegion mask = QRegion(path.toFillPolygon().toPolygon());
     ui->customPlot->setMask(mask);
 
+    //Plot tooltip
+    connect(ui->customPlot, &QCustomPlot::mouseMove, this, &mainFrame::plotTooltip);
+    ui->customPlot->setInteraction(QCP::iSelectPlottables, true);
+
+    //Legend
+    QFont legendFont = font();
+    legendFont.setPointSize(8);
+    ui->customPlot->legend->setBrush(QBrush(QColor(115,115,115, 115)));
+    ui->customPlot->legend->setFont(legendFont);
+    ui->customPlot->legend->setSelectedFont(legendFont);
+    ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
+
+    phaseTracer = new QCPItemTracer(ui->customPlot);
+    // ADDED
+    ui->customPlot->addLayer("tracer", ui->customPlot->layer("overlay"), QCustomPlot::limAbove);
+    phaseTracer->setLayer("tracer");
+    // End
+    phaseTracer->setInterpolating(true);
+    phaseTracer->setStyle(QCPItemTracer::tsCircle);
+    phaseTracer->setPen(QPen(QColor(8,54,117)));
+    phaseTracer->setBrush(QColor(8,54,117));
+    phaseTracer->setSize(7);
+    phaseTracer->setSelectable(false);
+    phaseTracer->setVisible(false);
+
+    // ADDED: Caution layer
+    cautionLayer = new QCPItemRect(ui->customPlot);
+    ui->customPlot->addLayer("cautionLayer", ui->customPlot->layer("grid"), QCustomPlot::limBelow);
+    cautionLayer->setLayer("cautionLayer");
+    cautionLayer->topLeft->setTypeX(QCPItemPosition::ptPlotCoords);
+    cautionLayer->topLeft->setTypeY(QCPItemPosition::ptAxisRectRatio);
+    cautionLayer->topLeft->setAxes(ui->customPlot->xAxis, ui->customPlot->yAxis);
+    cautionLayer->topLeft->setAxisRect(ui->customPlot->axisRect());
+    cautionLayer->bottomRight->setTypeX(QCPItemPosition::ptPlotCoords);
+    cautionLayer->bottomRight->setTypeY(QCPItemPosition::ptAxisRectRatio);
+    cautionLayer->bottomRight->setAxes(ui->customPlot->xAxis, ui->customPlot->yAxis);
+    cautionLayer->bottomRight->setAxisRect(ui->customPlot->axisRect());
+    cautionLayer->setClipToAxisRect(true); // is by default true already, but this will change in QCP 2.0.0
+    cautionLayer->topLeft->setCoords(-100000, 0.68); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
+    cautionLayer->bottomRight->setCoords(1000000, 0.82); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
+    cautionLayer->setBrush(QBrush(QColor(184,184,184,255)));
+    cautionLayer->setPen(Qt::NoPen);
+
+    //Graph interactions
+    ui->customPlot->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenuRequest(QPoint)));
+
+    // Bug fix: force update label font
+    QFont font("Segoe UI", 11, QFont::Bold);
+    ui->label->setFont(font);
+}
+
+void mainFrame::setPlayerHandling() {
     //Declare player and set properties
     player = new QMediaPlayer;
     playlist = new QMediaPlaylist;
@@ -127,21 +202,18 @@ mainFrame::mainFrame(QWidget *parent) :
         double percent = move/(double)(sliderMax);
         ui->horizontalScrollBar->setValue(percent*(double)scrollMax);
     });
+
     QImage image(":/images/Res/logoLARGE.bmp");
     QImage out(image.width(), image.height(), QImage::Format_ARGB32);
     out.fill(Qt::transparent);
-
     QBrush brush(image);
-
     QPen pen;
     pen.setColor(Qt::darkGray);
     pen.setJoinStyle(Qt::RoundJoin);
-
     QPainter painter(&out);
     painter.setBrush(brush);
     painter.setPen(pen);
     painter.drawRoundedRect(0, 0, image.width(), image.height(), 15, 15);
-
     ui->label_14->setPixmap(QPixmap::fromImage(out.scaled(35,35)));
 
     //player status handling
@@ -217,7 +289,9 @@ mainFrame::mainFrame(QWidget *parent) :
         }
         else if (status == QMediaPlayer::NoMedia || status == QMediaPlayer::EndOfMedia) player->stop();
     });
+}
 
+void mainFrame::setStatusBar() {
     //Create statusbar
     vidLabel = new QLabel;
     vidLabel->setText("No media loaded");
@@ -231,7 +305,9 @@ mainFrame::mainFrame(QWidget *parent) :
     ui->statusbar->addPermanentWidget(vidLabel, 2);
     ui->statusbar->addPermanentWidget(descriptionLabel, 6);
     ui->statusbar->addPermanentWidget(placeholderLabel, 2);
+}
 
+void mainFrame::setShortcuts() {
     //Create shortcuts
     ui->actionOpen_Video->setShortcut(Qt::Key_V | Qt::CTRL);
     ui->actionOpen_Report->setShortcut(Qt::Key_R | Qt::CTRL);
@@ -244,7 +320,9 @@ mainFrame::mainFrame(QWidget *parent) :
     ui->actionBack_5_Seconds->setShortcut(Qt::Key_J);
     ui->actionForward_30_Frames->setShortcut(Qt::Key_Right);
     ui->actionBack_30_Frames->setShortcut(Qt::Key_Left);
+}
 
+void mainFrame::setEventFilters() {
     //Install event filters
     ui->folderButton->installEventFilter(this);
     ui->reportButton->installEventFilter(this);
@@ -274,64 +352,6 @@ mainFrame::mainFrame(QWidget *parent) :
     ui->horizontalScrollBar->installEventFilter(this);
     ui->horizontalSlider->installEventFilter(this);
     ui->timeLabel->installEventFilter(this);
-
-    //Plot tooltip
-    connect(ui->customPlot, &QCustomPlot::mouseMove, this, &mainFrame::plotTooltip);
-    ui->customPlot->setInteraction(QCP::iSelectPlottables, true);
-
-    //Legend
-    QFont legendFont = font();
-    legendFont.setPointSize(8);
-    ui->customPlot->legend->setBrush(QBrush(QColor(115,115,115, 115)));
-    ui->customPlot->legend->setFont(legendFont);
-    ui->customPlot->legend->setSelectedFont(legendFont);
-    ui->customPlot->legend->setSelectableParts(QCPLegend::spItems); // legend box shall not be selectable, only legend items
-
-    phaseTracer = new QCPItemTracer(ui->customPlot);
-    // ADDED
-    ui->customPlot->addLayer("tracer", ui->customPlot->layer("overlay"), QCustomPlot::limAbove);
-    phaseTracer->setLayer("tracer");
-    // End
-    phaseTracer->setInterpolating(true);
-    phaseTracer->setStyle(QCPItemTracer::tsCircle);
-    phaseTracer->setPen(QPen(QColor(8,54,117)));
-    phaseTracer->setBrush(QColor(8,54,117));
-    phaseTracer->setSize(7);
-    phaseTracer->setSelectable(false);
-    phaseTracer->setVisible(false);
-
-    // ADDED: Caution layer
-    cautionLayer = new QCPItemRect(ui->customPlot);
-    ui->customPlot->addLayer("cautionLayer", ui->customPlot->layer("grid"), QCustomPlot::limBelow);
-    cautionLayer->setLayer("cautionLayer");
-    cautionLayer->topLeft->setTypeX(QCPItemPosition::ptPlotCoords);
-    cautionLayer->topLeft->setTypeY(QCPItemPosition::ptAxisRectRatio);
-    cautionLayer->topLeft->setAxes(ui->customPlot->xAxis, ui->customPlot->yAxis);
-    cautionLayer->topLeft->setAxisRect(ui->customPlot->axisRect());
-    cautionLayer->bottomRight->setTypeX(QCPItemPosition::ptPlotCoords);
-    cautionLayer->bottomRight->setTypeY(QCPItemPosition::ptAxisRectRatio);
-    cautionLayer->bottomRight->setAxes(ui->customPlot->xAxis, ui->customPlot->yAxis);
-    cautionLayer->bottomRight->setAxisRect(ui->customPlot->axisRect());
-    cautionLayer->setClipToAxisRect(true); // is by default true already, but this will change in QCP 2.0.0
-    cautionLayer->topLeft->setCoords(-100000, 0.68); // the y value is now in axis rect ratios, so -0.1 is "barely above" the top axis rect border
-    cautionLayer->bottomRight->setCoords(1000000, 0.82); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
-    cautionLayer->setBrush(QBrush(QColor(184,184,184,255)));
-    cautionLayer->setPen(Qt::NoPen);
-
-    //Setup x-axis
-
-    //Graph interactions
-    ui->customPlot->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->customPlot, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(contextMenuRequest(QPoint)));
-
-    // Bug fix: force update label font
-    QFont font("Segoe UI", 11, QFont::Bold);
-    ui->label->setFont(font);
-}
-
-mainFrame::~mainFrame()
-{
-    delete ui;
 }
 
 void mainFrame::closeEvent(QCloseEvent *event) {
@@ -400,7 +420,7 @@ void mainFrame::on_folderButton_clicked()
             messageBox.information(this, "Error", "Sorry, this encoding format is not supported by PEAT.");
             messageBox.setFixedSize(600,400);
         }
-        else if (fileString.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_./!@#$%^&*()-+=~`?<>,\\") != std::string::npos)
+        else if (fileString.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890_./!@#$%^&*()-+=~`?<>,\\") == std::string::npos)
         {
             QMessageBox messageBox;
             messageBox.information(this, "Error", "Please remove the spaces in the file name.");
@@ -570,20 +590,20 @@ void mainFrame::on_pauseButton_clicked()
 void mainFrame::on_forwardButton_clicked()
 {
 
-    if (x < 32.0)
+    if (playback_speed < 32.0)
     {
-        x = 2.0*x;
-        rate = x;
+        playback_speed = 2.0*playback_speed;
+        rate = playback_speed;
         player->setPlaybackRate(rate);
     }
 }
 
 void mainFrame::on_rewindButton_clicked()
 {
-    if (x > 0.03125)
+    if (playback_speed > 0.03125)
     {
-        x = 0.5*x;
-        player->setPlaybackRate(x);
+        playback_speed = 0.5*playback_speed;
+        player->setPlaybackRate(playback_speed);
     }
 }
 
@@ -676,255 +696,261 @@ void mainFrame::updatePlot(vector<QVector<double > > points_x, vector<QVector<do
 }
 
 void mainFrame::on_reportButton_clicked() {
-    try {
-        ui->customPlot->clearPlottables();
-        ui->frame_2->setEnabled(true);
-        ui->label_18->setEnabled(true);
-        ui->label_19->setText("NONE");
-        ui->label_19->setStyleSheet("color: rgb(193, 147, 28);");
-        ui->label_16->setText("0");
-        ui->label_20->setText("0");
-        ui->label_22->setText("0");
-        player->pause();
-        ui->label_6->setText("0");
-        reset_slider();
-        QString filename = vid_file;
-        std::string stringedFile = filename.toLocal8Bit().constData();
-        VideoCapture cap(stringedFile);
-        int frameNum = cap.get(CAP_PROP_FRAME_COUNT);
-        int fps = round(cap.get(CAP_PROP_FPS));
-        if (frameNum < 1) throw frameNum;
-        Mat frame;
-        cap >> frame;
-        if (frame.empty()) throw 210;
-        cap.release();
+    colorDialog = new ColorDialog;
+    int colorEnum = 0;
+    if (colorDialog->exec()) {
+        colorEnum = colorDialog->currentIndex();
 
-        //Initialize scrollbar
-        ui->horizontalScrollBar->setEnabled(true);
-        ui->horizontalScrollBar->setRange(0, frameNum);
-        connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
-        connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
+        try {
+            ui->customPlot->clearPlottables();
+            ui->frame_2->setEnabled(true);
+            ui->label_18->setEnabled(true);
+            ui->label_19->setText("NONE");
+            ui->label_19->setStyleSheet("color: rgb(193, 147, 28);");
+            ui->label_16->setText("0");
+            ui->label_20->setText("0");
+            ui->label_22->setText("0");
+            player->pause();
+            ui->label_6->setText("0");
+            reset_slider();
+            QString filename = vid_file;
+            std::string stringedFile = filename.toLocal8Bit().constData();
+            VideoCapture cap(stringedFile);
+            int frameNum = cap.get(CAP_PROP_FRAME_COUNT);
+            int fps = round(cap.get(CAP_PROP_FPS));
+            if (frameNum < 1) throw frameNum;
+            Mat frame;
+            cap >> frame;
+            if (frame.empty()) throw 210;
+            cap.release();
 
-        //Disable interaction
-        ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackDisabled.png); border-image: url(:/images/Res/FastBackDisabled.png); }");
-        ui->playButton->setStyleSheet("background-image: url(:/images/Res/PlayDisabled.png); border-image: url(:/images/Res/PlayDisabled.png);");
-        ui->forwardButton->setStyleSheet("background-image: url(:/images/Res/FFwdDisabled.png); border-image: url(:/images/Res/FFwdDisabled.png);");
-        ui->reportButton->setStyleSheet("background-image: url(:/images/Res/AnalyzeDisabled.png); border-image: url(:/images/Res/AnalyzeDisabled.png);");
-        ui->restartButton->setStyleSheet("background-image: url(:/images/Res/RewindDisabled.png); border-image: url(:/images/Res/RewindDisabled.png);");
-        //ui->folderButton->setStyleSheet("background-image: url(:/images/Res/EjectDisabled.png); border-image: url(:/images/Res/EjectDisabled.png);");
+            //Initialize scrollbar
+            ui->horizontalScrollBar->setEnabled(true);
+            ui->horizontalScrollBar->setRange(0, frameNum);
+            connect(ui->horizontalScrollBar, SIGNAL(valueChanged(int)), this, SLOT(horzScrollBarChanged(int)));
+            connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
 
-        ui->restartButton->setEnabled(false);
-        ui->rewindButton->setEnabled(false);
-        ui->playButton->setEnabled(false);
-        ui->forwardButton->setEnabled(false);
-        ui->reportButton->setEnabled(false);
-        ui->folderButton->setEnabled(false);
+            //Disable interaction
+            ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackDisabled.png); border-image: url(:/images/Res/FastBackDisabled.png); }");
+            ui->playButton->setStyleSheet("background-image: url(:/images/Res/PlayDisabled.png); border-image: url(:/images/Res/PlayDisabled.png);");
+            ui->forwardButton->setStyleSheet("background-image: url(:/images/Res/FFwdDisabled.png); border-image: url(:/images/Res/FFwdDisabled.png);");
+            ui->reportButton->setStyleSheet("background-image: url(:/images/Res/AnalyzeDisabled.png); border-image: url(:/images/Res/AnalyzeDisabled.png);");
+            ui->restartButton->setStyleSheet("background-image: url(:/images/Res/RewindDisabled.png); border-image: url(:/images/Res/RewindDisabled.png);");
+            //ui->folderButton->setStyleSheet("background-image: url(:/images/Res/EjectDisabled.png); border-image: url(:/images/Res/EjectDisabled.png);");
 
-        ui->actionGenerate_Report->setEnabled(false);
-        ui->actionBack_5_Seconds->setEnabled(false);
-        ui->actionBack_30_Frames->setEnabled(false);
-        ui->actionForward_5_Seconds->setEnabled(false);
-        ui->actionForward_30_Frames->setEnabled(false);
-        ui->actionPlay_Pause->setEnabled(false);
-        ui->actionOpen_Report->setEnabled(false);
-        ui->actionOpen_Video->setEnabled(false);
+            ui->restartButton->setEnabled(false);
+            ui->rewindButton->setEnabled(false);
+            ui->playButton->setEnabled(false);
+            ui->forwardButton->setEnabled(false);
+            ui->reportButton->setEnabled(false);
+            ui->folderButton->setEnabled(false);
 
-        ui->forwardWarning->setStyleSheet("background-image: url(:/images/Res/NextWarningDisabled.png); border-image: url(:/images/Res/NextWarningDisabled.png);");
-        ui->backWarning->setStyleSheet("background-image: url(:/images/Res/PrevWarningDisabled.png); border-image: url(:/images/Res/PrevWarningDisabled.png);");
+            ui->actionGenerate_Report->setEnabled(false);
+            ui->actionBack_5_Seconds->setEnabled(false);
+            ui->actionBack_30_Frames->setEnabled(false);
+            ui->actionForward_5_Seconds->setEnabled(false);
+            ui->actionForward_30_Frames->setEnabled(false);
+            ui->actionPlay_Pause->setEnabled(false);
+            ui->actionOpen_Report->setEnabled(false);
+            ui->actionOpen_Video->setEnabled(false);
 
-        //Initialize graphs
-        ui->customPlot->addGraph();
-        ui->customPlot->addGraph();
-        ui->customPlot->addGraph();
-        ui->customPlot->addGraph();
-        ui->customPlot->graph(0)->setName("Luminance flash");
-        ui->customPlot->graph(1)->setName("Red flash");
-        ui->customPlot->graph(2)->setName("Lum flash diag");
-        ui->customPlot->graph(3)->setName("Red flash diag");
+            ui->forwardWarning->setStyleSheet("background-image: url(:/images/Res/NextWarningDisabled.png); border-image: url(:/images/Res/NextWarningDisabled.png);");
+            ui->backWarning->setStyleSheet("background-image: url(:/images/Res/PrevWarningDisabled.png); border-image: url(:/images/Res/PrevWarningDisabled.png);");
 
-        ui->customPlot->yAxis->setRange(0.0, 1.05);
-        ui->customPlot->xAxis->setLabel("Frame Number");
-        ui->customPlot->yAxis->setVisible(false);
-        section->bottomRight->setCoords(frameNum, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
-        ui->customPlot->replot();
+            //Initialize graphs
+            ui->customPlot->addGraph();
+            ui->customPlot->addGraph();
+            ui->customPlot->addGraph();
+            ui->customPlot->addGraph();
+            ui->customPlot->graph(0)->setName("Luminance flash");
+            ui->customPlot->graph(1)->setName("Red flash");
+            ui->customPlot->graph(2)->setName("Lum flash diag");
+            ui->customPlot->graph(3)->setName("Red flash diag");
 
-        //Graph 1 style
-        QPen dotted;
-        dotted.setStyle(Qt::SolidLine);
-        dotted.setWidthF(3);
-        dotted.setColor(Qt::white);
-        ui->customPlot->graph(0)->setPen(dotted);
-        ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
-        ui->customPlot->graph(0)->addData(0.0, 0.0);
-        //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-
-        //Graph 2 style
-        QPen dottedRed;
-        dottedRed.setStyle(Qt::SolidLine);
-        dottedRed.setWidthF(3);
-        dottedRed.setColor(Qt::red);
-        ui->customPlot->graph(1)->setPen(dottedRed);
-        ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
-        ui->customPlot->graph(1)->addData(0.0, 0.0);
-        //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-
-        //Graph 3 style
-        QPen solid;
-        solid.setStyle(Qt::DotLine);
-        solid.setWidthF(1.5);
-        solid.setColor(Qt::black);
-        ui->customPlot->graph(2)->setPen(solid);
-        ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsLine);
-        ui->customPlot->graph(2)->addData(0.0, 0.0);
-        //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-
-        //Graph 4 style
-        QPen solidRed;
-        solidRed.setStyle(Qt::DotLine);
-        solidRed.setWidthF(1.5);
-        solidRed.setColor(Qt::red);
-        ui->customPlot->graph(3)->setPen(solidRed);
-        ui->customPlot->graph(3)->setLineStyle(QCPGraph::lsLine);
-        ui->customPlot->graph(3)->addData(0.0, 0.0);
-        ui->customPlot->replot();
-        //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
-
-        ui->customPlot->legend->setVisible(true);
-
-        //Connect slots (slider and QCP)
-        vidLabel->setText("Analysing...");
-        rObject* r_instance = new rObject;
-        connect(r_instance, &rObject::updateUI, this, &mainFrame::updatePlot, Qt::QueuedConnection);
-        connect(r_instance, &rObject::progressCount, this, &mainFrame::updateSlider, Qt::QueuedConnection);
-
-        vid_data.clear();
-        vid_data.resize(5);
-        vid_data[4].push_back(fps);
-        vid_data[4].push_back(frameNum);
-        vid_data[0].push_back(0);
-        vid_data[1].push_back(0);
-        vid_data[2].push_back(0);
-        vid_data[3].push_back(0);
-
-        ui->customPlot->legend->setVisible(true);
-        //r_instance->rkbcore(stringedFile);
-        //Threading attempt
-        QThread* workerThread = new QThread;
-        r_instance->moveToThread(workerThread);
-        connect(workerThread, &QThread::started, r_instance, [&]{
-            r_instance->rkbcore(stringedFile);
-        });
-        connect(r_instance, &rObject::finished, workerThread, &QThread::quit);
-        connect(r_instance, &rObject::finished, r_instance, &rObject::deleteLater);
-        connect(workerThread, &QThread::finished, workerThread, &QThread::deleteLater);
-
-        bool threadStopped = false;
-        QEventLoop loop;
-        workerThread->start();
-        connect(r_instance, &rObject::finished, &loop, &QEventLoop::quit);
-        connect(r_instance, &rObject::error, &loop, &QEventLoop::quit);
-
-        // TO-DO: Stopping
-        connect(ui->pauseButton, &QPushButton::clicked, r_instance, &rObject::stopLoop, Qt::DirectConnection);
-        connect(r_instance, &rObject::stopped, this, [&]{
-            threadStopped = true;
-        });
-        /*connect(this, &mainFrame::thread_stopped, [=]{
-            workerThread->terminate();
-            r_instance->~rObject();
-        });*/
-        //connect(this, &mainFrame::thread_stopped, &loop, &QEventLoop::quit);
-        loop.exec();
-        if (!threadStopped) {
-
-            //Check to see vid_data has valid arrays of data points
-            if (vid_data.size() < 4) {
-                throw 220;
-            }
-            else if (vid_data[0].size() != frameNum || vid_data[1].size() != frameNum || vid_data[2].size() != frameNum || vid_data[3].size() != frameNum) {
-                throw 230;
-            }
-            ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + "stop:1.0#25c660); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 255); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }");
-
-            ui->customPlot->graph(0)->addData(frameNum, 0);
-            ui->customPlot->graph(1)->addData(frameNum, 0);
-            ui->customPlot->graph(2)->addData(frameNum, 0);
-            ui->customPlot->graph(3)->addData(frameNum, 0);
+            ui->customPlot->yAxis->setRange(0.0, 1.05);
+            ui->customPlot->xAxis->setLabel("Frame Number");
+            ui->customPlot->yAxis->setVisible(false);
+            section->bottomRight->setCoords(frameNum, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
             ui->customPlot->replot();
 
-            // Load warnings
-            ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
-            ui->forwardWarning->setStyleSheet("#forwardWarning { background-image: url(:/images/Res/NextvWarningUp.png); border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
-            ui->backWarning->setEnabled(true);
-            ui->forwardWarning->setEnabled(true);
+            //Graph 1 style
+            QPen dotted;
+            dotted.setStyle(Qt::SolidLine);
+            dotted.setWidthF(3);
+            dotted.setColor(Qt::white);
+            ui->customPlot->graph(0)->setPen(dotted);
+            ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
+            ui->customPlot->graph(0)->addData(0.0, 0.0);
+            //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
-            ui->actionSave_Report->setEnabled(true);
-            ui->actionPrint_Report->setEnabled(true);
-            ui->actionRun_Prophylactic_Tool->setEnabled(true);
+            //Graph 2 style
+            QPen dottedRed;
+            dottedRed.setStyle(Qt::SolidLine);
+            dottedRed.setWidthF(3);
+            dottedRed.setColor(Qt::red);
+            ui->customPlot->graph(1)->setPen(dottedRed);
+            ui->customPlot->graph(1)->setLineStyle(QCPGraph::lsLine);
+            ui->customPlot->graph(1)->addData(0.0, 0.0);
+            //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
-            QDate date = QDate::currentDate();
-            qDebug() << date;
-            ui->label_13->setText(date.toString("dd.MM.yyyy"));
+            //Graph 3 style
+            QPen solid;
+            solid.setStyle(Qt::DotLine);
+            solid.setWidthF(1.5);
+            solid.setColor(Qt::black);
+            ui->customPlot->graph(2)->setPen(solid);
+            ui->customPlot->graph(2)->setLineStyle(QCPGraph::lsLine);
+            ui->customPlot->graph(2)->addData(0.0, 0.0);
+            //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
-            //Set report data to unsaved
-            saved = false;
-            vidLabel->setText("Done");
+            //Graph 4 style
+            QPen solidRed;
+            solidRed.setStyle(Qt::DotLine);
+            solidRed.setWidthF(1.5);
+            solidRed.setColor(Qt::red);
+            ui->customPlot->graph(3)->setPen(solidRed);
+            ui->customPlot->graph(3)->setLineStyle(QCPGraph::lsLine);
+            ui->customPlot->graph(3)->addData(0.0, 0.0);
+            ui->customPlot->replot();
+            //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
-            if (ui->label_16->text() != "0" || ui->label_20->text() != "0" || ui->label_22->text() != "0") {
-                ui->label_19->setText("FAIL");
-                ui->label_19->setStyleSheet("color: #c10707;");
-            } else {
-                ui->label_19->setText("PASS");
-                ui->label_19->setStyleSheet("color: #25c660;");
+            ui->customPlot->legend->setVisible(true);
+
+            //Connect slots (slider and QCP)
+            vidLabel->setText("Analysing...");
+            rObject* r_instance = new rObject;
+            connect(r_instance, &rObject::updateUI, this, &mainFrame::updatePlot, Qt::QueuedConnection);
+            connect(r_instance, &rObject::progressCount, this, &mainFrame::updateSlider, Qt::QueuedConnection);
+
+            vid_data.clear();
+            vid_data.resize(5);
+            vid_data[4].push_back(fps);
+            vid_data[4].push_back(frameNum);
+            vid_data[0].push_back(0);
+            vid_data[1].push_back(0);
+            vid_data[2].push_back(0);
+            vid_data[3].push_back(0);
+
+            ui->customPlot->legend->setVisible(true);
+            //r_instance->rkbcore(stringedFile);
+            //Threading attempt
+            QThread* workerThread = new QThread;
+            r_instance->moveToThread(workerThread);
+            connect(workerThread, &QThread::started, r_instance, [&]{
+                r_instance->rkbcore(stringedFile, colorEnum);
+            });
+            connect(r_instance, &rObject::finished, workerThread, &QThread::quit);
+            connect(r_instance, &rObject::finished, r_instance, &rObject::deleteLater);
+            connect(workerThread, &QThread::finished, workerThread, &QThread::deleteLater);
+
+            bool threadStopped = false;
+            QEventLoop loop;
+            workerThread->start();
+            connect(r_instance, &rObject::finished, &loop, &QEventLoop::quit);
+            connect(r_instance, &rObject::error, &loop, &QEventLoop::quit);
+
+            // TO-DO: Stopping
+            connect(ui->pauseButton, &QPushButton::clicked, r_instance, &rObject::stopLoop, Qt::DirectConnection);
+            connect(r_instance, &rObject::stopped, this, [&]{
+                threadStopped = true;
+            });
+            /*connect(this, &mainFrame::thread_stopped, [=]{
+                workerThread->terminate();
+                r_instance->~rObject();
+            });*/
+            //connect(this, &mainFrame::thread_stopped, &loop, &QEventLoop::quit);
+            loop.exec();
+            if (!threadStopped) {
+
+                //Check to see vid_data has valid arrays of data points
+                if (vid_data.size() < 4) {
+                    throw 220;
+                }
+                else if (vid_data[0].size() != frameNum || vid_data[1].size() != frameNum || vid_data[2].size() != frameNum || vid_data[3].size() != frameNum) {
+                    throw 230;
+                }
+                ui->slider->setStyleSheet(QString::fromStdString(firstHalfStylesheet) + "stop:1.0#25c660); margin: 2px 0; } QSlider::handle:horizontal { background-color: rgba(143,143,143, 255); border: 1px solid rgb(143,143,143); width: 8px; margin: -6px 0; border-radius: 5px; }");
+
+                ui->customPlot->graph(0)->addData(frameNum, 0);
+                ui->customPlot->graph(1)->addData(frameNum, 0);
+                ui->customPlot->graph(2)->addData(frameNum, 0);
+                ui->customPlot->graph(3)->addData(frameNum, 0);
+                ui->customPlot->replot();
+
+                // Load warnings
+                ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
+                ui->forwardWarning->setStyleSheet("#forwardWarning { background-image: url(:/images/Res/NextvWarningUp.png); border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
+                ui->backWarning->setEnabled(true);
+                ui->forwardWarning->setEnabled(true);
+
+                ui->actionSave_Report->setEnabled(true);
+                ui->actionPrint_Report->setEnabled(true);
+                ui->actionRun_Prophylactic_Tool->setEnabled(true);
+
+                QDate date = QDate::currentDate();
+                qDebug() << date;
+                ui->label_13->setText(date.toString("dd.MM.yyyy"));
+
+                //Set report data to unsaved
+                saved = false;
+                vidLabel->setText("Done");
+
+                if (ui->label_16->text() != "0" || ui->label_20->text() != "0" || ui->label_22->text() != "0") {
+                    ui->label_19->setText("FAIL");
+                    ui->label_19->setStyleSheet("color: #c10707;");
+                } else {
+                    ui->label_19->setText("PASS");
+                    ui->label_19->setStyleSheet("color: #25c660;");
+                }
+            }
+            else {
+                vidLabel->setText("Analysis stopped");
             }
         }
-        else {
-            vidLabel->setText("Analysis stopped");
+        catch(int e) {
+            vidLabel->setText(tr("Error"));
+            QMessageBox mb;
+            if (e == 230) {
+                mb.critical(this, "Error: " + QString::number(e), "A blank frame was encountered during the analysis. The video is corrupted. Please try and repair the video (using VLC) or convert your video to another compression format and try again.");
+            } else {
+                mb.critical(this, "Error: " + QString::number(e), "There was an error in decoding the video stream. Please try and install the appropriate codecs and try again.");
+            }
+            mb.setFixedSize(600,400);
         }
-    }
-    catch(int e) {
-        vidLabel->setText(tr("Error"));
-        QMessageBox mb;
-        if (e == 230) {
-            mb.critical(this, "Error: " + QString::number(e), "A blank frame was encountered during the analysis. The video is corrupted. Please try and repair the video (using VLC) or convert your video to another compression format and try again.");
-        } else {
-            mb.critical(this, "Error: " + QString::number(e), "There was an error in decoding the video stream. Please try and install the appropriate codecs and try again.");
-        }
-        mb.setFixedSize(600,400);
-    }
-    ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
-    ui->playButton->setStyleSheet("#playButton { background-image: url(:/images/Res/PlayUp.png); border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
-    ui->forwardButton->setStyleSheet("#forwardButton { background-image: url(:/images/Res/FFwdUp.png); border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
-    ui->reportButton->setStyleSheet("#reportButton { background-image: url(:/images/Res/AnalyzeUp.png); border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
-    ui->restartButton->setStyleSheet("#restartButton { background-image: url(:/images/Res/RewindUp.png); border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
-    ui->folderButton->setStyleSheet("#folderButton { background-image: url(:/images/Res/EjectUp.bmp); border-image: url(:/images/Res/EjectUp.bmp); } #folderButton:hover { border-image: url(:/images/Res/EjectDownHilite.png); } #folderButton:pressed { border-image: url(:/images/Res/EjectPressed.png); }");
+        ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
+        ui->playButton->setStyleSheet("#playButton { background-image: url(:/images/Res/PlayUp.png); border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
+        ui->forwardButton->setStyleSheet("#forwardButton { background-image: url(:/images/Res/FFwdUp.png); border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
+        ui->reportButton->setStyleSheet("#reportButton { background-image: url(:/images/Res/AnalyzeUp.png); border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
+        ui->restartButton->setStyleSheet("#restartButton { background-image: url(:/images/Res/RewindUp.png); border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
+        ui->folderButton->setStyleSheet("#folderButton { background-image: url(:/images/Res/EjectUp.bmp); border-image: url(:/images/Res/EjectUp.bmp); } #folderButton:hover { border-image: url(:/images/Res/EjectDownHilite.png); } #folderButton:pressed { border-image: url(:/images/Res/EjectPressed.png); }");
 
-    ui->restartButton->setEnabled(true);
-    ui->rewindButton->setEnabled(true);
-    ui->playButton->setEnabled(true);
-    ui->forwardButton->setEnabled(true);
-    ui->reportButton->setEnabled(true);
-    ui->folderButton->setEnabled(true);
+        ui->restartButton->setEnabled(true);
+        ui->rewindButton->setEnabled(true);
+        ui->playButton->setEnabled(true);
+        ui->forwardButton->setEnabled(true);
+        ui->reportButton->setEnabled(true);
+        ui->folderButton->setEnabled(true);
 
-    ui->actionGenerate_Report->setEnabled(true);
-    ui->actionBack_5_Seconds->setEnabled(true);
-    ui->actionBack_30_Frames->setEnabled(true);
-    ui->actionForward_5_Seconds->setEnabled(true);
-    ui->actionForward_30_Frames->setEnabled(true);
-    ui->actionPlay_Pause->setEnabled(true);
-    ui->actionOpen_Report->setEnabled(true);
-    ui->actionOpen_Video->setEnabled(true);
-    // ADDED
-    ui->actionShow_all_graphs->setEnabled(true);
-    ui->actionHide_All_Graphs->setEnabled(true);
-    ui->actionHide_Selected_Graph->setEnabled(true);
-    ui->actionLuminance_diag_graph->setEnabled(true);
-    ui->actionRed_Flash_Diag_Graph->setEnabled(true);
-    ui->actionLuminance_Flash_Graph->setEnabled(true);
-    ui->actionRed_Flash_Graph->setEnabled(true);
-    ui->actionPlot_Tooltips->setEnabled(true);
-    this->repaint();
-    qApp->processEvents();
+        ui->actionGenerate_Report->setEnabled(true);
+        ui->actionBack_5_Seconds->setEnabled(true);
+        ui->actionBack_30_Frames->setEnabled(true);
+        ui->actionForward_5_Seconds->setEnabled(true);
+        ui->actionForward_30_Frames->setEnabled(true);
+        ui->actionPlay_Pause->setEnabled(true);
+        ui->actionOpen_Report->setEnabled(true);
+        ui->actionOpen_Video->setEnabled(true);
+        // ADDED
+        ui->actionShow_all_graphs->setEnabled(true);
+        ui->actionHide_All_Graphs->setEnabled(true);
+        ui->actionHide_Selected_Graph->setEnabled(true);
+        ui->actionLuminance_diag_graph->setEnabled(true);
+        ui->actionRed_Flash_Diag_Graph->setEnabled(true);
+        ui->actionLuminance_Flash_Graph->setEnabled(true);
+        ui->actionRed_Flash_Graph->setEnabled(true);
+        ui->actionPlot_Tooltips->setEnabled(true);
+        this->repaint();
+        qApp->processEvents();
+    }
 }
 
 void mainFrame::openReport()

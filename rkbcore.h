@@ -38,9 +38,10 @@ private:
     float relative_luminance(float R, float G, float B);
     float saturation(float R, float G, float B);
     float red_saturation(float R, float G, float B);
+    std::map<int, int> colorConv = {{0, NULL}, {1, COLOR_BGRA2BGR}, {2, COLOR_RGB2BGR}, {3, COLOR_RGBA2BGR}, {4, COLOR_YCrCb2BGR}};
 
 public slots:
-    void rkbcore(string filename);
+    void rkbcore(string filename, int colorEnum);
     void stopLoop();
 
 signals:

@@ -1,3 +1,10 @@
+//
+//  main.cpp
+//  PEAT_V2
+//
+//  Created by Hossain, Rakeeb on 2018-01-02.
+//  Copyright © 2018 Hossain, Rakeeb. All rights reserved.
+//
 #include "mainwindow.h"
 #include <QApplication>
 
@@ -11,6 +18,11 @@ extern "C"
 */
 int main(int argc, char *argv[])
 {
+    qputenv("QT_SCALE_FACTOR", "1");
+    qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "0");
+    qputenv("QT_SCREEN_SCALE_FACTORS", "1");
+    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+
     QApplication a(argc, argv);
 
     //av_register_all();

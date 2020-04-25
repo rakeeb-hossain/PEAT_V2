@@ -1,3 +1,10 @@
+//
+//  rkbprotool.cpp
+//  PEAT_V2
+//
+//  Created by Hossain, Rakeeb on 2018-01-02.
+//  Copyright © 2018 Hossain, Rakeeb. All rights reserved.
+//
 #include "rkbprotool.h"
 #include "ui_rkbprotool.h"
 #include <stdio.h>

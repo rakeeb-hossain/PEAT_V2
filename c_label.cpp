@@ -1,3 +1,10 @@
+//
+//  c_label.cpp
+//  PEAT_V2
+//
+//  Created by Hossain, Rakeeb on 2018-01-02.
+//  Copyright © 2018 Hossain, Rakeeb. All rights reserved.
+//
 #include "c_label.h"
 
 C_Label::C_Label(QWidget * parent) : QLabel(parent)

@@ -14,6 +14,7 @@ class ColorDialog : public QDialog
 public:
     explicit ColorDialog(QWidget *parent = nullptr);
     ~ColorDialog();
+    int currentIndex();
 
 private:
     Ui::ColorDialog *ui;
