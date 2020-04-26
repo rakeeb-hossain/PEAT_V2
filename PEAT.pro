@@ -24,7 +24,8 @@ SOURCES += \
     rkbprotool.cpp \
     mainframe.cpp \
     c_label.cpp \
-    colordialog.cpp
+    colordialog.cpp \
+    rkbaxisticker.cpp
 
 HEADERS += \
     mainwindow.h \
@@ -34,7 +35,8 @@ HEADERS += \
     rkbprotool.h \
     mainframe.h \
     c_label.h \
-    colordialog.h
+    colordialog.h \
+    rkbaxisticker.h
 
 FORMS += \
         mainwindow.ui \

@@ -73,7 +73,12 @@ void mainFrame::setupPlot() {
     //Setup plot
     ui->customPlot->yAxis->setRange(0.0, 1.05);
     ui->customPlot->yAxis->setVisible(false);
-    ui->customPlot->xAxis->setLabel("Frame Number");
+    QSharedPointer<rkbAxisTicker> rTicker(new rkbAxisTicker);
+    ui->customPlot->xAxis->setTicker(rTicker);
+    QFont legendFont = font();
+    legendFont.setPointSize(TIME_FONTSIZE);
+    ui->customPlot->xAxis->setTickLabelFont(legendFont);
+    ui->customPlot->xAxis->setLabel("Timestamp");
     ui->customPlot->axisRect()->setAutoMargins(QCP::msNone);
     ui->customPlot->axisRect()->setMargins(QMargins(0,0,0,38));
     ui->customPlot->setBackground(QBrush(QColor(214,214,214,255)));
@@ -140,7 +145,6 @@ void mainFrame::setupPlot() {
     ui->customPlot->setInteraction(QCP::iSelectPlottables, true);
 
     //Legend
-    QFont legendFont = font();
     legendFont.setPointSize(8);
     ui->customPlot->legend->setBrush(QBrush(QColor(115,115,115, 115)));
     ui->customPlot->legend->setFont(legendFont);
@@ -459,6 +463,7 @@ void mainFrame::on_folderButton_clicked()
                     no_report_loaded();
                     QString dimensions = QString::number(frame.cols) + "x" + QString::number(frame.rows);
                     double fps = cap.get(CAP_PROP_FPS);
+                    nFps = fps;
                     quint32 frame_count = cap.get(CAP_PROP_FRAME_COUNT);
                     int fourcc = cap.get(CAP_PROP_FOURCC);
                     string fourcc_str = format("%c%c%c%c", fourcc & 255, (fourcc >> 8) & 255, (fourcc >> 16) & 255, (fourcc >> 24) & 255);
@@ -717,7 +722,9 @@ void mainFrame::on_reportButton_clicked() {
             std::string stringedFile = filename.toLocal8Bit().constData();
             VideoCapture cap(stringedFile);
             int frameNum = cap.get(CAP_PROP_FRAME_COUNT);
+            nFrame = frameNum;
             int fps = round(cap.get(CAP_PROP_FPS));
+            nFps = fps;
             if (frameNum < 1) throw frameNum;
             Mat frame;
             cap >> frame;
@@ -771,6 +778,10 @@ void mainFrame::on_reportButton_clicked() {
             ui->customPlot->xAxis->setLabel("Frame Number");
             ui->customPlot->yAxis->setVisible(false);
             section->bottomRight->setCoords(frameNum, 0.0); // the y value is now in axis rect ratios, so 1.1 is "barely below" the bottom axis rect border
+            QSharedPointer<rkbAxisTicker> xPtr = qSharedPointerCast<rkbAxisTicker>(ui->customPlot->xAxis->ticker());
+            xPtr->setFPS(nFps);
+            xPtr->setFrameNum(qint64(nFrame));
+            xPtr->setVidLen(qint64(1000*(double)nFrame/(double)nFps));
             ui->customPlot->replot();
 
             //Graph 1 style
@@ -1120,8 +1131,6 @@ void mainFrame::openReport()
                 }
                 qDebug() << "success";
 
-
-
                 //ui->customPlot->graph()->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, 5));
 
                 //Check to see vid_data has valid arrays of data points
@@ -1133,6 +1142,9 @@ void mainFrame::openReport()
                 }
                 vid_data = vid_data_t;
                 vid_data_t.clear();
+
+                nFps = cap.get(CAP_PROP_FPS);
+                nFrame = frame_count;
 
                 //Initialize slider and scrollbar
                 ui->horizontalScrollBar->setValue(0);
@@ -1375,6 +1387,10 @@ void mainFrame::openReport()
                 ui->customPlot->graph(2)->addData(frame_count, 0);
                 ui->customPlot->graph(3)->addData(frame_count, 0);
 
+                QSharedPointer<rkbAxisTicker> xPtr = qSharedPointerCast<rkbAxisTicker>(ui->customPlot->xAxis->ticker());
+                xPtr->setFPS(nFps);
+                xPtr->setFrameNum(qint64(nFrame));
+                xPtr->setVidLen(qint64(1000*(double)nFrame/(double)nFps));
                 ui->customPlot->replot();
 
                 if (ui->label_16->text() != "0" || ui->label_20->text() != "0" || ui->label_22->text() != "0") {
@@ -1821,8 +1837,38 @@ void mainFrame::on_actionWhite_triggered()
     else {
         ui->actionWhite->setChecked(true);
     }
+}
 
+void mainFrame::on_actionShow_Timestamp_triggered()
+{
+    if (ui->actionShow_Timestamp->isChecked() == true) {
+        ui->actionShow_Frame_Number->setChecked(false);
+        QSharedPointer<rkbAxisTicker> xPtr = qSharedPointerCast<rkbAxisTicker>(ui->customPlot->xAxis->ticker());
+        xPtr->setAxisType(0);
+        QFont legendFont = font();
+        legendFont.setPointSize(TIME_FONTSIZE);
+        ui->customPlot->xAxis->setTickLabelFont(legendFont);
+        ui->customPlot->xAxis->setLabel("Timestamp");
+        ui->customPlot->replot();
+    } else {
+        ui->actionShow_Timestamp->setChecked(true);
+    }
+}
 
+void mainFrame::on_actionShow_Frame_Number_triggered()
+{
+    if (ui->actionShow_Frame_Number->isChecked() == true) {
+        ui->actionShow_Timestamp->setChecked(false);
+        QSharedPointer<rkbAxisTicker> xPtr = qSharedPointerCast<rkbAxisTicker>(ui->customPlot->xAxis->ticker());
+        xPtr->setAxisType(1);
+        QFont legendFont = font();
+        legendFont.setPointSize(FRAME_FONTSIZE);
+        ui->customPlot->xAxis->setTickLabelFont(legendFont);
+        ui->customPlot->xAxis->setLabel("Frame number");
+        ui->customPlot->replot();
+    } else {
+        ui->actionShow_Frame_Number->setChecked(true);
+    }
 }
 
 void mainFrame::on_actionPrint_Report_triggered()
@@ -2295,6 +2341,7 @@ int mainFrame::visibleGraphCount() {
     }
     return count;
 }
+
 // *printing*,
 // *UI plans*, *resizing*, *previews*, *screen capture*
 // *fix reloading of plots*, *sensitivity*, final testing!

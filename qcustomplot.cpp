@@ -5569,7 +5569,7 @@ void QCPAxisTicker::generate(const QCPRange &range, const QLocale &locale, QChar
   double tickStep = getTickStep(range);
   ticks = createTickVector(tickStep, range);
   trimTicks(range, ticks, true); // trim ticks to visible range plus one outer tick on each side (incase a subclass createTickVector creates more)
-  
+
   // generate sub ticks between major ticks:
   if (subTicks)
   {
@@ -5580,7 +5580,7 @@ void QCPAxisTicker::generate(const QCPRange &range, const QLocale &locale, QChar
     } else
       *subTicks = QVector<double>();
   }
-  
+
   // finally trim also outliers (no further clipping happens in axis drawing):
   trimTicks(range, ticks, false);
   // generate labels for visible ticks if requested:
@@ -5676,6 +5676,7 @@ int QCPAxisTicker::getSubTickCount(double tickStep)
 */
 QString QCPAxisTicker::getTickLabel(double tick, const QLocale &locale, QChar formatChar, int precision)
 {
+  if (tick < 0) return "";
   return locale.toString(tick, formatChar.toLatin1(), precision);
 }
 
@@ -5729,7 +5730,7 @@ QVector<double> QCPAxisTicker::createTickVector(double tickStep, const QCPRange 
   if (tickcount < 0) tickcount = 0;
   result.resize(tickcount);
   for (int i=0; i<tickcount; ++i)
-    result[i] = mTickOrigin + (firstStep+i)*tickStep;
+      result[i] = mTickOrigin + (firstStep+i)*tickStep;
   return result;
 }
 

@@ -646,7 +646,7 @@ border-image: url(:/images/Res/EjectPressed.png);
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="resources.qrc">:/images/Res/NiddrLogo.bmp</pixmap>
+      <pixmap>:/images/Res/NiddrLogo.bmp</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -1391,9 +1391,18 @@ background: transparent;</string>
     <property name="title">
      <string>Graph</string>
     </property>
+    <widget class="QMenu" name="menuChange_X_Axis_Type">
+     <property name="title">
+      <string>Change X-Axis Type</string>
+     </property>
+     <addaction name="actionShow_Timestamp"/>
+     <addaction name="actionShow_Frame_Number"/>
+    </widget>
     <addaction name="actionHide_Selected_Graph"/>
     <addaction name="actionShow_all_graphs"/>
     <addaction name="actionHide_All_Graphs"/>
+    <addaction name="separator"/>
+    <addaction name="menuChange_X_Axis_Type"/>
     <addaction name="separator"/>
     <addaction name="actionLuminance_diag_graph"/>
     <addaction name="actionRed_Flash_Diag_Graph"/>
@@ -1785,6 +1794,25 @@ background: transparent;</string>
    </property>
    <property name="text">
     <string>Plot Tooltips</string>
+   </property>
+  </action>
+  <action name="actionShow_Timestamp">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Timestamp</string>
+   </property>
+  </action>
+  <action name="actionShow_Frame_Number">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Frame Number</string>
    </property>
   </action>
  </widget>

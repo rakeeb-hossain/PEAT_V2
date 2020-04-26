@@ -29,6 +29,7 @@
 #include <QPrinter>
 #include <QThread>
 #include "colordialog.h"
+#include "rkbaxisticker.h"
 
 using namespace std;
 
@@ -60,6 +61,7 @@ public:
     bool saved = true;
     QString vid_file;
     int nFrame;
+    double nFps;
 
 signals:
     void received();
@@ -178,6 +180,10 @@ private slots:
     void on_label_17_mouseMoved();
     */
 
+    void on_actionShow_Timestamp_triggered();
+
+    void on_actionShow_Frame_Number_triggered();
+
 private:
     Ui::mainFrame *ui;
 
@@ -220,7 +226,8 @@ private:
     QRect label_17Rect;
     QRect lineRect;
     ColorDialog *colorDialog;
-
+    const int TIME_FONTSIZE = 8;
+    const int FRAME_FONTSIZE = 8;
 };
 
 
