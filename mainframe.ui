@@ -212,8 +212,7 @@ border-radius: 5px;</string>
      <number>1</number>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-image: url(:/images/Res/RewindDisabled.png);
-border-image: url(:/images/Res/RewindDisabled.png);</string>
+     <string notr="true">border-image: url(:/images/Res/RewindDisabled.png);</string>
     </property>
     <property name="text">
      <string/>
@@ -238,8 +237,8 @@ border-image: url(:/images/Res/RewindDisabled.png);</string>
      <string>Generate a PEAT report</string>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-image: url(:/images/Res/AnalyzeDisabled.png);
-border-image: url(:/images/Res/AnalyzeDisabled.png);</string>
+     <string notr="true">border-image: url(:/images/Res/AnalyzeDisabled.png) ;
+</string>
     </property>
     <property name="text">
      <string/>
@@ -320,8 +319,7 @@ border-image: url(:/images/Res/AnalyzeDisabled.png);</string>
      <string>Pause</string>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-image: url(:/images/Res/StopDisabled.png);
-border-image: url(:/images/Res/StopDisabled.png);</string>
+     <string notr="true">border-image: url(:/images/Res/StopDisabled.png);</string>
     </property>
     <property name="text">
      <string/>
@@ -346,8 +344,7 @@ border-image: url(:/images/Res/StopDisabled.png);</string>
      <string>Play</string>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-image: url(:/images/Res/PlayDisabled.png);
-border-image: url(:/images/Res/PlayDisabled.png);</string>
+     <string notr="true">border-image: url(:/images/Res/PlayDisabled.png);</string>
     </property>
     <property name="text">
      <string/>
@@ -448,7 +445,6 @@ border-image: url(:/images/Res/PlayDisabled.png);</string>
     <property name="styleSheet">
      <string notr="true">#rewindButton
 {
-background-image: url(:/images/Res/FastBackDisabled.png);
 border-image: url(:/images/Res/FastBackDisabled.png);
 }
 </string>
@@ -476,8 +472,7 @@ border-image: url(:/images/Res/FastBackDisabled.png);
      <string>2x playback speed</string>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-image: url(:/images/Res/FFwdDisabled.png);
-border-image: url(:/images/Res/FFwdDisabled.png);</string>
+     <string notr="true">border-image: url(:/images/Res/FFwdDisabled.png);</string>
     </property>
     <property name="text">
      <string/>
@@ -501,8 +496,7 @@ border-image: url(:/images/Res/FFwdDisabled.png);</string>
     <property name="styleSheet">
      <string notr="true">#folderButton
 {
-background-image: url(:/images/Res/EjectUp.bmp);
-border-image: url(:/images/Res/EjectUp.bmp);
+border-image: url(:/images/Res/EjectUp.png);
 }
 #folderButton:hover 
 {
@@ -815,7 +809,6 @@ QSlider::handle:horizontal {
      <property name="styleSheet">
       <string notr="true">#forwardWarning
 {
-background-image: url(:/images/Res/NextWarningDisabled.png);
 border-image: url(:/images/Res/NextWarningDisabled.png);
 }</string>
      </property>
@@ -882,7 +875,6 @@ color: #C01A00;</string>
      <property name="styleSheet">
       <string notr="true">#backWarning
 {
-background-image: url(:/images/Res/PrevWarningDisabled.png);
 border-image: url(:/images/Res/PrevWarningDisabled.png);
 }
 </string>

@@ -1,10 +1,8 @@
 <RCC>
     <qresource prefix="/images">
-        <file>Res/EjectUp.bmp</file>
         <file>Res/Toolbar.bmp</file>
         <file>Res/TraceLogo.bmp</file>
         <file>Res/TraceLogoSmall.bmp</file>
-        <file>Res/AnalyzeDisabled.png</file>
         <file>Res/AnalyzePressed.png</file>
         <file>Res/AnalyzeUp.png</file>
         <file>Res/AnalyzeUpHilite.png</file>
@@ -59,5 +57,7 @@
         <file>Res/contrast.gif</file>
         <file>Res/overlay.gif</file>
         <file>Res/swap.gif</file>
+        <file>Res/AnalyzeDisabled.png</file>
+        <file>Res/EjectUp.png</file>
     </qresource>
 </RCC>

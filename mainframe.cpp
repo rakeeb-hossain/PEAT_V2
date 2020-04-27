@@ -223,11 +223,11 @@ void mainFrame::setPlayerHandling() {
     //player status handling
     connect(player, &QMediaPlayer::stateChanged, this, [&](QMediaPlayer::State state) {
         if (state == QMediaPlayer::StoppedState) {
-            ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackDisabled.png); border-image: url(:/images/Res/FastBackDisabled.png); }");
-            ui->pauseButton->setStyleSheet("background-image: url(:/images/Res/StopDisabled.png); border-image: url(:/images/Res/StopDisabled.png);");
-            ui->forwardButton->setStyleSheet("background-image: url(:/images/Res/FFwdDisabled.png); border-image: url(:/images/Res/FFwdDisabled.png);");
-            ui->reportButton->setStyleSheet("background-image: url(:/images/Res/AnalyzeDisabled.png); border-image: url(:/images/Res/AnalyzeDisabled.png);");
-            ui->restartButton->setStyleSheet("background-image: url(:/images/Res/RewindDisabled.png); border-image: url(:/images/Res/RewindDisabled.png);");
+            ui->rewindButton->setStyleSheet("#rewindButton { border-image: url(:/images/Res/FastBackDisabled.png); }");
+            ui->pauseButton->setStyleSheet("border-image: url(:/images/Res/StopDisabled.png);");
+            ui->forwardButton->setStyleSheet("border-image: url(:/images/Res/FFwdDisabled.png);");
+            ui->reportButton->setStyleSheet("border-image: url(:/images/Res/AnalyzeDisabled.png);");
+            ui->restartButton->setStyleSheet("border-image: url(:/images/Res/RewindDisabled.png);");
 
             ui->restartButton->setEnabled(false);
             ui->rewindButton->setEnabled(false);
@@ -257,11 +257,11 @@ void mainFrame::setPlayerHandling() {
             [&](QMediaPlayer::MediaStatus status){
         qDebug() << status;
         if(status == QMediaPlayer::BufferedMedia) {
-            ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
-            ui->pauseButton->setStyleSheet("#pauseButton { background-image: url(:/images/Res/StopUp.png); border-image: url(:/images/Res/StopUp.png); } #pauseButton:hover { border-image: url(:/images/Res/StopDownHilite.png); } #pauseButton:pressed { border-image: url(:/images/Res/StopPressed.png); }");
-            ui->forwardButton->setStyleSheet("#forwardButton { background-image: url(:/images/Res/FFwdUp.png); border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
-            ui->reportButton->setStyleSheet("#reportButton { background-image: url(:/images/Res/AnalyzeUp.png); border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
-            ui->restartButton->setStyleSheet("#restartButton { background-image: url(:/images/Res/RewindUp.png); border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
+            ui->rewindButton->setStyleSheet("#rewindButton { border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
+            ui->pauseButton->setStyleSheet("#pauseButton { border-image: url(:/images/Res/StopUp.png); } #pauseButton:hover { border-image: url(:/images/Res/StopDownHilite.png); } #pauseButton:pressed { border-image: url(:/images/Res/StopPressed.png); }");
+            ui->forwardButton->setStyleSheet("#forwardButton { border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
+            ui->reportButton->setStyleSheet("#reportButton { border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
+            ui->restartButton->setStyleSheet("#restartButton { border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
 
             ui->restartButton->setEnabled(true);
             ui->rewindButton->setEnabled(true);
@@ -562,7 +562,7 @@ void mainFrame::on_folderButton_clicked()
                     });
 
                     player->setVolume(5);
-                    ui->playButton->setStyleSheet("#playButton { background-image: url(:/images/Res/PlayUp.png); border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
+                    ui->playButton->setStyleSheet("#playButton { border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
                     ui->playButton->setEnabled(true);
 
                     vidLabel->setText("Ready");
@@ -738,12 +738,12 @@ void mainFrame::on_reportButton_clicked() {
             connect(ui->customPlot->xAxis, SIGNAL(rangeChanged(QCPRange)), this, SLOT(xAxisChanged(QCPRange)));
 
             //Disable interaction
-            ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackDisabled.png); border-image: url(:/images/Res/FastBackDisabled.png); }");
-            ui->playButton->setStyleSheet("background-image: url(:/images/Res/PlayDisabled.png); border-image: url(:/images/Res/PlayDisabled.png);");
-            ui->forwardButton->setStyleSheet("background-image: url(:/images/Res/FFwdDisabled.png); border-image: url(:/images/Res/FFwdDisabled.png);");
-            ui->reportButton->setStyleSheet("background-image: url(:/images/Res/AnalyzeDisabled.png); border-image: url(:/images/Res/AnalyzeDisabled.png);");
-            ui->restartButton->setStyleSheet("background-image: url(:/images/Res/RewindDisabled.png); border-image: url(:/images/Res/RewindDisabled.png);");
-            //ui->folderButton->setStyleSheet("background-image: url(:/images/Res/EjectDisabled.png); border-image: url(:/images/Res/EjectDisabled.png);");
+            ui->rewindButton->setStyleSheet("#rewindButton { border-image: url(:/images/Res/FastBackDisabled.png); }");
+            ui->playButton->setStyleSheet("border-image: url(:/images/Res/PlayDisabled.png);");
+            ui->forwardButton->setStyleSheet("border-image: url(:/images/Res/FFwdDisabled.png);");
+            ui->reportButton->setStyleSheet("border-image: url(:/images/Res/AnalyzeDisabled.png);");
+            ui->restartButton->setStyleSheet("border-image: url(:/images/Res/RewindDisabled.png);");
+            //ui->folderButton->setStyleSheet("border-image: url(:/images/Res/EjectDisabled.png);");
 
             ui->restartButton->setEnabled(false);
             ui->rewindButton->setEnabled(false);
@@ -761,8 +761,8 @@ void mainFrame::on_reportButton_clicked() {
             ui->actionOpen_Report->setEnabled(false);
             ui->actionOpen_Video->setEnabled(false);
 
-            ui->forwardWarning->setStyleSheet("background-image: url(:/images/Res/NextWarningDisabled.png); border-image: url(:/images/Res/NextWarningDisabled.png);");
-            ui->backWarning->setStyleSheet("background-image: url(:/images/Res/PrevWarningDisabled.png); border-image: url(:/images/Res/PrevWarningDisabled.png);");
+            ui->forwardWarning->setStyleSheet("border-image: url(:/images/Res/NextWarningDisabled.png);");
+            ui->backWarning->setStyleSheet("border-image: url(:/images/Res/PrevWarningDisabled.png);");
 
             //Initialize graphs
             ui->customPlot->addGraph();
@@ -889,13 +889,13 @@ void mainFrame::on_reportButton_clicked() {
                 ui->customPlot->replot();
 
                 // Load warnings
-                ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
-                ui->forwardWarning->setStyleSheet("#forwardWarning { background-image: url(:/images/Res/NextvWarningUp.png); border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
+                ui->backWarning->setStyleSheet("#backWarning { border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
+                ui->forwardWarning->setStyleSheet("#forwardWarning { border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
                 ui->backWarning->setEnabled(true);
                 ui->forwardWarning->setEnabled(true);
 
                 ui->actionSave_Report->setEnabled(true);
-                ui->actionPrint_Report->setEnabled(true);
+                ui->actionPrint_Report->setEnabled(false); // To-add: Print support
                 ui->actionRun_Prophylactic_Tool->setEnabled(true);
 
                 QDate date = QDate::currentDate();
@@ -928,12 +928,12 @@ void mainFrame::on_reportButton_clicked() {
             }
             mb.setFixedSize(600,400);
         }
-        ui->rewindButton->setStyleSheet("#rewindButton { background-image: url(:/images/Res/FastBackUp.png); border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
-        ui->playButton->setStyleSheet("#playButton { background-image: url(:/images/Res/PlayUp.png); border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
-        ui->forwardButton->setStyleSheet("#forwardButton { background-image: url(:/images/Res/FFwdUp.png); border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
-        ui->reportButton->setStyleSheet("#reportButton { background-image: url(:/images/Res/AnalyzeUp.png); border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
-        ui->restartButton->setStyleSheet("#restartButton { background-image: url(:/images/Res/RewindUp.png); border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
-        ui->folderButton->setStyleSheet("#folderButton { background-image: url(:/images/Res/EjectUp.bmp); border-image: url(:/images/Res/EjectUp.bmp); } #folderButton:hover { border-image: url(:/images/Res/EjectDownHilite.png); } #folderButton:pressed { border-image: url(:/images/Res/EjectPressed.png); }");
+        ui->rewindButton->setStyleSheet("#rewindButton { border-image: url(:/images/Res/FastBackUp.png); } #rewindButton:hover { border-image: url(:/images/Res/FastBackDownHilite.png); } #rewindButton:pressed { border-image: url(:/images/Res/FastBackPressed.png); }");
+        ui->playButton->setStyleSheet("#playButton { border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
+        ui->forwardButton->setStyleSheet("#forwardButton { border-image: url(:/images/Res/FFwdUp.png); } #forwardButton:hover { border-image: url(:/images/Res/FFwdDownHilite.png); } #forwardButton:pressed { border-image: url(:/images/Res/FFwdPressed.png); }");
+        ui->reportButton->setStyleSheet("#reportButton { border-image: url(:/images/Res/AnalyzeUp.png); } #reportButton:hover { border-image: url(:/images/Res/AnalyzeDownHilite.png); } #reportButton:pressed { border-image: url(:/images/Res/AnalyzePressed.png); }");
+        ui->restartButton->setStyleSheet("#restartButton {border-image: url(:/images/Res/RewindUp.png); } #restartButton:hover { border-image: url(:/images/Res/RewindDownHilite.png); } #restartButton:pressed { border-image: url(:/images/Res/RewindPressed.png); }");
+        ui->folderButton->setStyleSheet("#folderButton { border-image: url(:/images/Res/EjectUp.png); } #folderButton:hover { border-image: url(:/images/Res/EjectDownHilite.png); } #folderButton:pressed { border-image: url(:/images/Res/EjectPressed.png); }");
 
         ui->restartButton->setEnabled(true);
         ui->rewindButton->setEnabled(true);
@@ -1410,12 +1410,12 @@ void mainFrame::openReport()
                 ui->label_13->setText(date);
 
                 player->setVolume(5);
-                ui->playButton->setStyleSheet("#playButton { background-image: url(:/images/Res/PlayUp.png); border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
+                ui->playButton->setStyleSheet("#playButton { border-image: url(:/images/Res/PlayUp.png); } #playButton:hover { border-image: url(:/images/Res/PlayDownHilite.png); } #playButton:pressed { border-image: url(:/images/Res/PlayPressed.png); }");
                 ui->playButton->setEnabled(true);
 
                 // Load warnings
-                ui->backWarning->setStyleSheet("#backWarning { background-image: url(:/images/Res/PrevWarningUp.png); border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
-                ui->forwardWarning->setStyleSheet("#forwardWarning { background-image: url(:/images/Res/NextvWarningUp.png); border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
+                ui->backWarning->setStyleSheet("#backWarning { border-image: url(:/images/Res/PrevWarningUp.png); } #backWarning:hover { border-image: url(:/images/Res/PrevWarningDownHilite.png); } #backWarning:pressed { border-image: url(:/images/Res/PrevWarningPressed.png); }");
+                ui->forwardWarning->setStyleSheet("#forwardWarning { border-image: url(:/images/Res/NextWarningUp.png); } #forwardWarning:hover { border-image: url(:/images/Res/NextWarningDownHilite.png); } #forwardWarning:pressed { border-image: url(:/images/Res/NextWarningPressed.png); }");
                 ui->backWarning->setEnabled(true);
                 ui->forwardWarning->setEnabled(true);
                 warnings.clear();
@@ -2014,8 +2014,8 @@ void mainFrame::no_report_loaded() {
     ui->horizontalSlider->setEnabled(true);
     ui->horizontalSlider->setStyleSheet("QSlider::groove:horizontal { border: 1px solid #999999; height: 5px; background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0.0 #B1B1B1, stop: 1.0 #c4c4c4); margin: 2px 0; } QSlider::handle:horizontal { background: #8f8f8f; border: 1px solid #5c5c5c; width: 8px; margin: -6px 0; border-radius: 3px; }");
 
-    ui->forwardWarning->setStyleSheet("background-image: url(:/images/Res/NextWarningDisabled.png); border-image: url(:/images/Res/NextWarningDisabled.png);");
-    ui->backWarning->setStyleSheet("background-image: url(:/images/Res/PrevWarningDisabled.png); border-image: url(:/images/Res/PrevWarningDisabled.png);");
+    ui->forwardWarning->setStyleSheet("border-image: url(:/images/Res/NextWarningDisabled.png);");
+    ui->backWarning->setStyleSheet("border-image: url(:/images/Res/PrevWarningDisabled.png);");
 
     index = 0;
 }
